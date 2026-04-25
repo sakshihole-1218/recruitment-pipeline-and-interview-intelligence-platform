@@ -19,6 +19,7 @@ import { UserEntity } from './entities/user.entity';
 import { RoleRepository } from './repositories/role.repository';
 import { UserRepository } from './repositories/user.repository';
 import { UserRoleRepository } from './repositories/user-role.repository';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity, RoleEntity, UserRoleEntity])],
@@ -41,7 +42,15 @@ import { UserRoleRepository } from './repositories/user-role.repository';
 
     UsersService,
     RolesService,
+
+    RolesGuard,
   ],
-  exports: [UsersService, RolesService],
+  exports: [
+    UsersService,
+    RolesService,
+    UserRepository,
+    RoleRepository,
+    UserRoleRepository,
+  ],
 })
 export class AccessControlModule {}

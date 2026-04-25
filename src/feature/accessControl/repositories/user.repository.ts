@@ -69,6 +69,16 @@ export class UserRepository {
     return this.findByNormalizedEmail(normalizedEmail, options);
   }
 
+  async findByEmailWithRoles(
+    email: string,
+    options?: { manager?: EntityManager },
+  ): Promise<UserEntity | null> {
+    const normalizedEmail = normalizeEmail(email);
+    return this.baseQuery('users', options?.manager)
+      .andWhere('users.email = :email', { email: normalizedEmail })
+      .getOne();
+  }
+
   async findByNormalizedEmail(
     normalizedEmail: string,
     options?: { includeDeleted?: boolean; manager?: EntityManager },
@@ -117,7 +127,9 @@ export class UserRepository {
 
     const orderDirection =
       (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
-    qb.orderBy(`users.${query.sort_by || 'created_at'}`, orderDirection);
+    const sortBy = query.sort_by || 'created_at';
+    qb.orderBy(`users.${sortBy}`, orderDirection);
+    qb.addOrderBy('users.id', 'ASC');
 
     const limit = query.limit || 10;
 
@@ -126,7 +138,7 @@ export class UserRepository {
 
       if (Number.isNaN(cursorDate.getTime())) {
         throw new BadRequestException({
-          message: 'Invalid cursor. Expected ISO timestamp.',
+          message: 'Invalid pagination cursor',
           code: 'INVALID_CURSOR',
         });
       }
@@ -137,11 +149,32 @@ export class UserRepository {
         qb.andWhere('users.created_at > :cursorDate', { cursorDate });
       }
 
-      const data = await qb.take(limit + 1).getMany();
-      const hasMore = data.length > limit;
-      const results = hasMore ? data.slice(0, limit) : data;
+      const idRows = await qb
+        .clone()
+        .select(['users.id AS id', 'users.created_at AS created_at'])
+        .distinct(true)
+        .take(limit + 1)
+        .getRawMany<{ id: string; created_at: Date }>();
+
+      const hasMore = idRows.length > limit;
+      const pageRows = hasMore ? idRows.slice(0, limit) : idRows;
+      const ids = pageRows.map((r) => r.id);
+
+      const users = ids.length
+        ? await this.baseQuery('users')
+            .andWhere('users.id IN (:...ids)', { ids })
+            .getMany()
+        : [];
+
+      const usersById = new Map(users.map((u) => [u.id, u] as const));
+      const results = ids
+        .map((id) => usersById.get(id))
+        .filter((u): u is UserEntity => Boolean(u));
+
       const nextCursor = hasMore
-        ? results[results.length - 1]?.created_at?.toISOString() ?? null
+        ? pageRows[pageRows.length - 1]?.created_at
+          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          : null
         : null;
 
       return {
@@ -156,7 +189,38 @@ export class UserRepository {
     const page = query.page || 1;
     const skip = (page - 1) * limit;
 
-    const [data, total] = await qb.skip(skip).take(limit).getManyAndCount();
+    const countQb = qb.clone();
+    countQb.expressionMap.orderBys = {};
+
+    const totalRaw = await countQb
+      .select('COUNT(DISTINCT users.id)', 'count')
+      .getRawOne<{ count: string }>();
+    const total = Number(totalRaw?.count || 0);
+
+    const idSelect = qb.clone();
+
+    const idRows = await idSelect
+      .select([
+        'users.id AS id',
+        `users.${sortBy} AS sort_value`,
+      ])
+      .distinct(true)
+      .skip(skip)
+      .take(limit)
+      .getRawMany<{ id: string; sort_value: unknown }>();
+
+    const ids = idRows.map((r) => r.id);
+
+    const users = ids.length
+      ? await this.baseQuery('users')
+          .andWhere('users.id IN (:...ids)', { ids })
+          .getMany()
+      : [];
+
+    const usersById = new Map(users.map((u) => [u.id, u] as const));
+    const data = ids
+      .map((id) => usersById.get(id))
+      .filter((u): u is UserEntity => Boolean(u));
 
     return {
       mode: 'offset',

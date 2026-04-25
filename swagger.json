@@ -54,10 +54,21 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal server error"
           }
         },
+        "security": [
+          {
+            "JWT-auth": []
+          },
+          {
+            "JWT-auth": []
+          }
+        ],
         "summary": "Create user",
         "tags": [
           "Access Control - Users"
@@ -190,10 +201,21 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal server error"
           }
         },
+        "security": [
+          {
+            "JWT-auth": []
+          },
+          {
+            "JWT-auth": []
+          }
+        ],
         "summary": "List users (offset or cursor pagination)",
         "tags": [
           "Access Control - Users"
@@ -249,10 +271,21 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal server error"
           }
         },
+        "security": [
+          {
+            "JWT-auth": []
+          },
+          {
+            "JWT-auth": []
+          }
+        ],
         "summary": "Update user",
         "tags": [
           "Access Control - Users"
@@ -296,10 +329,21 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal server error"
           }
         },
+        "security": [
+          {
+            "JWT-auth": []
+          },
+          {
+            "JWT-auth": []
+          }
+        ],
         "summary": "Get user by id",
         "tags": [
           "Access Control - Users"
@@ -354,10 +398,21 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal server error"
           }
         },
+        "security": [
+          {
+            "JWT-auth": []
+          },
+          {
+            "JWT-auth": []
+          }
+        ],
         "summary": "Assign role to user",
         "tags": [
           "Access Control - Users"
@@ -410,10 +465,21 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal server error"
           }
         },
+        "security": [
+          {
+            "JWT-auth": []
+          },
+          {
+            "JWT-auth": []
+          }
+        ],
         "summary": "Remove role from user",
         "tags": [
           "Access Control - Users"
@@ -512,10 +578,21 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal server error"
           }
         },
+        "security": [
+          {
+            "JWT-auth": []
+          },
+          {
+            "JWT-auth": []
+          }
+        ],
         "summary": "Get roles",
         "tags": [
           "Access Control - Roles"
@@ -561,13 +638,222 @@
           "400": {
             "description": "Bad request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal server error"
           }
         },
+        "security": [
+          {
+            "JWT-auth": []
+          },
+          {
+            "JWT-auth": []
+          }
+        ],
         "summary": "Get role by id",
         "tags": [
           "Access Control - Roles"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logged in successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AuthResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Login with email and password",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AuthResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Invalid refresh token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Refresh access token using refresh token",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Logged out successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LogoutResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Logout (clears stored refresh token)",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "operationId": "AuthController_profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ProfileResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get logged-in user profile",
+        "tags": [
+          "Auth"
         ]
       }
     }
@@ -744,11 +1030,6 @@
                 "HIRING_MANAGER"
               ]
             }
-          },
-          "created_by_user_id": {
-            "type": "string",
-            "description": "Optional audit field. Typically derived from authenticated user.",
-            "example": "f3a6b0ea-2b1a-4af1-a4a8-bb2b2a45a7c9"
           }
         },
         "required": [
@@ -785,11 +1066,6 @@
           "is_active": {
             "type": "boolean",
             "example": true
-          },
-          "updated_by_user_id": {
-            "type": "string",
-            "description": "Optional audit field. Typically derived from authenticated user.",
-            "example": "f3a6b0ea-2b1a-4af1-a4a8-bb2b2a45a7c9"
           }
         }
       },
@@ -849,6 +1125,141 @@
           "success",
           "message",
           "pagination"
+        ]
+      },
+      "ProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "f3a6b0ea-2b1a-4af1-a4a8-bb2b2a45a7c9"
+          },
+          "email": {
+            "type": "string",
+            "example": "sakshi@example.com"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Sakshi"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Sharma"
+          },
+          "phone": {
+            "type": "object",
+            "example": "+91-9000000000",
+            "nullable": true
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "last_login_at": {
+            "type": "object",
+            "example": "2026-01-15T10:30:00.000Z",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "example": [
+              "RECRUITER"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "RECRUITER",
+                "INTERVIEWER",
+                "HIRING_MANAGER"
+              ]
+            }
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "first_name",
+          "last_name",
+          "phone",
+          "is_active",
+          "last_login_at",
+          "roles",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "JWT access token (short-lived)"
+          },
+          "refresh_token": {
+            "type": "string",
+            "description": "JWT refresh token (long-lived)"
+          },
+          "user": {
+            "$ref": "#/components/schemas/ProfileResponseDto"
+          }
+        },
+        "required": [
+          "access_token",
+          "refresh_token",
+          "user"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "sakshi@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "stringst",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "description": "Refresh token previously issued by /auth/login or /auth/refresh"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ]
+      },
+      "LogoutResponseDto": {
+        "type": "object",
+        "properties": {
+          "logged_out": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "logged_out"
         ]
       }
     }

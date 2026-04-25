@@ -5,7 +5,6 @@ import {
   IsEmail,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -60,13 +59,4 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   is_active?: boolean;
-
-  @ApiPropertyOptional({
-    description:
-      'Optional audit field. Typically derived from authenticated user.',
-    example: 'f3a6b0ea-2b1a-4af1-a4a8-bb2b2a45a7c9',
-  })
-  @IsOptional()
-  @IsUUID()
-  updated_by_user_id?: string;
 }
