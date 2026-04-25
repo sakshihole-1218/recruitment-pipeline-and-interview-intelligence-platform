@@ -14,6 +14,562 @@
           "Health"
         ]
       }
+    },
+    "/api/access-control/users": {
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Create user",
+        "tags": [
+          "Access Control - Users"
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "email",
+                "first_name",
+                "last_name",
+                "last_login_at"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "sakshi",
+              "type": "string"
+            }
+          },
+          {
+            "name": "is_active",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "role_code",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "RECRUITER",
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "RECRUITER",
+                "INTERVIEWER",
+                "HIRING_MANAGER"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "List users (offset or cursor pagination)",
+        "tags": [
+          "Access Control - Users"
+        ]
+      }
+    },
+    "/api/access-control/users/{id}": {
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Update user",
+        "tags": [
+          "Access Control - Users"
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get user by id",
+        "tags": [
+          "Access Control - Users"
+        ]
+      }
+    },
+    "/api/access-control/users/{id}/roles/{roleId}": {
+      "post": {
+        "operationId": "UsersController_assignRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "description": "Role UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role assigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Assign role to user",
+        "tags": [
+          "Access Control - Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_removeRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "description": "Role UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Remove role from user",
+        "tags": [
+          "Access Control - Users"
+        ]
+      }
+    },
+    "/api/access-control/roles": {
+      "get": {
+        "operationId": "RolesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "code",
+                "name"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "admin",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RoleResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get roles",
+        "tags": [
+          "Access Control - Roles"
+        ]
+      }
+    },
+    "/api/access-control/roles/{id}": {
+      "get": {
+        "operationId": "RolesController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Role UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RoleResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get role by id",
+        "tags": [
+          "Access Control - Roles"
+        ]
+      }
     }
   },
   "info": {
@@ -35,6 +591,266 @@
         "in": "header"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "BaseResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Request processed successfully"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
+      "RoleResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "6d0b5c72-3e4d-4d36-a070-1d8f1e4b7c67"
+          },
+          "name": {
+            "type": "string",
+            "example": "Recruiter"
+          },
+          "code": {
+            "type": "string",
+            "example": "RECRUITER"
+          },
+          "description": {
+            "type": "object",
+            "example": "Handles candidate pipeline and coordination"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-01T10:00:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-02T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "code",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "9c0a8c8f-820a-45c8-a95f-9cdbad8ffcc4"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Sakshi"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Sharma"
+          },
+          "email": {
+            "type": "string",
+            "example": "sakshi@example.com"
+          },
+          "phone": {
+            "type": "object",
+            "example": "+91-9000000000"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "last_login_at": {
+            "type": "object",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-01T10:00:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-02T12:00:00.000Z"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "example": "Sakshi"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Sharma"
+          },
+          "email": {
+            "type": "string",
+            "example": "sakshi@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91-9000000000"
+          },
+          "password": {
+            "type": "string",
+            "description": "Plain password; will be hashed and stored as password_hash.",
+            "minLength": 8
+          },
+          "role_codes": {
+            "type": "array",
+            "description": "Assign initial roles by code. Transaction-safe.",
+            "example": [
+              "RECRUITER"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "RECRUITER",
+                "INTERVIEWER",
+                "HIRING_MANAGER"
+              ]
+            }
+          },
+          "created_by_user_id": {
+            "type": "string",
+            "description": "Optional audit field. Typically derived from authenticated user.",
+            "example": "f3a6b0ea-2b1a-4af1-a4a8-bb2b2a45a7c9"
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "email",
+          "password"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "example": "Sakshi"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Sharma"
+          },
+          "email": {
+            "type": "string",
+            "example": "sakshi@example.com"
+          },
+          "phone": {
+            "type": "object",
+            "example": "+91-9000000000"
+          },
+          "password": {
+            "type": "string",
+            "description": "New plain password; will be hashed and stored.",
+            "minLength": 8
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "updated_by_user_id": {
+            "type": "string",
+            "description": "Optional audit field. Typically derived from authenticated user.",
+            "example": "f3a6b0ea-2b1a-4af1-a4a8-bb2b2a45a7c9"
+          }
+        }
+      },
+      "PaginationMetaDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "example": 10
+          },
+          "total_records": {
+            "type": "number",
+            "example": 57
+          },
+          "total_pages": {
+            "type": "number",
+            "example": 6
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "example": true
+          },
+          "has_previous_page": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "page",
+          "limit",
+          "total_records",
+          "total_pages",
+          "has_next_page",
+          "has_previous_page"
+        ]
+      },
+      "PaginatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Records fetched successfully"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "pagination"
+        ]
+      }
+    }
   }
 }

@@ -1,0 +1,6 @@
+export enum SystemRoleCode {
+  ADMIN = 'ADMIN',
+  RECRUITER = 'RECRUITER',
+  INTERVIEWER = 'INTERVIEWER',
+  HIRING_MANAGER = 'HIRING_MANAGER',
+}

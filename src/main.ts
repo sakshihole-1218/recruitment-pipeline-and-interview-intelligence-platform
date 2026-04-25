@@ -12,6 +12,7 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 import { createWinstonLogger } from './common/logger/winston.config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { RequestHandlerInterceptor } from './common/interceptors/request-handler.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -76,6 +77,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  app.useGlobalInterceptors(new RequestHandlerInterceptor());
 
   app.useGlobalFilters(new GlobalExceptionFilter());
 
