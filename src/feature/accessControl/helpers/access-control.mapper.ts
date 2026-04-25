@@ -20,7 +20,7 @@ export class AccessControlMapper {
       .filter((ur) => !ur.deleted_at)
       .map((ur) => ur.role)
       .filter((r): r is RoleEntity => Boolean(r))
-      .map((r) => this.toRoleResponse(r));
+      .map((r) => AccessControlMapper.toRoleResponse(r));
 
     return {
       id: user.id,

@@ -22,12 +22,16 @@ export class UsersService {
     private readonly removeRoleUseCase: RemoveRoleFromUserUseCase,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<UserEntity> {
-    return this.createUserUseCase.execute(dto);
+  async create(dto: CreateUserDto, actorUserId?: string): Promise<UserEntity> {
+    return this.createUserUseCase.execute(dto, actorUserId);
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<UserEntity> {
-    return this.updateUserUseCase.execute(id, dto);
+  async update(
+    id: string,
+    dto: UpdateUserDto,
+    actorUserId?: string,
+  ): Promise<UserEntity> {
+    return this.updateUserUseCase.execute(id, dto, actorUserId);
   }
 
   async findById(id: string): Promise<UserEntity> {
