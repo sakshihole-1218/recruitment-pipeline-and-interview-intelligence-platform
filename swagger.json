@@ -722,7 +722,8 @@
           },
           "phone": {
             "type": "string",
-            "example": "+91-9000000000"
+            "description": "Phone number in correct format (e.g. +919876543210).",
+            "example": "+919000000000"
           },
           "password": {
             "type": "string",
@@ -775,7 +776,8 @@
           },
           "phone": {
             "type": "object",
-            "example": "+91-9000000000"
+            "description": "Phone number in correct format (e.g. +919876543210). Use null to clear.",
+            "example": "+919000000000"
           },
           "password": {
             "type": "string",
