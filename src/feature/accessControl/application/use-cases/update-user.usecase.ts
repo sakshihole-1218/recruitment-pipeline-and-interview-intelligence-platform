@@ -14,7 +14,11 @@ export class UpdateUserUseCase {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(id: string, dto: UpdateUserDto): Promise<UserEntity> {
+  async execute(
+    id: string,
+    dto: UpdateUserDto,
+    actorUserId?: string,
+  ): Promise<UserEntity> {
     return this.dataSource.transaction(async (manager) => {
       const user = await this.userRepository.findById(id, { manager });
 
@@ -35,7 +39,7 @@ export class UpdateUserUseCase {
 
         if (emailOwner && emailOwner.id !== user.id) {
           throw new ConflictException({
-            message: 'Email already exists',
+            message: 'An account with this email already exists',
             code: 'USER_EMAIL_ALREADY_EXISTS',
           });
         }
@@ -49,11 +53,11 @@ export class UpdateUserUseCase {
       if (dto.is_active !== undefined) user.is_active = dto.is_active;
 
       if (dto.password) {
-        user.password_hash = PasswordHashingHelper.hashPassword(dto.password);
+        user.password_hash = await PasswordHashingHelper.hashPassword(dto.password);
       }
 
-      if (dto.updated_by_user_id) {
-        user.updated_by_user_id = dto.updated_by_user_id;
+      if (actorUserId) {
+        user.updated_by_user_id = actorUserId;
       }
 
       await this.userRepository.save(user, { manager });
@@ -61,7 +65,7 @@ export class UpdateUserUseCase {
       const updated = await this.userRepository.findById(user.id, { manager });
       if (!updated) {
         throw new NotFoundException({
-          message: 'User not found after update',
+          message: 'User not found',
           code: 'USER_NOT_FOUND',
         });
       }

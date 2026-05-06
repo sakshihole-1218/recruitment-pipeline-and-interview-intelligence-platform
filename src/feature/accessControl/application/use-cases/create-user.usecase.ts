@@ -22,7 +22,7 @@ export class CreateUserUseCase {
     private readonly userRoleRepository: UserRoleRepository,
   ) {}
 
-  async execute(dto: CreateUserDto): Promise<UserEntity> {
+  async execute(dto: CreateUserDto, actorUserId?: string): Promise<UserEntity> {
     const normalizedEmail = normalizeEmail(dto.email);
 
     return this.dataSource.transaction(async (manager) => {
@@ -33,7 +33,7 @@ export class CreateUserUseCase {
 
       if (existing) {
         throw new ConflictException({
-          message: 'Email already exists',
+          message: 'An account with this email already exists',
           code: 'USER_EMAIL_ALREADY_EXISTS',
         });
       }
@@ -44,11 +44,11 @@ export class CreateUserUseCase {
           last_name: dto.last_name,
           email: normalizedEmail,
           phone: dto.phone ?? null,
-          password_hash: PasswordHashingHelper.hashPassword(dto.password),
+          password_hash: await PasswordHashingHelper.hashPassword(dto.password),
           refresh_token_hash: null,
           is_active: true,
           last_login_at: null,
-          created_by_user_id: dto.created_by_user_id ?? null,
+          created_by_user_id: actorUserId ?? null,
           updated_by_user_id: null,
           deleted_by_user_id: null,
         },
@@ -65,7 +65,7 @@ export class CreateUserUseCase {
 
           if (!role) {
             throw new BadRequestException({
-              message: `Invalid role code: ${roleCode}`,
+              message: 'One or more selected roles are invalid',
               code: 'INVALID_ROLE_CODE',
             });
           }
@@ -85,7 +85,7 @@ export class CreateUserUseCase {
 
       if (!created) {
         throw new ConflictException({
-          message: 'User could not be loaded after creation',
+          message: 'We could not complete the request. Please try again',
           code: 'USER_POST_CREATE_LOAD_FAILED',
         });
       }

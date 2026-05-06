@@ -9,12 +9,15 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBody,
+  ApiBearerAuth,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 import { ApiStandardResponse } from '../../../common/decorators/api-standard-response.decorator';
@@ -26,19 +29,30 @@ import { UserResponseDto } from '../dto/user.response.dto';
 import { AccessControlMapper } from '../helpers/access-control.mapper';
 import { ApiPaginatedResponse } from '../decorators/api-paginated-response.decorator';
 import { UsersService } from '../application/services/users.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { AuthJwtPayload } from '../../auth/helpers/jwt-payload.helper';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { SystemRoleCode } from '../enums/system-role-code.enum';
 
 @ApiTags('Access Control - Users')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(SystemRoleCode.ADMIN)
+@ApiBearerAuth('JWT-auth')
+@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('access-control/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create user' })
   @ApiBody({ type: CreateUserDto })
   @ApiStandardResponse(UserResponseDto, 'User created successfully')
-  async create(@Body() dto: CreateUserDto) {
-    const user = await this.usersService.create(dto);
+  async create(@Body() dto: CreateUserDto, @CurrentUser() actor: AuthJwtPayload) {
+    const user = await this.usersService.create(dto, actor.sub);
     return ResponseUtil.success(
       'User created successfully',
       AccessControlMapper.toUserResponse(user),
@@ -46,13 +60,18 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update user' })
   @ApiParam({ name: 'id', description: 'User UUID' })
   @ApiBody({ type: UpdateUserDto })
   @ApiStandardResponse(UserResponseDto, 'User updated successfully')
-  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    const user = await this.usersService.update(id, dto);
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const user = await this.usersService.update(id, dto, actor.sub);
     return ResponseUtil.success(
       'User updated successfully',
       AccessControlMapper.toUserResponse(user),
@@ -60,6 +79,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get user by id' })
   @ApiParam({ name: 'id', description: 'User UUID' })
@@ -73,6 +93,7 @@ export class UsersController {
   }
 
   @Get()
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List users (offset or cursor pagination)' })
   @ApiPaginatedResponse(UserResponseDto, 'Users fetched successfully')
@@ -98,6 +119,7 @@ export class UsersController {
   }
 
   @Post(':id/roles/:roleId')
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Assign role to user' })
   @ApiParam({ name: 'id', description: 'User UUID' })
@@ -113,6 +135,7 @@ export class UsersController {
   }
 
   @Delete(':id/roles/:roleId')
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove role from user' })
   @ApiParam({ name: 'id', description: 'User UUID' })

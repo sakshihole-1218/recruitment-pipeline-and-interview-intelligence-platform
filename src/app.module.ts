@@ -7,6 +7,7 @@ import { envValidationSchema } from './config/env.validation';
 import { getTypeOrmConfig } from './database/typeorm.config';
 import { HealthModule } from './feature/health/health.module';
 import { AccessControlModule } from './feature/accessControl/access-control.module';
+import { AuthModule } from './feature/auth/auth.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AccessControlModule } from './feature/accessControl/access-control.modu
     }),
     HealthModule,
     AccessControlModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
