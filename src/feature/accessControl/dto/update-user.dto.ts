@@ -5,11 +5,13 @@ import {
   IsEmail,
   IsOptional,
   IsString,
+  IsUUID,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
 
-import { normalizeEmail } from '../../../common/utils/normalization.util';
+import { normalizeEmail, normalizePhoneE164 } from '../../../common/utils/normalization.util';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({ example: 'Sakshi' })
@@ -34,15 +36,20 @@ export class UpdateUserDto {
   @MaxLength(255)
   email?: string;
 
-  @ApiPropertyOptional({ example: '+91-9000000000' })
+  @ApiPropertyOptional({
+    description: 'Phone number in correct format (e.g. +919876543210). Use null to clear.',
+    example: '+919000000000',
+  })
   @IsOptional()
   @Transform(({ value }) => {
     if (value === undefined || value === null) return value;
-    const trimmed = String(value).trim();
-    return trimmed.length > 0 ? trimmed : null;
+    return normalizePhoneE164(value);
   })
   @IsString()
-  @MaxLength(25)
+  @Matches(/^\+[1-9]\d{7,14}$/, {
+    message: 'Phone number must be in correct format (e.g. +919876543210)',
+  })
+  @MaxLength(16)
   phone?: string | null;
 
   @ApiPropertyOptional({
