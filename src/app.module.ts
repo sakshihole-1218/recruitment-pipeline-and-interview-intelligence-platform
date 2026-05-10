@@ -9,6 +9,7 @@ import { HealthModule } from './feature/health/health.module';
 import { AccessControlModule } from './feature/accessControl/access-control.module';
 import { AuthModule } from './feature/auth/auth.module';
 import { DepartmentsModule } from './feature/departments/departments.module';
+import { SkillsModule } from './feature/skills/skills.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DepartmentsModule } from './feature/departments/departments.module';
     AccessControlModule,
     AuthModule,
     DepartmentsModule,
+    SkillsModule,
   ],
 })
 export class AppModule {}
