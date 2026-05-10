@@ -1832,6 +1832,785 @@
           "Skills"
         ]
       }
+    },
+    "/api/job-openings": {
+      "post": {
+        "operationId": "JobOpeningsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateJobOpeningDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job opening created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/JobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create job opening",
+        "tags": [
+          "Job Openings"
+        ]
+      },
+      "get": {
+        "operationId": "JobOpeningsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "title",
+                "code",
+                "status",
+                "published_at",
+                "closed_at",
+                "is_active"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "description": "Filter by title (partial match)",
+            "schema": {
+              "example": "backend",
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "Filter by job opening code",
+            "schema": {
+              "example": "BE-2026-001",
+              "type": "string"
+            }
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "in": "query",
+            "description": "Department UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recruiter_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Recruiter user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hiring_manager_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Hiring manager user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employment_type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "FULL_TIME",
+                "PART_TIME",
+                "CONTRACT",
+                "INTERN"
+              ]
+            }
+          },
+          {
+            "name": "work_mode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ONSITE",
+                "REMOTE",
+                "HYBRID"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "OPEN",
+                "CLOSED",
+                "ON_HOLD",
+                "CANCELLED"
+              ]
+            }
+          },
+          {
+            "name": "is_active",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job openings fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/JobOpeningResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/JobOpeningResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List job openings (offset or cursor pagination)",
+        "tags": [
+          "Job Openings"
+        ]
+      }
+    },
+    "/api/job-openings/{id}": {
+      "patch": {
+        "operationId": "JobOpeningsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateJobOpeningDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job opening updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/JobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update job opening fields (skills via /:id/skills)",
+        "tags": [
+          "Job Openings"
+        ]
+      },
+      "get": {
+        "operationId": "JobOpeningsController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job opening fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/JobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get job opening by id",
+        "tags": [
+          "Job Openings"
+        ]
+      },
+      "delete": {
+        "operationId": "JobOpeningsController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job opening deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SoftDeleteJobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete job opening",
+        "tags": [
+          "Job Openings"
+        ]
+      }
+    },
+    "/api/job-openings/{id}/publish": {
+      "post": {
+        "operationId": "JobOpeningsController_publish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job opening published successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/JobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Publish a job opening",
+        "tags": [
+          "Job Openings"
+        ]
+      }
+    },
+    "/api/job-openings/{id}/unpublish": {
+      "post": {
+        "operationId": "JobOpeningsController_unpublish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job opening unpublished successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/JobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Unpublish a job opening",
+        "tags": [
+          "Job Openings"
+        ]
+      }
+    },
+    "/api/job-openings/{id}/open": {
+      "post": {
+        "operationId": "JobOpeningsController_open",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job opening opened successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/JobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Open a job opening",
+        "tags": [
+          "Job Openings"
+        ]
+      }
+    },
+    "/api/job-openings/{id}/close": {
+      "post": {
+        "operationId": "JobOpeningsController_close",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job opening closed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/JobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Close a job opening",
+        "tags": [
+          "Job Openings"
+        ]
+      }
+    },
+    "/api/job-openings/{id}/skills": {
+      "put": {
+        "operationId": "JobOpeningsController_replaceSkills",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceJobOpeningSkillsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job opening skills updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/JobOpeningResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Replace job opening skills",
+        "tags": [
+          "Job Openings"
+        ]
+      }
     }
   },
   "info": {
@@ -2496,6 +3275,488 @@
         ]
       },
       "SoftDeleteSkillResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "JobOpeningSkillResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "skill_id": {
+            "type": "string",
+            "description": "Skill UUID"
+          },
+          "proficiency_level": {
+            "type": "string",
+            "enum": [
+              "BEGINNER",
+              "INTERMEDIATE",
+              "ADVANCED",
+              "EXPERT"
+            ],
+            "example": "INTERMEDIATE"
+          },
+          "is_mandatory": {
+            "type": "boolean",
+            "example": true
+          },
+          "years_of_experience_required": {
+            "type": "object",
+            "example": 2
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "skill_name": {
+            "type": "string",
+            "description": "Skill name",
+            "example": "TypeScript"
+          },
+          "skill_code": {
+            "type": "string",
+            "description": "Skill code",
+            "example": "TYPESCRIPT"
+          },
+          "skill_category": {
+            "type": "string",
+            "description": "Skill category",
+            "example": "LANGUAGE"
+          }
+        },
+        "required": [
+          "id",
+          "skill_id",
+          "proficiency_level",
+          "is_mandatory",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "JobOpeningResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "title": {
+            "type": "string",
+            "example": "Senior Backend Engineer"
+          },
+          "code": {
+            "type": "string",
+            "example": "BE-2026-001"
+          },
+          "department_id": {
+            "type": "string",
+            "description": "Department UUID"
+          },
+          "hiring_manager_user_id": {
+            "type": "string",
+            "description": "Hiring manager user UUID"
+          },
+          "recruiter_user_id": {
+            "type": "string",
+            "description": "Recruiter user UUID"
+          },
+          "employment_type": {
+            "type": "string",
+            "enum": [
+              "FULL_TIME",
+              "PART_TIME",
+              "CONTRACT",
+              "INTERN"
+            ]
+          },
+          "work_mode": {
+            "type": "string",
+            "enum": [
+              "ONSITE",
+              "REMOTE",
+              "HYBRID"
+            ]
+          },
+          "experience_min_years": {
+            "type": "object",
+            "example": 3
+          },
+          "experience_max_years": {
+            "type": "object",
+            "example": 7
+          },
+          "min_salary": {
+            "type": "object",
+            "example": "1500000.00"
+          },
+          "max_salary": {
+            "type": "object",
+            "example": "2800000.00"
+          },
+          "currency_code": {
+            "type": "object",
+            "example": "INR"
+          },
+          "openings_count": {
+            "type": "number",
+            "example": 2
+          },
+          "job_description": {
+            "type": "object"
+          },
+          "responsibilities": {
+            "type": "object"
+          },
+          "requirements": {
+            "type": "object"
+          },
+          "location": {
+            "type": "object",
+            "example": "Bengaluru, IN"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "OPEN",
+              "CLOSED",
+              "ON_HOLD",
+              "CANCELLED"
+            ]
+          },
+          "published_at": {
+            "type": "object",
+            "example": "2026-01-15T10:30:00.000Z",
+            "nullable": true
+          },
+          "closed_at": {
+            "type": "object",
+            "example": "2026-01-15T10:30:00.000Z",
+            "nullable": true
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobOpeningSkillResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "code",
+          "department_id",
+          "hiring_manager_user_id",
+          "recruiter_user_id",
+          "employment_type",
+          "work_mode",
+          "openings_count",
+          "status",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "JobOpeningSkillInputDto": {
+        "type": "object",
+        "properties": {
+          "skill_id": {
+            "type": "string",
+            "description": "Skill UUID"
+          },
+          "proficiency_level": {
+            "type": "string",
+            "enum": [
+              "BEGINNER",
+              "INTERMEDIATE",
+              "ADVANCED",
+              "EXPERT"
+            ],
+            "example": "INTERMEDIATE"
+          },
+          "is_mandatory": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          },
+          "years_of_experience_required": {
+            "type": "number",
+            "example": 2,
+            "description": "Years of experience required for this skill"
+          }
+        },
+        "required": [
+          "skill_id",
+          "proficiency_level"
+        ]
+      },
+      "CreateJobOpeningDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Senior Backend Engineer"
+          },
+          "code": {
+            "type": "string",
+            "example": "BE-2026-001",
+            "description": "Unique job opening code"
+          },
+          "department_id": {
+            "type": "string",
+            "description": "Department UUID"
+          },
+          "hiring_manager_user_id": {
+            "type": "string",
+            "description": "Hiring manager user UUID"
+          },
+          "recruiter_user_id": {
+            "type": "string",
+            "description": "Recruiter user UUID"
+          },
+          "employment_type": {
+            "type": "string",
+            "enum": [
+              "FULL_TIME",
+              "PART_TIME",
+              "CONTRACT",
+              "INTERN"
+            ],
+            "example": "FULL_TIME"
+          },
+          "work_mode": {
+            "type": "string",
+            "enum": [
+              "ONSITE",
+              "REMOTE",
+              "HYBRID"
+            ],
+            "example": "HYBRID"
+          },
+          "experience_min_years": {
+            "type": "number",
+            "example": 3
+          },
+          "experience_max_years": {
+            "type": "number",
+            "example": 7
+          },
+          "min_salary": {
+            "type": "number",
+            "example": 1500000,
+            "description": "Minimum annual salary"
+          },
+          "max_salary": {
+            "type": "number",
+            "example": 2800000,
+            "description": "Maximum annual salary"
+          },
+          "currency_code": {
+            "type": "string",
+            "example": "INR",
+            "description": "ISO currency code"
+          },
+          "openings_count": {
+            "type": "number",
+            "example": 2
+          },
+          "job_description": {
+            "type": "string",
+            "example": "Role overview and impact"
+          },
+          "responsibilities": {
+            "type": "string",
+            "example": "Build and scale APIs"
+          },
+          "requirements": {
+            "type": "string",
+            "example": "Strong Node.js and PostgreSQL skills"
+          },
+          "location": {
+            "type": "string",
+            "example": "Bengaluru, IN"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "OPEN",
+              "CLOSED",
+              "ON_HOLD",
+              "CANCELLED"
+            ],
+            "example": "DRAFT",
+            "description": "Defaults to DRAFT when omitted"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          },
+          "skills": {
+            "description": "Required skills for the opening (deduplicated by skill_id)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobOpeningSkillInputDto"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "code",
+          "department_id",
+          "hiring_manager_user_id",
+          "recruiter_user_id",
+          "employment_type",
+          "work_mode",
+          "openings_count"
+        ]
+      },
+      "UpdateJobOpeningDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Senior Backend Engineer"
+          },
+          "code": {
+            "type": "string",
+            "example": "BE-2026-001"
+          },
+          "department_id": {
+            "type": "string",
+            "description": "Department UUID"
+          },
+          "hiring_manager_user_id": {
+            "type": "string",
+            "description": "Hiring manager user UUID"
+          },
+          "recruiter_user_id": {
+            "type": "string",
+            "description": "Recruiter user UUID"
+          },
+          "employment_type": {
+            "type": "string",
+            "enum": [
+              "FULL_TIME",
+              "PART_TIME",
+              "CONTRACT",
+              "INTERN"
+            ],
+            "example": "FULL_TIME"
+          },
+          "work_mode": {
+            "type": "string",
+            "enum": [
+              "ONSITE",
+              "REMOTE",
+              "HYBRID"
+            ],
+            "example": "HYBRID"
+          },
+          "experience_min_years": {
+            "type": "number",
+            "example": 3
+          },
+          "experience_max_years": {
+            "type": "number",
+            "example": 7
+          },
+          "min_salary": {
+            "type": "number",
+            "example": 1500000
+          },
+          "max_salary": {
+            "type": "number",
+            "example": 2800000
+          },
+          "currency_code": {
+            "type": "object",
+            "example": "INR"
+          },
+          "openings_count": {
+            "type": "number",
+            "example": 2
+          },
+          "job_description": {
+            "type": "object",
+            "example": "Role overview and impact"
+          },
+          "responsibilities": {
+            "type": "object",
+            "example": "Build and scale APIs"
+          },
+          "requirements": {
+            "type": "object",
+            "example": "Strong Node.js and PostgreSQL skills"
+          },
+          "location": {
+            "type": "object",
+            "example": "Bengaluru, IN"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "OPEN",
+              "CLOSED",
+              "ON_HOLD",
+              "CANCELLED"
+            ],
+            "example": "OPEN"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "ReplaceJobOpeningSkillsDto": {
+        "type": "object",
+        "properties": {
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobOpeningSkillInputDto"
+            }
+          }
+        },
+        "required": [
+          "skills"
+        ]
+      },
+      "SoftDeleteJobOpeningResponseDto": {
         "type": "object",
         "properties": {
           "id": {
