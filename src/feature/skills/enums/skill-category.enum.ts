@@ -1,0 +1,8 @@
+export enum SkillCategory {
+  LANGUAGE = 'LANGUAGE',
+  FRAMEWORK = 'FRAMEWORK',
+  DATABASE = 'DATABASE',
+  DEVOPS = 'DEVOPS',
+  CLOUD = 'CLOUD',
+  OTHER = 'OTHER',
+}
