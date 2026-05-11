@@ -68,8 +68,20 @@ export class ReplaceJobOpeningSkillsUseCase {
       });
 
       if (actorUserId) {
-        opening.updated_by_user_id = actorUserId;
-        await this.jobOpeningRepository.save(opening, { manager });
+        // Do not call `save(opening)` here.
+        // `opening` was loaded with `job_opening_skills` relation, and after replacement
+        // TypeORM may try to reconcile that stale in-memory relation set (nulling job_opening_id),
+        // which violates NOT NULL constraints.
+        await manager
+          .getRepository(JobOpeningEntity)
+          .createQueryBuilder()
+          .update(JobOpeningEntity)
+          .set({
+            updated_by_user_id: actorUserId,
+            updated_at: () => 'CURRENT_TIMESTAMP',
+          })
+          .where('id = :id', { id: opening.id })
+          .execute();
       }
 
       const updated = await this.jobOpeningRepository.findById(jobOpeningId, {
