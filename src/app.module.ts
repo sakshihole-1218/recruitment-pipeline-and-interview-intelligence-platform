@@ -11,6 +11,7 @@ import { AuthModule } from './feature/auth/auth.module';
 import { DepartmentsModule } from './feature/departments/departments.module';
 import { SkillsModule } from './feature/skills/skills.module';
 import { JobOpeningsModule } from './feature/job-openings/job-openings.module';
+import { CandidatesModule } from './feature/candidates/candidates.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { JobOpeningsModule } from './feature/job-openings/job-openings.module';
     DepartmentsModule,
     SkillsModule,
     JobOpeningsModule,
+    CandidatesModule,
   ],
 })
 export class AppModule {}
