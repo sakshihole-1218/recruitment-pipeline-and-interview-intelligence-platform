@@ -1,0 +1,8 @@
+export enum CandidateDocumentType {
+  RESUME = 'RESUME',
+  COVER_LETTER = 'COVER_LETTER',
+  PORTFOLIO = 'PORTFOLIO',
+  CERTIFICATION = 'CERTIFICATION',
+  ID_PROOF = 'ID_PROOF',
+  OTHER = 'OTHER',
+}

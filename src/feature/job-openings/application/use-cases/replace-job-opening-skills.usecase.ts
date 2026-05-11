@@ -68,10 +68,6 @@ export class ReplaceJobOpeningSkillsUseCase {
       });
 
       if (actorUserId) {
-        // Do not call `save(opening)` here.
-        // `opening` was loaded with `job_opening_skills` relation, and after replacement
-        // TypeORM may try to reconcile that stale in-memory relation set (nulling job_opening_id),
-        // which violates NOT NULL constraints.
         await manager
           .getRepository(JobOpeningEntity)
           .createQueryBuilder()
