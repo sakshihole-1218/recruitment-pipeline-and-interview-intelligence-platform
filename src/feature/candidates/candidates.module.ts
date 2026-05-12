@@ -23,9 +23,9 @@ import { SoftDeleteCandidateUseCase } from './application/use-cases/soft-delete-
 import { UpsertCandidateSkillsUseCase } from './application/use-cases/upsert-candidate-skills.usecase';
 import { RemoveCandidateSkillUseCase } from './application/use-cases/remove-candidate-skill.usecase';
 import { ListCandidateSkillsUseCase } from './application/use-cases/list-candidate-skills.usecase';
-import { AddCandidateDocumentMetadataUseCase } from './application/use-cases/add-candidate-document-metadata.usecase';
 import { ListCandidateDocumentsUseCase } from './application/use-cases/list-candidate-documents.usecase';
 import { MarkLatestCandidateResumeUseCase } from './application/use-cases/mark-latest-candidate-resume.usecase';
+import { UploadCandidateDocumentUseCase } from './application/use-cases/upload-candidate-document.usecase';
 
 @Module({
   imports: [
@@ -55,9 +55,9 @@ import { MarkLatestCandidateResumeUseCase } from './application/use-cases/mark-l
     UpsertCandidateSkillsUseCase,
     RemoveCandidateSkillUseCase,
     ListCandidateSkillsUseCase,
-    AddCandidateDocumentMetadataUseCase,
     ListCandidateDocumentsUseCase,
     MarkLatestCandidateResumeUseCase,
+    UploadCandidateDocumentUseCase,
     // service
     CandidatesService,
   ],

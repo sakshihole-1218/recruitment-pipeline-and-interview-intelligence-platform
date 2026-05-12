@@ -35,7 +35,11 @@ export class UpdateCandidateUseCase {
     if (dto.last_name !== undefined) candidate.last_name = dto.last_name;
 
     if (dto.phone !== undefined) {
-      candidate.phone = this.validationHelper.normalizePhone(dto.phone);
+      const phone = this.validationHelper.normalizePhone(dto.phone);
+      if (phone) {
+        await this.validationHelper.ensureUniquePhone({ phone, excludeId: id });
+      }
+      candidate.phone = phone;
     }
 
     if (dto.date_of_birth !== undefined) candidate.date_of_birth = dto.date_of_birth ?? null;

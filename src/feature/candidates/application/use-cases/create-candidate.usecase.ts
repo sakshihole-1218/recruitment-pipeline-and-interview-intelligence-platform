@@ -17,6 +17,9 @@ export class CreateCandidateUseCase {
     await this.validationHelper.ensureUniqueEmail({ email });
 
     const phone = dto.phone !== undefined ? this.validationHelper.normalizePhone(dto.phone) : null;
+    if (phone) {
+      await this.validationHelper.ensureUniquePhone({ phone });
+    }
 
     return this.candidateRepository.createAndSave({
       first_name: dto.first_name,

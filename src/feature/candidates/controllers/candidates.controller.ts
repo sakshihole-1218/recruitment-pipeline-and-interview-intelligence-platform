@@ -10,11 +10,14 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
@@ -23,6 +26,11 @@ import {
   ApiUnauthorizedResponse,
   getSchemaPath,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import type { Request } from 'express';
+import * as fs from 'fs';
+import { join } from 'path';
 
 import { ApiStandardResponse } from '../../../common/decorators/api-standard-response.decorator';
 import { BaseResponseDto } from '../../../common/dto/base-response.dto';
@@ -44,9 +52,9 @@ import { ApiCandidatesPaginatedResponse } from '../decorators/api-candidates-pag
 import { CandidatesMapper } from '../helpers/candidates.mapper';
 import { UpsertCandidateSkillsDto } from '../dto/upsert-candidate-skills.dto';
 import { CandidateSkillResponseDto } from '../dto/candidate-skill.response.dto';
-import { CreateCandidateDocumentMetadataDto } from '../dto/create-candidate-document-metadata.dto';
 import { CandidateDocumentResponseDto } from '../dto/candidate-document.response.dto';
 import { RemoveCandidateSkillResponseDto } from '../dto/remove-candidate-skill.response.dto';
+import { UploadCandidateDocumentDto } from '../dto/upload-candidate-document.dto';
 
 @ApiTags('Candidates')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -56,6 +64,19 @@ import { RemoveCandidateSkillResponseDto } from '../dto/remove-candidate-skill.r
 @Controller('candidates')
 export class CandidatesController {
   constructor(private readonly candidatesService: CandidatesService) {}
+
+  private static getMaxUploadBytes(): number {
+    const fallback = 25 * 1024 * 1024; // 25MB
+    const raw = Number(process.env.CANDIDATE_DOCUMENT_MAX_BYTES);
+    return Number.isFinite(raw) && raw > 0 ? raw : fallback;
+  }
+
+  private static sanitizeFilename(name: string): string {
+    return String(name ?? '')
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/_+/g, '_')
+      .slice(0, 180);
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -218,20 +239,82 @@ export class CandidatesController {
     });
   }
 
-  @Post(':id/documents')
+  @Post(':id/documents/upload')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Add candidate document metadata' })
+  @ApiOperation({ summary: 'Upload candidate document (stores file + metadata)' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
-  @ApiBody({ type: CreateCandidateDocumentMetadataDto })
-  @ApiStandardResponse(CandidateDocumentResponseDto, 'Candidate document added successfully')
-  async addDocument(
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (
+          req: Request,
+          file: Express.Multer.File,
+          cb: (error: Error | null, destination: string) => void,
+        ) => {
+          const candidateId = String((req as any)?.params?.id ?? 'unknown');
+          const dest = join(process.cwd(), 'uploads', 'candidates', candidateId);
+          fs.mkdirSync(dest, { recursive: true });
+          cb(null, dest);
+        },
+        filename: (
+          req: Request,
+          file: Express.Multer.File,
+          cb: (error: Error | null, filename: string) => void,
+        ) => {
+          const safe = CandidatesController.sanitizeFilename(file.originalname);
+          const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+          cb(null, `${unique}-${safe}`);
+        },
+      }),
+      limits: { fileSize: CandidatesController.getMaxUploadBytes() },
+    }),
+  )
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['document_type', 'file'],
+      properties: {
+        document_type: {
+          type: 'string',
+          enum: ['RESUME', 'COVER_LETTER', 'PORTFOLIO', 'CERTIFICATION', 'ID_PROOF', 'OTHER'],
+          example: 'RESUME',
+        },
+        is_latest: {
+          type: 'boolean',
+          example: true,
+          description: 'Only applicable for RESUME documents',
+        },
+        file: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiStandardResponse(
+    CandidateDocumentResponseDto,
+    'Candidate document uploaded successfully',
+  )
+  async uploadDocument(
     @Param('id') id: string,
-    @Body() dto: CreateCandidateDocumentMetadataDto,
+    @Body() dto: UploadCandidateDocumentDto,
+    @UploadedFile() file: Express.Multer.File,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const doc = await this.candidatesService.addDocument(id, dto, actor?.sub);
+    const doc = await this.candidatesService.uploadDocument(
+      id,
+      dto,
+      file
+        ? {
+            originalname: file.originalname,
+            filename: file.filename,
+            mimetype: file.mimetype,
+            size: file.size,
+          }
+        : undefined,
+      actor?.sub,
+    );
+
     return ResponseUtil.success(
-      'Candidate document added successfully',
+      'Candidate document uploaded successfully',
       CandidatesMapper.toDocumentResponse(doc),
     );
   }

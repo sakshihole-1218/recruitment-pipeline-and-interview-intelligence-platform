@@ -72,6 +72,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     switch (status) {
       case HttpStatus.BAD_REQUEST:
         return 'BAD_REQUEST';
+      case HttpStatus.PAYLOAD_TOO_LARGE:
+        return 'PAYLOAD_TOO_LARGE';
       case HttpStatus.UNAUTHORIZED:
         return 'UNAUTHORIZED';
       case HttpStatus.FORBIDDEN:
