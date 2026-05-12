@@ -4,7 +4,7 @@ import { CreateCandidateDto } from '../../dto/create-candidate.dto';
 import { UpdateCandidateDto } from '../../dto/update-candidate.dto';
 import { ListCandidatesQueryDto } from '../../dto/list-candidates.query.dto';
 import { UpsertCandidateSkillsDto } from '../../dto/upsert-candidate-skills.dto';
-import { CreateCandidateDocumentMetadataDto } from '../../dto/create-candidate-document-metadata.dto';
+import { UploadCandidateDocumentDto } from '../../dto/upload-candidate-document.dto';
 import { CreateCandidateUseCase } from '../use-cases/create-candidate.usecase';
 import { UpdateCandidateUseCase } from '../use-cases/update-candidate.usecase';
 import { FindCandidateByIdUseCase } from '../use-cases/find-candidate-by-id.usecase';
@@ -13,9 +13,12 @@ import { SoftDeleteCandidateUseCase } from '../use-cases/soft-delete-candidate.u
 import { UpsertCandidateSkillsUseCase } from '../use-cases/upsert-candidate-skills.usecase';
 import { RemoveCandidateSkillUseCase } from '../use-cases/remove-candidate-skill.usecase';
 import { ListCandidateSkillsUseCase } from '../use-cases/list-candidate-skills.usecase';
-import { AddCandidateDocumentMetadataUseCase } from '../use-cases/add-candidate-document-metadata.usecase';
 import { ListCandidateDocumentsUseCase } from '../use-cases/list-candidate-documents.usecase';
 import { MarkLatestCandidateResumeUseCase } from '../use-cases/mark-latest-candidate-resume.usecase';
+import {
+  UploadCandidateDocumentUseCase,
+  UploadedCandidateFile,
+} from '../use-cases/upload-candidate-document.usecase';
 
 @Injectable()
 export class CandidatesService {
@@ -28,9 +31,9 @@ export class CandidatesService {
     private readonly upsertSkillsUseCase: UpsertCandidateSkillsUseCase,
     private readonly removeSkillUseCase: RemoveCandidateSkillUseCase,
     private readonly listSkillsUseCase: ListCandidateSkillsUseCase,
-    private readonly addDocumentUseCase: AddCandidateDocumentMetadataUseCase,
     private readonly listDocumentsUseCase: ListCandidateDocumentsUseCase,
     private readonly markLatestResumeUseCase: MarkLatestCandidateResumeUseCase,
+    private readonly uploadDocumentUseCase: UploadCandidateDocumentUseCase,
   ) {}
 
   async create(dto: CreateCandidateDto, actorUserId?: string) {
@@ -65,12 +68,13 @@ export class CandidatesService {
     return this.removeSkillUseCase.execute(candidateId, skillId);
   }
 
-  async addDocument(
+  async uploadDocument(
     candidateId: string,
-    dto: CreateCandidateDocumentMetadataDto,
+    dto: UploadCandidateDocumentDto,
+    file: UploadedCandidateFile | undefined,
     actorUserId?: string,
   ) {
-    return this.addDocumentUseCase.execute(candidateId, dto, actorUserId);
+    return this.uploadDocumentUseCase.execute(candidateId, dto, file, actorUserId);
   }
 
   async listDocuments(candidateId: string) {

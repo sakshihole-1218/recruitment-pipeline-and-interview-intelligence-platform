@@ -69,6 +69,24 @@ export class CandidateRepository {
     return qb.getOne();
   }
 
+  async findByPhone(
+    phone: string,
+    options?: { includeDeleted?: boolean; manager?: EntityManager },
+  ): Promise<CandidateEntity | null> {
+    const normalized = String(phone ?? '').trim();
+    if (!normalized) return null;
+
+    const qb = this.repo(options?.manager)
+      .createQueryBuilder('candidates')
+      .where('candidates.phone = :phone', { phone: normalized });
+
+    if (!(options?.includeDeleted ?? false)) {
+      qb.andWhere('candidates.deleted_at IS NULL');
+    }
+
+    return qb.getOne();
+  }
+
   async save(
     entity: CandidateEntity,
     options?: { manager?: EntityManager },

@@ -2611,6 +2611,878 @@
           "Job Openings"
         ]
       }
+    },
+    "/api/candidates": {
+      "post": {
+        "operationId": "CandidatesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCandidateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Candidate created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CandidateResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create candidate profile",
+        "tags": [
+          "Candidates"
+        ]
+      },
+      "get": {
+        "operationId": "CandidatesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "first_name",
+                "last_name",
+                "email",
+                "current_location",
+                "total_experience_years",
+                "is_active"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "first_name",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "Sakshi",
+              "type": "string"
+            }
+          },
+          {
+            "name": "last_name",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "Sharma",
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "sakshi@example.com",
+              "type": "string"
+            }
+          },
+          {
+            "name": "phone",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "+919876543210",
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "LINKEDIN",
+              "type": "string",
+              "enum": [
+                "REFERRAL",
+                "LINKEDIN",
+                "COMPANY_PORTAL",
+                "JOB_BOARD",
+                "AGENCY",
+                "WALK_IN",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "current_location",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "Bengaluru",
+              "type": "string"
+            }
+          },
+          {
+            "name": "total_experience_years",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 5.5,
+              "type": "number"
+            }
+          },
+          {
+            "name": "is_active",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "skill_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter candidates by skill UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidates fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/CandidateResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/CandidateResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List candidates (offset or cursor pagination)",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
+    "/api/candidates/{id}": {
+      "patch": {
+        "operationId": "CandidatesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCandidateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Candidate updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CandidateResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update candidate profile",
+        "tags": [
+          "Candidates"
+        ]
+      },
+      "get": {
+        "operationId": "CandidatesController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CandidateResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get candidate by id",
+        "tags": [
+          "Candidates"
+        ]
+      },
+      "delete": {
+        "operationId": "CandidatesController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SoftDeleteCandidateResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete candidate",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
+    "/api/candidates/{id}/skills": {
+      "put": {
+        "operationId": "CandidatesController_upsertSkills",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertCandidateSkillsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Candidate skills updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CandidateSkillResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Add/update candidate skills",
+        "tags": [
+          "Candidates"
+        ]
+      },
+      "get": {
+        "operationId": "CandidatesController_listSkills",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate skills fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CandidateSkillResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get candidate skills",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
+    "/api/candidates/{id}/skills/{skillId}": {
+      "delete": {
+        "operationId": "CandidatesController_removeSkill",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skillId",
+            "required": true,
+            "in": "path",
+            "description": "Skill UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate skill removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RemoveCandidateSkillResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Remove candidate skill",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
+    "/api/candidates/{id}/documents/upload": {
+      "post": {
+        "operationId": "CandidatesController_uploadDocument",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "document_type",
+                  "file"
+                ],
+                "properties": {
+                  "document_type": {
+                    "type": "string",
+                    "enum": [
+                      "RESUME",
+                      "COVER_LETTER",
+                      "PORTFOLIO",
+                      "CERTIFICATION",
+                      "ID_PROOF",
+                      "OTHER"
+                    ],
+                    "example": "RESUME"
+                  },
+                  "is_latest": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Only applicable for RESUME documents"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Candidate document uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CandidateDocumentResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Upload candidate document (stores file + metadata)",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
+    "/api/candidates/{id}/documents": {
+      "get": {
+        "operationId": "CandidatesController_listDocuments",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate documents fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CandidateDocumentResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get candidate documents",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
+    "/api/candidates/{id}/documents/{documentId}/latest": {
+      "patch": {
+        "operationId": "CandidatesController_markLatestResume",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "description": "Candidate document UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate resume marked as latest successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CandidateDocumentResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Mark candidate resume as latest",
+        "tags": [
+          "Candidates"
+        ]
+      }
     }
   },
   "info": {
@@ -3766,6 +4638,573 @@
         },
         "required": [
           "id"
+        ]
+      },
+      "CandidateResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Sakshi"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Sharma"
+          },
+          "email": {
+            "type": "string",
+            "example": "sakshi@example.com"
+          },
+          "phone": {
+            "type": "object",
+            "example": "+919876543210",
+            "nullable": true
+          },
+          "date_of_birth": {
+            "type": "object",
+            "example": "1998-05-10",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER",
+              "PREFER_NOT_TO_SAY"
+            ],
+            "nullable": true
+          },
+          "total_experience_years": {
+            "type": "object",
+            "example": "5.50",
+            "nullable": true
+          },
+          "current_company": {
+            "type": "object",
+            "example": "Contoso",
+            "nullable": true
+          },
+          "current_job_title": {
+            "type": "object",
+            "example": "Backend Engineer",
+            "nullable": true
+          },
+          "current_location": {
+            "type": "object",
+            "example": "Bengaluru, IN",
+            "nullable": true
+          },
+          "notice_period_days": {
+            "type": "object",
+            "example": 30,
+            "nullable": true
+          },
+          "current_salary": {
+            "type": "object",
+            "example": "1500000.00",
+            "nullable": true
+          },
+          "expected_salary": {
+            "type": "object",
+            "example": "2500000.00",
+            "nullable": true
+          },
+          "currency_code": {
+            "type": "object",
+            "example": "INR",
+            "nullable": true
+          },
+          "linkedin_url": {
+            "type": "object",
+            "example": "https://www.linkedin.com/in/sakshi",
+            "nullable": true
+          },
+          "github_url": {
+            "type": "object",
+            "example": "https://github.com/sakshi",
+            "nullable": true
+          },
+          "portfolio_url": {
+            "type": "object",
+            "example": "https://sakshi.dev",
+            "nullable": true
+          },
+          "resume_headline": {
+            "type": "object",
+            "example": "Backend engineer with 5+ years",
+            "nullable": true
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "REFERRAL",
+              "LINKEDIN",
+              "COMPANY_PORTAL",
+              "JOB_BOARD",
+              "AGENCY",
+              "WALK_IN",
+              "OTHER"
+            ],
+            "nullable": true
+          },
+          "source_details": {
+            "type": "object",
+            "example": "Referred by John Doe",
+            "nullable": true
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateCandidateDto": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "example": "Sakshi"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Sharma"
+          },
+          "email": {
+            "type": "string",
+            "example": "sakshi@example.com"
+          },
+          "phone": {
+            "type": "object",
+            "example": "+919876543210"
+          },
+          "date_of_birth": {
+            "type": "string",
+            "example": "1998-05-10",
+            "description": "ISO date (YYYY-MM-DD)"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER",
+              "PREFER_NOT_TO_SAY"
+            ],
+            "example": "FEMALE"
+          },
+          "total_experience_years": {
+            "type": "number",
+            "example": 5.5
+          },
+          "current_company": {
+            "type": "string",
+            "example": "Contoso"
+          },
+          "current_job_title": {
+            "type": "string",
+            "example": "Backend Engineer"
+          },
+          "current_location": {
+            "type": "string",
+            "example": "Bengaluru, IN"
+          },
+          "notice_period_days": {
+            "type": "number",
+            "example": 30
+          },
+          "current_salary": {
+            "type": "number",
+            "example": 1500000
+          },
+          "expected_salary": {
+            "type": "number",
+            "example": 2500000
+          },
+          "currency_code": {
+            "type": "string",
+            "example": "INR"
+          },
+          "linkedin_url": {
+            "type": "string",
+            "example": "https://www.linkedin.com/in/sakshi"
+          },
+          "github_url": {
+            "type": "string",
+            "example": "https://github.com/sakshi"
+          },
+          "portfolio_url": {
+            "type": "string",
+            "example": "https://sakshi.dev"
+          },
+          "resume_headline": {
+            "type": "string",
+            "example": "Backend engineer with 5+ years in Node.js"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "REFERRAL",
+              "LINKEDIN",
+              "COMPANY_PORTAL",
+              "JOB_BOARD",
+              "AGENCY",
+              "WALK_IN",
+              "OTHER"
+            ],
+            "example": "LINKEDIN"
+          },
+          "source_details": {
+            "type": "string",
+            "example": "Referred by John Doe"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "email"
+        ]
+      },
+      "UpdateCandidateDto": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "example": "Sakshi"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Sharma"
+          },
+          "email": {
+            "type": "string",
+            "example": "sakshi@example.com"
+          },
+          "phone": {
+            "type": "object",
+            "example": "+919876543210"
+          },
+          "date_of_birth": {
+            "type": "string",
+            "example": "1998-05-10",
+            "description": "ISO date (YYYY-MM-DD)"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER",
+              "PREFER_NOT_TO_SAY"
+            ],
+            "example": "FEMALE"
+          },
+          "total_experience_years": {
+            "type": "number",
+            "example": 5.5
+          },
+          "current_company": {
+            "type": "string",
+            "example": "Contoso"
+          },
+          "current_job_title": {
+            "type": "string",
+            "example": "Backend Engineer"
+          },
+          "current_location": {
+            "type": "string",
+            "example": "Bengaluru, IN"
+          },
+          "notice_period_days": {
+            "type": "number",
+            "example": 30
+          },
+          "current_salary": {
+            "type": "number",
+            "example": 1500000
+          },
+          "expected_salary": {
+            "type": "number",
+            "example": 2500000
+          },
+          "currency_code": {
+            "type": "string",
+            "example": "INR"
+          },
+          "linkedin_url": {
+            "type": "string",
+            "example": "https://www.linkedin.com/in/sakshi"
+          },
+          "github_url": {
+            "type": "string",
+            "example": "https://github.com/sakshi"
+          },
+          "portfolio_url": {
+            "type": "string",
+            "example": "https://sakshi.dev"
+          },
+          "resume_headline": {
+            "type": "string",
+            "example": "Backend engineer with 5+ years in Node.js"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "REFERRAL",
+              "LINKEDIN",
+              "COMPANY_PORTAL",
+              "JOB_BOARD",
+              "AGENCY",
+              "WALK_IN",
+              "OTHER"
+            ],
+            "example": "LINKEDIN"
+          },
+          "source_details": {
+            "type": "string",
+            "example": "Referred by John Doe"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "SoftDeleteCandidateResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CandidateSkillResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "candidate_id": {
+            "type": "string",
+            "description": "Candidate UUID"
+          },
+          "skill_id": {
+            "type": "string",
+            "description": "Skill UUID"
+          },
+          "years_of_experience": {
+            "type": "object",
+            "example": "3.50",
+            "nullable": true
+          },
+          "proficiency_level": {
+            "type": "string",
+            "enum": [
+              "BEGINNER",
+              "INTERMEDIATE",
+              "ADVANCED",
+              "EXPERT"
+            ],
+            "nullable": true
+          },
+          "is_primary": {
+            "type": "boolean",
+            "example": false
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "skill_name": {
+            "type": "object",
+            "example": "TypeScript",
+            "nullable": true
+          },
+          "skill_code": {
+            "type": "object",
+            "example": "TYPESCRIPT",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "candidate_id",
+          "skill_id",
+          "is_primary",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CandidateSkillInputDto": {
+        "type": "object",
+        "properties": {
+          "skill_id": {
+            "type": "string",
+            "description": "Skill UUID"
+          },
+          "years_of_experience": {
+            "type": "number",
+            "example": 3.5
+          },
+          "proficiency_level": {
+            "type": "string",
+            "enum": [
+              "BEGINNER",
+              "INTERMEDIATE",
+              "ADVANCED",
+              "EXPERT"
+            ],
+            "example": "INTERMEDIATE"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "example": false,
+            "default": false
+          }
+        },
+        "required": [
+          "skill_id"
+        ]
+      },
+      "UpsertCandidateSkillsDto": {
+        "type": "object",
+        "properties": {
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CandidateSkillInputDto"
+            }
+          }
+        },
+        "required": [
+          "skills"
+        ]
+      },
+      "RemoveCandidateSkillResponseDto": {
+        "type": "object",
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "description": "Candidate UUID"
+          },
+          "skill_id": {
+            "type": "string",
+            "description": "Skill UUID"
+          }
+        },
+        "required": [
+          "candidate_id",
+          "skill_id"
+        ]
+      },
+      "CandidateDocumentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "candidate_id": {
+            "type": "string",
+            "description": "Candidate UUID"
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "RESUME",
+              "COVER_LETTER",
+              "PORTFOLIO",
+              "CERTIFICATION",
+              "ID_PROOF",
+              "OTHER"
+            ]
+          },
+          "file_name": {
+            "type": "string",
+            "example": "sakshi_resume.pdf"
+          },
+          "file_url": {
+            "type": "string",
+            "example": "https://cdn.example.com/candidates/123/resume.pdf"
+          },
+          "file_size": {
+            "type": "object",
+            "example": "345678",
+            "nullable": true
+          },
+          "mime_type": {
+            "type": "object",
+            "example": "application/pdf",
+            "nullable": true
+          },
+          "uploaded_at": {
+            "type": "object",
+            "example": "2026-01-15T10:30:00.000Z",
+            "nullable": true
+          },
+          "is_latest": {
+            "type": "boolean",
+            "example": false
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "candidate_id",
+          "document_type",
+          "file_name",
+          "file_url",
+          "is_latest",
+          "created_at",
+          "updated_at"
         ]
       }
     }
