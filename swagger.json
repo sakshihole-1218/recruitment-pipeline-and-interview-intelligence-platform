@@ -3483,6 +3483,704 @@
           "Candidates"
         ]
       }
+    },
+    "/api/applications": {
+      "post": {
+        "operationId": "ApplicationsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create candidate application",
+        "tags": [
+          "Applications"
+        ]
+      },
+      "get": {
+        "operationId": "ApplicationsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "applied_at",
+                "application_number",
+                "last_stage_changed_at",
+                "current_stage",
+                "application_status",
+                "is_priority"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_number",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "APP-2026-000001",
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "required": false,
+            "in": "query",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "job_opening_id",
+            "required": false,
+            "in": "query",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "current_stage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "APPLIED",
+                "SCREENING",
+                "SHORTLISTED",
+                "INTERVIEW",
+                "DECISION",
+                "OFFER",
+                "HIRED",
+                "REJECTED",
+                "WITHDRAWN",
+                "ON_HOLD"
+              ]
+            }
+          },
+          {
+            "name": "application_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "CLOSED",
+                "REJECTED",
+                "HIRED",
+                "WITHDRAWN",
+                "ON_HOLD"
+              ]
+            }
+          },
+          {
+            "name": "assigned_recruiter_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Assigned recruiter user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assigned_hiring_manager_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Assigned hiring manager user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "is_priority",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "applied_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter applications applied at or after this timestamp (ISO8601)",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "applied_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter applications applied at or before this timestamp (ISO8601)",
+            "schema": {
+              "example": "2026-01-31T23:59:59.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applications fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ApplicationResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/ApplicationResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List applications (offset or cursor pagination)",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/{id}": {
+      "get": {
+        "operationId": "ApplicationsController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get application by id",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/{id}/move-stage": {
+      "post": {
+        "operationId": "ApplicationsController_moveStage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveApplicationStageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application stage updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Move application stage (controlled transitions)",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/{id}/reject": {
+      "post": {
+        "operationId": "ApplicationsController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectApplicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application rejected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Reject an application",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/{id}/hold": {
+      "post": {
+        "operationId": "ApplicationsController_hold",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoldApplicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application put on hold successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Put an application on hold",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/{id}/withdraw": {
+      "post": {
+        "operationId": "ApplicationsController_withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawApplicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application withdrawn successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Withdraw an application",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/{id}/stage-history": {
+      "get": {
+        "operationId": "ApplicationsController_stageHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application stage history fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ApplicationStageHistoryResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get application stage history",
+        "tags": [
+          "Applications"
+        ]
+      }
     }
   },
   "info": {
@@ -5203,6 +5901,293 @@
           "file_name",
           "file_url",
           "is_latest",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ApplicationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "application_number": {
+            "type": "string",
+            "example": "APP-2026-000001"
+          },
+          "candidate_id": {
+            "type": "string",
+            "description": "Candidate UUID"
+          },
+          "job_opening_id": {
+            "type": "string",
+            "description": "Job opening UUID"
+          },
+          "applied_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "current_stage": {
+            "type": "string",
+            "enum": [
+              "APPLIED",
+              "SCREENING",
+              "SHORTLISTED",
+              "INTERVIEW",
+              "DECISION",
+              "OFFER",
+              "HIRED",
+              "REJECTED",
+              "WITHDRAWN",
+              "ON_HOLD"
+            ]
+          },
+          "application_status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CLOSED",
+              "REJECTED",
+              "HIRED",
+              "WITHDRAWN",
+              "ON_HOLD"
+            ]
+          },
+          "screening_score": {
+            "type": "object",
+            "example": "75.50",
+            "nullable": true
+          },
+          "fit_score": {
+            "type": "object",
+            "example": "82.25",
+            "nullable": true
+          },
+          "assigned_recruiter_user_id": {
+            "type": "object",
+            "description": "Assigned recruiter user UUID",
+            "nullable": true
+          },
+          "assigned_hiring_manager_user_id": {
+            "type": "object",
+            "description": "Assigned hiring manager user UUID",
+            "nullable": true
+          },
+          "is_priority": {
+            "type": "boolean",
+            "example": false
+          },
+          "rejection_reason": {
+            "type": "object",
+            "nullable": true
+          },
+          "withdrawal_reason": {
+            "type": "object",
+            "nullable": true
+          },
+          "last_stage_changed_at": {
+            "type": "object",
+            "example": "2026-01-15T10:30:00.000Z",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "application_number",
+          "candidate_id",
+          "job_opening_id",
+          "applied_at",
+          "current_stage",
+          "application_status",
+          "is_priority",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateApplicationDto": {
+        "type": "object",
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "description": "Candidate UUID"
+          },
+          "job_opening_id": {
+            "type": "string",
+            "description": "Job opening UUID"
+          },
+          "assigned_recruiter_user_id": {
+            "type": "string",
+            "description": "Assigned recruiter user UUID"
+          },
+          "assigned_hiring_manager_user_id": {
+            "type": "string",
+            "description": "Assigned hiring manager user UUID"
+          },
+          "is_priority": {
+            "type": "boolean",
+            "example": false,
+            "default": false
+          },
+          "screening_score": {
+            "type": "number",
+            "example": 75.5,
+            "description": "Optional screening score (0-100)"
+          },
+          "fit_score": {
+            "type": "number",
+            "example": 82.25,
+            "description": "Optional fit score (0-100)"
+          }
+        },
+        "required": [
+          "candidate_id",
+          "job_opening_id"
+        ]
+      },
+      "MoveApplicationStageDto": {
+        "type": "object",
+        "properties": {
+          "to_stage": {
+            "type": "string",
+            "enum": [
+              "APPLIED",
+              "SCREENING",
+              "SHORTLISTED",
+              "INTERVIEW",
+              "DECISION",
+              "OFFER",
+              "HIRED",
+              "REJECTED",
+              "WITHDRAWN",
+              "ON_HOLD"
+            ]
+          },
+          "change_reason": {
+            "type": "string",
+            "example": "Screening completed"
+          }
+        },
+        "required": [
+          "to_stage"
+        ]
+      },
+      "RejectApplicationDto": {
+        "type": "object",
+        "properties": {
+          "rejection_reason": {
+            "type": "string",
+            "example": "Not a fit for current requirements"
+          }
+        },
+        "required": [
+          "rejection_reason"
+        ]
+      },
+      "HoldApplicationDto": {
+        "type": "object",
+        "properties": {
+          "change_reason": {
+            "type": "string",
+            "example": "Waiting for headcount approval"
+          }
+        }
+      },
+      "WithdrawApplicationDto": {
+        "type": "object",
+        "properties": {
+          "withdrawal_reason": {
+            "type": "string",
+            "example": "Candidate accepted another offer"
+          }
+        },
+        "required": [
+          "withdrawal_reason"
+        ]
+      },
+      "ApplicationStageHistoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "from_stage": {
+            "type": "string",
+            "enum": [
+              "APPLIED",
+              "SCREENING",
+              "SHORTLISTED",
+              "INTERVIEW",
+              "DECISION",
+              "OFFER",
+              "HIRED",
+              "REJECTED",
+              "WITHDRAWN",
+              "ON_HOLD"
+            ],
+            "nullable": true
+          },
+          "to_stage": {
+            "type": "string",
+            "enum": [
+              "APPLIED",
+              "SCREENING",
+              "SHORTLISTED",
+              "INTERVIEW",
+              "DECISION",
+              "OFFER",
+              "HIRED",
+              "REJECTED",
+              "WITHDRAWN",
+              "ON_HOLD"
+            ]
+          },
+          "changed_by_user_id": {
+            "type": "string",
+            "description": "Actor user UUID"
+          },
+          "change_reason": {
+            "type": "object",
+            "nullable": true
+          },
+          "changed_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "application_id",
+          "to_stage",
+          "changed_by_user_id",
+          "changed_at",
           "created_at",
           "updated_at"
         ]
