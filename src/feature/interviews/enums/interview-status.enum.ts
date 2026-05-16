@@ -1,0 +1,7 @@
+export enum InterviewStatus {
+  SCHEDULED = 'SCHEDULED',
+  RESCHEDULED = 'RESCHEDULED',
+  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED',
+  NO_SHOW = 'NO_SHOW',
+}

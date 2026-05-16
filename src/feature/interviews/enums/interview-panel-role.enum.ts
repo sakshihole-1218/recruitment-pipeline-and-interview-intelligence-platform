@@ -1,0 +1,5 @@
+export enum InterviewPanelRole {
+  PRIMARY_INTERVIEWER = 'PRIMARY_INTERVIEWER',
+  PANELIST = 'PANELIST',
+  OBSERVER = 'OBSERVER',
+}
