@@ -1,0 +1,8 @@
+export enum InterviewRoundType {
+  SCREENING = 'SCREENING',
+  TECHNICAL = 'TECHNICAL',
+  MANAGERIAL = 'MANAGERIAL',
+  HR = 'HR',
+  ASSIGNMENT = 'ASSIGNMENT',
+  FINAL = 'FINAL',
+}

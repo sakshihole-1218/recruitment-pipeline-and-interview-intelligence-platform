@@ -13,6 +13,7 @@ import { SkillsModule } from './feature/skills/skills.module';
 import { JobOpeningsModule } from './feature/job-openings/job-openings.module';
 import { CandidatesModule } from './feature/candidates/candidates.module';
 import { ApplicationsModule } from './feature/applications/applications.module';
+import { InterviewsModule } from './feature/interviews/interviews.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ApplicationsModule } from './feature/applications/applications.module';
     JobOpeningsModule,
     CandidatesModule,
     ApplicationsModule,
+    InterviewsModule,
   ],
 })
 export class AppModule {}

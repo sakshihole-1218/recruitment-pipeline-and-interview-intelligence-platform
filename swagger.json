@@ -4181,6 +4181,1260 @@
           "Applications"
         ]
       }
+    },
+    "/api/interviews/rounds": {
+      "post": {
+        "operationId": "InterviewRoundsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInterviewRoundDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview round created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewRoundResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create interview round",
+        "tags": [
+          "Interviews - Rounds"
+        ]
+      },
+      "get": {
+        "operationId": "InterviewRoundsController_listByJobOpening",
+        "parameters": [
+          {
+            "name": "job_opening_id",
+            "required": true,
+            "in": "query",
+            "description": "Job opening UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interview rounds fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/InterviewRoundResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List interview rounds by job opening",
+        "tags": [
+          "Interviews - Rounds"
+        ]
+      }
+    },
+    "/api/interviews/rounds/{id}": {
+      "patch": {
+        "operationId": "InterviewRoundsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interview round UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInterviewRoundDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview round updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewRoundResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update interview round",
+        "tags": [
+          "Interviews - Rounds"
+        ]
+      }
+    },
+    "/api/interviews/{interviewId}/feedback": {
+      "post": {
+        "operationId": "InterviewFeedbackController_submit",
+        "parameters": [
+          {
+            "name": "interviewId",
+            "required": true,
+            "in": "path",
+            "description": "Interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitInterviewFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewFeedbackResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Submit interview feedback (panel members only)",
+        "tags": [
+          "Interviews - Feedback"
+        ]
+      },
+      "get": {
+        "operationId": "InterviewFeedbackController_listByInterview",
+        "parameters": [
+          {
+            "name": "interviewId",
+            "required": true,
+            "in": "path",
+            "description": "Interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "submitted_at"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "interview_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by application UUID (via interviews.application_id)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interviewer_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by interviewer user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recommendation",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STRONGLY_REJECT",
+                "REJECT",
+                "HOLD",
+                "SELECT",
+                "STRONGLY_SELECT"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/InterviewFeedbackResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/InterviewFeedbackResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List feedback by interview (offset or cursor pagination)",
+        "tags": [
+          "Interviews - Feedback"
+        ]
+      }
+    },
+    "/api/interviews/feedback/by-application/{applicationId}": {
+      "get": {
+        "operationId": "InterviewFeedbackController_listByApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "submitted_at"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "interview_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by application UUID (via interviews.application_id)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interviewer_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by interviewer user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recommendation",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STRONGLY_REJECT",
+                "REJECT",
+                "HOLD",
+                "SELECT",
+                "STRONGLY_SELECT"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/InterviewFeedbackResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/InterviewFeedbackResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List feedback by application (offset or cursor pagination)",
+        "tags": [
+          "Interviews - Feedback"
+        ]
+      }
+    },
+    "/api/interviews": {
+      "post": {
+        "operationId": "InterviewsController_schedule",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleInterviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview scheduled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Schedule interview",
+        "tags": [
+          "Interviews"
+        ]
+      },
+      "get": {
+        "operationId": "InterviewsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "scheduled_start_at",
+                "scheduled_end_at",
+                "completed_at",
+                "interview_status"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interview_round_id",
+            "required": false,
+            "in": "query",
+            "description": "Interview round UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interview_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SCHEDULED",
+                "RESCHEDULED",
+                "CANCELLED",
+                "COMPLETED",
+                "NO_SHOW"
+              ]
+            }
+          },
+          {
+            "name": "interview_mode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "VIRTUAL",
+                "ONSITE",
+                "TELEPHONIC"
+              ]
+            }
+          },
+          {
+            "name": "scheduled_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter by scheduled_start_at >= scheduled_from",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "scheduled_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter by scheduled_start_at <= scheduled_to",
+            "schema": {
+              "example": "2026-01-31T23:59:59.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "interviewer_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter interviews where a given user is a panel member",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interviews fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/InterviewResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/InterviewResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List interviews (offset or cursor pagination)",
+        "tags": [
+          "Interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}/reschedule": {
+      "post": {
+        "operationId": "InterviewsController_reschedule",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interview UUID to reschedule",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleInterviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview rescheduled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Reschedule interview (creates a new interview)",
+        "tags": [
+          "Interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}/cancel": {
+      "post": {
+        "operationId": "InterviewsController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interview UUID to cancel",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelInterviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Cancel interview",
+        "tags": [
+          "Interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}/complete": {
+      "post": {
+        "operationId": "InterviewsController_complete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interview UUID to complete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteInterviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Mark interview as completed",
+        "tags": [
+          "Interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}/panel-members": {
+      "put": {
+        "operationId": "InterviewsController_replacePanelMembers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignInterviewPanelMembersDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interview panel updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Replace interview panel members",
+        "tags": [
+          "Interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}": {
+      "get": {
+        "operationId": "InterviewsController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interview fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get interview by id",
+        "tags": [
+          "Interviews"
+        ]
+      }
     }
   },
   "info": {
@@ -6190,6 +7444,585 @@
           "changed_at",
           "created_at",
           "updated_at"
+        ]
+      },
+      "InterviewRoundResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "job_opening_id": {
+            "type": "string",
+            "description": "Job opening UUID"
+          },
+          "round_name": {
+            "type": "string",
+            "example": "Technical Round 1"
+          },
+          "round_type": {
+            "type": "string",
+            "enum": [
+              "SCREENING",
+              "TECHNICAL",
+              "MANAGERIAL",
+              "HR",
+              "ASSIGNMENT",
+              "FINAL"
+            ]
+          },
+          "sequence_number": {
+            "type": "number",
+            "example": 1
+          },
+          "is_mandatory": {
+            "type": "boolean",
+            "example": true
+          },
+          "max_score": {
+            "type": "object",
+            "example": 10,
+            "nullable": true
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "job_opening_id",
+          "round_name",
+          "round_type",
+          "sequence_number",
+          "is_mandatory",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateInterviewRoundDto": {
+        "type": "object",
+        "properties": {
+          "job_opening_id": {
+            "type": "string",
+            "description": "Job opening UUID"
+          },
+          "round_name": {
+            "type": "string",
+            "example": "Technical Round 1"
+          },
+          "round_type": {
+            "type": "string",
+            "enum": [
+              "SCREENING",
+              "TECHNICAL",
+              "MANAGERIAL",
+              "HR",
+              "ASSIGNMENT",
+              "FINAL"
+            ]
+          },
+          "sequence_number": {
+            "type": "number",
+            "example": 1,
+            "description": "1-based order of this round"
+          },
+          "is_mandatory": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          },
+          "max_score": {
+            "type": "number",
+            "example": 10,
+            "description": "Maximum score for this round"
+          },
+          "description": {
+            "type": "string",
+            "example": "Focus on data structures and system design"
+          }
+        },
+        "required": [
+          "job_opening_id",
+          "round_name",
+          "round_type",
+          "sequence_number"
+        ]
+      },
+      "UpdateInterviewRoundDto": {
+        "type": "object",
+        "properties": {
+          "round_name": {
+            "type": "string",
+            "example": "Technical Round 1"
+          },
+          "round_type": {
+            "type": "string",
+            "enum": [
+              "SCREENING",
+              "TECHNICAL",
+              "MANAGERIAL",
+              "HR",
+              "ASSIGNMENT",
+              "FINAL"
+            ]
+          },
+          "sequence_number": {
+            "type": "number",
+            "example": 1,
+            "description": "1-based order of this round"
+          },
+          "is_mandatory": {
+            "type": "boolean",
+            "example": true
+          },
+          "max_score": {
+            "type": "number",
+            "example": 10
+          },
+          "description": {
+            "type": "string",
+            "example": "Focus on system design and scaling"
+          }
+        }
+      },
+      "InterviewFeedbackResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "interview_id": {
+            "type": "string",
+            "description": "Interview UUID"
+          },
+          "interviewer_user_id": {
+            "type": "string",
+            "description": "Interviewer user UUID"
+          },
+          "technical_score": {
+            "type": "number",
+            "example": 8
+          },
+          "communication_score": {
+            "type": "number",
+            "example": 7
+          },
+          "problem_solving_score": {
+            "type": "number",
+            "example": 8
+          },
+          "culture_fit_score": {
+            "type": "number",
+            "example": 7
+          },
+          "overall_score": {
+            "type": "string",
+            "example": "7.50"
+          },
+          "strengths": {
+            "type": "object",
+            "nullable": true
+          },
+          "concerns": {
+            "type": "object",
+            "nullable": true
+          },
+          "detailed_feedback": {
+            "type": "object",
+            "nullable": true
+          },
+          "recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ]
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T12:30:00.000Z"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T12:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T12:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "interview_id",
+          "interviewer_user_id",
+          "technical_score",
+          "communication_score",
+          "problem_solving_score",
+          "culture_fit_score",
+          "overall_score",
+          "recommendation",
+          "submitted_at",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "SubmitInterviewFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "technical_score": {
+            "type": "number",
+            "example": 8,
+            "minimum": 0,
+            "maximum": 10
+          },
+          "communication_score": {
+            "type": "number",
+            "example": 7,
+            "minimum": 0,
+            "maximum": 10
+          },
+          "problem_solving_score": {
+            "type": "number",
+            "example": 8,
+            "minimum": 0,
+            "maximum": 10
+          },
+          "culture_fit_score": {
+            "type": "number",
+            "example": 7,
+            "minimum": 0,
+            "maximum": 10
+          },
+          "strengths": {
+            "type": "string",
+            "example": "Strong problem solving and clear communication"
+          },
+          "concerns": {
+            "type": "string",
+            "example": "Needs improvement in system design fundamentals"
+          },
+          "detailed_feedback": {
+            "type": "string",
+            "example": "Detailed notes about coding exercise and discussion"
+          },
+          "recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ]
+          }
+        },
+        "required": [
+          "technical_score",
+          "communication_score",
+          "problem_solving_score",
+          "culture_fit_score",
+          "recommendation"
+        ]
+      },
+      "InterviewPanelMemberResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "interview_id": {
+            "type": "string",
+            "description": "Interview UUID"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User UUID"
+          },
+          "role_in_panel": {
+            "type": "string",
+            "enum": [
+              "PRIMARY_INTERVIEWER",
+              "PANELIST",
+              "OBSERVER"
+            ]
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "interview_id",
+          "user_id",
+          "role_in_panel",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "InterviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "interview_round_id": {
+            "type": "string",
+            "description": "Interview round UUID"
+          },
+          "scheduled_start_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "scheduled_end_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T11:30:00.000Z"
+          },
+          "interview_mode": {
+            "type": "string",
+            "enum": [
+              "VIRTUAL",
+              "ONSITE",
+              "TELEPHONIC"
+            ]
+          },
+          "meeting_link": {
+            "type": "object",
+            "nullable": true
+          },
+          "location_details": {
+            "type": "object",
+            "nullable": true
+          },
+          "interview_status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "RESCHEDULED",
+              "CANCELLED",
+              "COMPLETED",
+              "NO_SHOW"
+            ]
+          },
+          "scheduled_by_user_id": {
+            "type": "string",
+            "description": "Scheduled by user UUID"
+          },
+          "rescheduled_from_interview_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "reschedule_reason": {
+            "type": "object",
+            "nullable": true
+          },
+          "cancel_reason": {
+            "type": "object",
+            "nullable": true
+          },
+          "completed_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "panel_members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewPanelMemberResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "application_id",
+          "interview_round_id",
+          "scheduled_start_at",
+          "scheduled_end_at",
+          "interview_mode",
+          "interview_status",
+          "scheduled_by_user_id",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "InterviewPanelMemberInputDto": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User UUID"
+          },
+          "role_in_panel": {
+            "type": "string",
+            "enum": [
+              "PRIMARY_INTERVIEWER",
+              "PANELIST",
+              "OBSERVER"
+            ]
+          }
+        },
+        "required": [
+          "user_id",
+          "role_in_panel"
+        ]
+      },
+      "ScheduleInterviewDto": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "interview_round_id": {
+            "type": "string",
+            "description": "Interview round UUID"
+          },
+          "scheduled_start_at": {
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "scheduled_end_at": {
+            "type": "string",
+            "example": "2026-01-15T11:30:00.000Z"
+          },
+          "interview_mode": {
+            "type": "string",
+            "enum": [
+              "VIRTUAL",
+              "ONSITE",
+              "TELEPHONIC"
+            ]
+          },
+          "meeting_link": {
+            "type": "string",
+            "example": "https://meet.google.com/xxx-yyyy-zzz"
+          },
+          "location_details": {
+            "type": "string",
+            "example": "Office - Meeting Room A, 3rd floor"
+          },
+          "members": {
+            "description": "Optional panel members to assign while scheduling",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewPanelMemberInputDto"
+            }
+          }
+        },
+        "required": [
+          "application_id",
+          "interview_round_id",
+          "scheduled_start_at",
+          "scheduled_end_at",
+          "interview_mode"
+        ]
+      },
+      "RescheduleInterviewDto": {
+        "type": "object",
+        "properties": {
+          "scheduled_start_at": {
+            "type": "string",
+            "example": "2026-01-16T10:30:00.000Z"
+          },
+          "scheduled_end_at": {
+            "type": "string",
+            "example": "2026-01-16T11:30:00.000Z"
+          },
+          "reschedule_reason": {
+            "type": "string",
+            "example": "Candidate requested a different time slot"
+          },
+          "meeting_link": {
+            "type": "string",
+            "example": "https://meet.google.com/new-link"
+          },
+          "location_details": {
+            "type": "string",
+            "example": "Office - Meeting Room B"
+          }
+        },
+        "required": [
+          "scheduled_start_at",
+          "scheduled_end_at",
+          "reschedule_reason"
+        ]
+      },
+      "CancelInterviewDto": {
+        "type": "object",
+        "properties": {
+          "cancel_reason": {
+            "type": "string",
+            "example": "Interviewer unavailable"
+          }
+        },
+        "required": [
+          "cancel_reason"
+        ]
+      },
+      "CompleteInterviewDto": {
+        "type": "object",
+        "properties": {
+          "completed_at": {
+            "type": "string",
+            "description": "If omitted, the server sets it to current time",
+            "example": "2026-01-15T11:35:00.000Z"
+          }
+        }
+      },
+      "AssignInterviewPanelMembersDto": {
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewPanelMemberInputDto"
+            }
+          }
+        },
+        "required": [
+          "members"
         ]
       }
     }
