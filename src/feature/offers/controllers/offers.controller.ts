@@ -49,6 +49,7 @@ export class OffersController {
   constructor(private readonly offersService: OffersService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create offer (DRAFT)' })
   @ApiBody({ type: CreateOfferDto })
@@ -59,6 +60,7 @@ export class OffersController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update offer (only when DRAFT)' })
   @ApiParam({ name: 'id', description: 'Offer UUID' })
@@ -119,6 +121,7 @@ export class OffersController {
   }
 
   @Post(':id/send')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Send offer (DRAFT -> SENT)' })
   @ApiParam({ name: 'id', description: 'Offer UUID' })
@@ -129,6 +132,7 @@ export class OffersController {
   }
 
   @Post(':id/accept')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Accept offer (SENT -> ACCEPTED)' })
   @ApiParam({ name: 'id', description: 'Offer UUID' })
@@ -139,6 +143,7 @@ export class OffersController {
   }
 
   @Post(':id/decline')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Decline offer (SENT -> DECLINED)' })
   @ApiParam({ name: 'id', description: 'Offer UUID' })
@@ -154,6 +159,7 @@ export class OffersController {
   }
 
   @Post(':id/cancel')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cancel offer (DRAFT/SENT -> CANCELLED)' })
   @ApiParam({ name: 'id', description: 'Offer UUID' })
@@ -164,6 +170,7 @@ export class OffersController {
   }
 
   @Post(':id/expire')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Expire offer (SENT -> EXPIRED)' })
   @ApiParam({ name: 'id', description: 'Offer UUID' })
@@ -174,6 +181,7 @@ export class OffersController {
   }
 
   @Delete(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete offer' })
   @ApiParam({ name: 'id', description: 'Offer UUID' })

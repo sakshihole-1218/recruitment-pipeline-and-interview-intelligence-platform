@@ -48,6 +48,7 @@ export class InterviewFeedbackController {
   constructor(private readonly interviewsService: InterviewsService) {}
 
   @Post(':interviewId/feedback')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.INTERVIEWER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Submit interview feedback (panel members only)' })
   @ApiParam({ name: 'interviewId', description: 'Interview UUID' })
@@ -81,10 +82,12 @@ export class InterviewFeedbackController {
   async listByInterview(
     @Param('interviewId') interviewId: string,
     @Query() query: ListInterviewFeedbackQueryDto,
+    @CurrentUser() actor: AuthJwtPayload,
   ) {
     const result = await this.interviewsService.listFeedbackByInterview(
       interviewId,
       query,
+      actor,
     );
 
     if (result.mode === 'cursor') {
@@ -116,10 +119,12 @@ export class InterviewFeedbackController {
   async listByApplication(
     @Param('applicationId') applicationId: string,
     @Query() query: ListInterviewFeedbackQueryDto,
+    @CurrentUser() actor: AuthJwtPayload,
   ) {
     const result = await this.interviewsService.listFeedbackByApplication(
       applicationId,
       query,
+      actor,
     );
 
     if (result.mode === 'cursor') {

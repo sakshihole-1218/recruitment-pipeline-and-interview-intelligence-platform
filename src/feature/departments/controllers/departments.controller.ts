@@ -40,7 +40,12 @@ import { DepartmentsMapper } from '../helpers/departments.mapper';
 
 @ApiTags('Departments')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+  SystemRoleCode.INTERVIEWER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('departments')
@@ -48,6 +53,7 @@ export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create department' })
   @ApiBody({ type: CreateDepartmentDto })
@@ -64,6 +70,7 @@ export class DepartmentsController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update department' })
   @ApiParam({ name: 'id', description: 'Department UUID' })
@@ -74,11 +81,7 @@ export class DepartmentsController {
     @Body() dto: UpdateDepartmentDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const department = await this.departmentsService.update(
-      id,
-      dto,
-      actor?.sub,
-    );
+    const department = await this.departmentsService.update(id, dto, actor?.sub);
     return ResponseUtil.success(
       'Department updated successfully',
       DepartmentsMapper.toResponse(department),
@@ -86,6 +89,7 @@ export class DepartmentsController {
   }
 
   @Patch(':id/status')
+  @Roles(SystemRoleCode.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Activate/deactivate department' })
   @ApiParam({ name: 'id', description: 'Department UUID' })
@@ -126,9 +130,7 @@ export class DepartmentsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'List departments (offset or cursor pagination)',
-  })
+  @ApiOperation({ summary: 'List departments (offset or cursor pagination)' })
   @ApiDepartmentsPaginatedResponse(
     DepartmentResponseDto,
     'Departments fetched successfully',
@@ -155,6 +157,7 @@ export class DepartmentsController {
   }
 
   @Delete(':id')
+  @Roles(SystemRoleCode.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete department' })
   @ApiParam({ name: 'id', description: 'Department UUID' })
@@ -162,7 +165,10 @@ export class DepartmentsController {
     SoftDeleteDepartmentResponseDto,
     'Department deleted successfully',
   )
-  async softDelete(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
+  async softDelete(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
     await this.departmentsService.softDelete(id, actor?.sub);
     return ResponseUtil.success('Department deleted successfully', { id });
   }

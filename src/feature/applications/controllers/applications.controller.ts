@@ -57,6 +57,7 @@ export class ApplicationsController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create candidate application' })
   @ApiBody({ type: CreateApplicationDto })
@@ -111,6 +112,7 @@ export class ApplicationsController {
   }
 
   @Post(':id/move-stage')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Move application stage (controlled transitions)' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
@@ -129,6 +131,7 @@ export class ApplicationsController {
   }
 
   @Post(':id/reject')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reject an application' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
@@ -147,6 +150,7 @@ export class ApplicationsController {
   }
 
   @Post(':id/hold')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Put an application on hold' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
@@ -165,6 +169,7 @@ export class ApplicationsController {
   }
 
   @Post(':id/withdraw')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Withdraw an application' })
   @ApiParam({ name: 'id', description: 'Application UUID' })

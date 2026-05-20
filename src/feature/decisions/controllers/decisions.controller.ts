@@ -47,6 +47,7 @@ export class DecisionsController {
   constructor(private readonly decisionsService: DecisionsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.HIRING_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create final application decision' })
   @ApiBody({ type: CreateApplicationDecisionDto })
@@ -66,6 +67,7 @@ export class DecisionsController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.HIRING_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update application decision' })
   @ApiParam({ name: 'id', description: 'Decision UUID' })
@@ -87,6 +89,7 @@ export class DecisionsController {
   }
 
   @Get('application/:applicationId')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get decision by application id' })
   @ApiParam({ name: 'applicationId', description: 'Application UUID' })
@@ -105,6 +108,7 @@ export class DecisionsController {
   }
 
   @Get(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get decision by id' })
   @ApiParam({ name: 'id', description: 'Decision UUID' })
@@ -121,6 +125,7 @@ export class DecisionsController {
   }
 
   @Get()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List decisions (offset or cursor pagination)' })
   @ApiDecisionsPaginatedResponse(
@@ -149,6 +154,7 @@ export class DecisionsController {
   }
 
   @Delete(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.HIRING_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete decision' })
   @ApiParam({ name: 'id', description: 'Decision UUID' })
