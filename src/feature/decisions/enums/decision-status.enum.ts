@@ -1,0 +1,8 @@
+export enum DecisionStatus {
+  SELECTED = 'SELECTED',
+  REJECTED = 'REJECTED',
+  HOLD = 'HOLD',
+  OFFER_IN_PROGRESS = 'OFFER_IN_PROGRESS',
+  OFFERED = 'OFFERED',
+  HIRED = 'HIRED',
+}

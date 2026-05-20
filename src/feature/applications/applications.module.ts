@@ -1,0 +1,63 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { ApplicationsController } from './controllers/applications.controller';
+import { ApplicationsService } from './application/services/applications.service';
+
+import { ApplicationEntity } from './entities/application.entity';
+import { ApplicationStageHistoryEntity } from './entities/application-stage-history.entity';
+
+import { ApplicationRepository } from './repositories/application.repository';
+import { ApplicationStageHistoryRepository } from './repositories/application-stage-history.repository';
+import { ApplicationReferenceRepository } from './repositories/application-reference.repository';
+
+import { ApplicationsPaginationHelper } from './helpers/applications-pagination.helper';
+import { ApplicationsValidationHelper } from './helpers/applications-validation.helper';
+
+import { CreateApplicationUseCase } from './application/use-cases/create-application.usecase';
+import { FindApplicationByIdUseCase } from './application/use-cases/find-application-by-id.usecase';
+import { ListApplicationsUseCase } from './application/use-cases/list-applications.usecase';
+import { MoveApplicationStageUseCase } from './application/use-cases/move-application-stage.usecase';
+import { RejectApplicationUseCase } from './application/use-cases/reject-application.usecase';
+import { HoldApplicationUseCase } from './application/use-cases/hold-application.usecase';
+import { WithdrawApplicationUseCase } from './application/use-cases/withdraw-application.usecase';
+import { ListApplicationStageHistoryUseCase } from './application/use-cases/list-application-stage-history.usecase';
+
+import { CandidateEntity } from '../candidates/entities/candidate.entity';
+import { JobOpeningEntity } from '../job-openings/entities/job-opening.entity';
+import { UserEntity } from '../accessControl/entities/user.entity';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([
+      ApplicationEntity,
+      ApplicationStageHistoryEntity,
+      CandidateEntity,
+      JobOpeningEntity,
+      UserEntity,
+    ]),
+  ],
+  controllers: [ApplicationsController],
+  providers: [
+    // repositories
+    ApplicationRepository,
+    ApplicationStageHistoryRepository,
+    ApplicationReferenceRepository,
+    // helpers
+    ApplicationsPaginationHelper,
+    ApplicationsValidationHelper,
+    // use-cases
+    CreateApplicationUseCase,
+    FindApplicationByIdUseCase,
+    ListApplicationsUseCase,
+    MoveApplicationStageUseCase,
+    RejectApplicationUseCase,
+    HoldApplicationUseCase,
+    WithdrawApplicationUseCase,
+    ListApplicationStageHistoryUseCase,
+    // service
+    ApplicationsService,
+  ],
+  exports: [ApplicationsService, ApplicationRepository],
+})
+export class ApplicationsModule {}

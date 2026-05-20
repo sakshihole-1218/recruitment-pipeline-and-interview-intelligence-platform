@@ -1,0 +1,9 @@
+export enum CandidateSourceType {
+  REFERRAL = 'REFERRAL',
+  LINKEDIN = 'LINKEDIN',
+  COMPANY_PORTAL = 'COMPANY_PORTAL',
+  JOB_BOARD = 'JOB_BOARD',
+  AGENCY = 'AGENCY',
+  WALK_IN = 'WALK_IN',
+  OTHER = 'OTHER',
+}
