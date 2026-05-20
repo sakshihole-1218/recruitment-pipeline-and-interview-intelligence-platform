@@ -15,6 +15,7 @@ import { CandidatesModule } from './feature/candidates/candidates.module';
 import { ApplicationsModule } from './feature/applications/applications.module';
 import { InterviewsModule } from './feature/interviews/interviews.module';
 import { DecisionsModule } from './feature/decisions/decisions.module';
+import { OffersModule } from './feature/offers/offers.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { DecisionsModule } from './feature/decisions/decisions.module';
     ApplicationsModule,
     InterviewsModule,
     DecisionsModule,
+    OffersModule,
   ],
 })
 export class AppModule {}

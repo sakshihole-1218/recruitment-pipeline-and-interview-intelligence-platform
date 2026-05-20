@@ -5928,6 +5928,806 @@
           "Decisions"
         ]
       }
+    },
+    "/api/offers": {
+      "post": {
+        "operationId": "OffersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Offer created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create offer (DRAFT)",
+        "tags": [
+          "Offers"
+        ]
+      },
+      "get": {
+        "operationId": "OffersController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "offered_at",
+                "expected_joining_date",
+                "offer_status"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offer_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "SENT",
+                "ACCEPTED",
+                "DECLINED",
+                "EXPIRED",
+                "CANCELLED"
+              ]
+            }
+          },
+          {
+            "name": "expected_joining_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter offers with expected_joining_date >= this date (ISO)",
+            "schema": {
+              "example": "2026-10-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "expected_joining_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter offers with expected_joining_date <= this date (ISO)",
+            "schema": {
+              "example": "2026-12-31T23:59:59.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "offered_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter offers with offered_at >= this date (ISO)",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "offered_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter offers with offered_at <= this date (ISO)",
+            "schema": {
+              "example": "2026-12-31T23:59:59.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offers fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/OfferResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/OfferResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List offers (offset or cursor pagination)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{id}": {
+      "patch": {
+        "operationId": "OffersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Offer updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update offer (only when DRAFT)",
+        "tags": [
+          "Offers"
+        ]
+      },
+      "get": {
+        "operationId": "OffersController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get offer by id",
+        "tags": [
+          "Offers"
+        ]
+      },
+      "delete": {
+        "operationId": "OffersController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SoftDeleteOfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete offer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/by-application/{applicationId}": {
+      "get": {
+        "operationId": "OffersController_findByApplicationId",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get latest offer by application id",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{id}/send": {
+      "post": {
+        "operationId": "OffersController_send",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Send offer (DRAFT -> SENT)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{id}/accept": {
+      "post": {
+        "operationId": "OffersController_accept",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer accepted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Accept offer (SENT -> ACCEPTED)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{id}/decline": {
+      "post": {
+        "operationId": "OffersController_decline",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeclineOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Offer declined successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Decline offer (SENT -> DECLINED)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{id}/cancel": {
+      "post": {
+        "operationId": "OffersController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Cancel offer (DRAFT/SENT -> CANCELLED)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{id}/expire": {
+      "post": {
+        "operationId": "OffersController_expire",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Offer UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer expired successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OfferResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Expire offer (SENT -> EXPIRED)",
+        "tags": [
+          "Offers"
+        ]
+      }
     }
   },
   "info": {
@@ -8630,6 +9430,201 @@
           "id": {
             "type": "string",
             "description": "Decision UUID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "OfferResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
+          },
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "offered_role_title": {
+            "type": "string",
+            "example": "Senior Backend Engineer"
+          },
+          "offered_ctc": {
+            "type": "string",
+            "example": "2800000.00"
+          },
+          "joining_bonus": {
+            "type": "object",
+            "example": "100000.00",
+            "nullable": true
+          },
+          "currency_code": {
+            "type": "object",
+            "example": "INR",
+            "nullable": true
+          },
+          "probation_period_months": {
+            "type": "object",
+            "example": 6,
+            "nullable": true
+          },
+          "expected_joining_date": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-12-01T00:00:00.000Z"
+          },
+          "offer_status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SENT",
+              "ACCEPTED",
+              "DECLINED",
+              "EXPIRED",
+              "CANCELLED"
+            ],
+            "example": "DRAFT"
+          },
+          "offered_at": {
+            "type": "object",
+            "example": "2026-01-15T10:30:00.000Z",
+            "nullable": true
+          },
+          "accepted_at": {
+            "type": "object",
+            "example": "2026-01-16T10:30:00.000Z",
+            "nullable": true
+          },
+          "declined_at": {
+            "type": "object",
+            "example": "2026-01-16T10:30:00.000Z",
+            "nullable": true
+          },
+          "decline_reason": {
+            "type": "object",
+            "example": "Accepted another offer",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "application_id",
+          "offered_role_title",
+          "offered_ctc",
+          "expected_joining_date",
+          "offer_status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateOfferDto": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "offered_role_title": {
+            "type": "string",
+            "example": "Senior Backend Engineer"
+          },
+          "offered_ctc": {
+            "type": "number",
+            "example": 2800000,
+            "description": "Annual offered CTC (must be > 0)"
+          },
+          "joining_bonus": {
+            "type": "number",
+            "example": 100000,
+            "description": "Joining bonus (>= 0)"
+          },
+          "currency_code": {
+            "type": "string",
+            "example": "INR",
+            "description": "ISO currency code"
+          },
+          "probation_period_months": {
+            "type": "number",
+            "example": 6,
+            "description": "Probation period months (>= 0)"
+          },
+          "expected_joining_date": {
+            "type": "string",
+            "example": "2026-12-01T00:00:00.000Z",
+            "description": "Expected joining date (future date required)"
+          }
+        },
+        "required": [
+          "application_id",
+          "offered_role_title",
+          "offered_ctc",
+          "expected_joining_date"
+        ]
+      },
+      "UpdateOfferDto": {
+        "type": "object",
+        "properties": {
+          "offered_role_title": {
+            "type": "string",
+            "example": "Senior Backend Engineer"
+          },
+          "offered_ctc": {
+            "type": "number",
+            "example": 2800000,
+            "description": "Annual offered CTC (> 0)"
+          },
+          "joining_bonus": {
+            "type": "number",
+            "example": 100000,
+            "description": "Joining bonus (>= 0)"
+          },
+          "currency_code": {
+            "type": "string",
+            "example": "INR",
+            "description": "ISO currency code"
+          },
+          "probation_period_months": {
+            "type": "number",
+            "example": 6,
+            "description": "Probation period months (>= 0)"
+          },
+          "expected_joining_date": {
+            "type": "string",
+            "example": "2026-12-01T00:00:00.000Z",
+            "description": "Expected joining date (future date required)"
+          }
+        }
+      },
+      "DeclineOfferDto": {
+        "type": "object",
+        "properties": {
+          "decline_reason": {
+            "type": "string",
+            "example": "Accepted another offer"
+          }
+        },
+        "required": [
+          "decline_reason"
+        ]
+      },
+      "SoftDeleteOfferResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b9b5d98d-4f82-4d87-8a84-0f4f6c9dfef2"
           }
         },
         "required": [
