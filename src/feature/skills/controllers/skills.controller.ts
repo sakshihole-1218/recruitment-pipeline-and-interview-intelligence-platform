@@ -40,7 +40,12 @@ import { SkillsMapper } from '../helpers/skills.mapper';
 
 @ApiTags('Skills')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+  SystemRoleCode.INTERVIEWER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('skills')
@@ -48,6 +53,7 @@ export class SkillsController {
   constructor(private readonly skillsService: SkillsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create skill' })
   @ApiBody({ type: CreateSkillDto })
@@ -64,6 +70,7 @@ export class SkillsController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update skill' })
   @ApiParam({ name: 'id', description: 'Skill UUID' })
@@ -75,13 +82,11 @@ export class SkillsController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     const skill = await this.skillsService.update(id, dto, actor?.sub);
-    return ResponseUtil.success(
-      'Skill updated successfully',
-      SkillsMapper.toResponse(skill),
-    );
+    return ResponseUtil.success('Skill updated successfully', SkillsMapper.toResponse(skill));
   }
 
   @Patch(':id/status')
+  @Roles(SystemRoleCode.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Activate/deactivate skill' })
   @ApiParam({ name: 'id', description: 'Skill UUID' })
@@ -106,10 +111,7 @@ export class SkillsController {
   @ApiStandardResponse(SkillResponseDto, 'Skill fetched successfully')
   async findById(@Param('id') id: string) {
     const skill = await this.skillsService.findById(id);
-    return ResponseUtil.success(
-      'Skill fetched successfully',
-      SkillsMapper.toResponse(skill),
-    );
+    return ResponseUtil.success('Skill fetched successfully', SkillsMapper.toResponse(skill));
   }
 
   @Get()
@@ -138,13 +140,11 @@ export class SkillsController {
   }
 
   @Delete(':id')
+  @Roles(SystemRoleCode.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete skill' })
   @ApiParam({ name: 'id', description: 'Skill UUID' })
-  @ApiStandardResponse(
-    SoftDeleteSkillResponseDto,
-    'Skill deleted successfully',
-  )
+  @ApiStandardResponse(SoftDeleteSkillResponseDto, 'Skill deleted successfully')
   async softDelete(
     @Param('id') id: string,
     @CurrentUser() actor: AuthJwtPayload,

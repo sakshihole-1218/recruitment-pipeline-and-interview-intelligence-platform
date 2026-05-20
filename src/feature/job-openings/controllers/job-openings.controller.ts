@@ -53,6 +53,7 @@ export class JobOpeningsController {
   constructor(private readonly jobOpeningsService: JobOpeningsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create job opening' })
   @ApiBody({ type: CreateJobOpeningDto })
@@ -69,6 +70,7 @@ export class JobOpeningsController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update job opening fields (skills via /:id/skills)' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
@@ -128,6 +130,7 @@ export class JobOpeningsController {
   }
 
   @Post(':id/publish')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Publish a job opening' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
@@ -141,6 +144,7 @@ export class JobOpeningsController {
   }
 
   @Post(':id/unpublish')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Unpublish a job opening' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
@@ -160,6 +164,7 @@ export class JobOpeningsController {
   }
 
   @Post(':id/open')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Open a job opening' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
@@ -173,6 +178,7 @@ export class JobOpeningsController {
   }
 
   @Post(':id/close')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Close a job opening' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
@@ -186,6 +192,7 @@ export class JobOpeningsController {
   }
 
   @Put(':id/skills')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Replace job opening skills' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
@@ -211,6 +218,7 @@ export class JobOpeningsController {
   }
 
   @Delete(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete job opening' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })

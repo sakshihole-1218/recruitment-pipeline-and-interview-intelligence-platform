@@ -79,6 +79,7 @@ export class CandidatesController {
   }
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create candidate profile' })
   @ApiBody({ type: CreateCandidateDto })
@@ -95,6 +96,7 @@ export class CandidatesController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update candidate profile' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
@@ -151,6 +153,7 @@ export class CandidatesController {
   }
 
   @Delete(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete candidate' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
@@ -164,6 +167,7 @@ export class CandidatesController {
   }
 
   @Put(':id/skills')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Add/update candidate skills' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
@@ -223,6 +227,7 @@ export class CandidatesController {
   }
 
   @Delete(':id/skills/:skillId')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove candidate skill' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
@@ -240,6 +245,7 @@ export class CandidatesController {
   }
 
   @Post(':id/documents/upload')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Upload candidate document (stores file + metadata)' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
@@ -349,6 +355,7 @@ export class CandidatesController {
   }
 
   @Patch(':id/documents/:documentId/latest')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark candidate resume as latest' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })

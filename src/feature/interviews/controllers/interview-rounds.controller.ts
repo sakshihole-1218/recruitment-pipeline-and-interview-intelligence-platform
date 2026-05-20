@@ -45,6 +45,7 @@ export class InterviewRoundsController {
   constructor(private readonly interviewsService: InterviewsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create interview round' })
   @ApiBody({ type: CreateInterviewRoundDto })
@@ -61,6 +62,7 @@ export class InterviewRoundsController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update interview round' })
   @ApiParam({ name: 'id', description: 'Interview round UUID' })

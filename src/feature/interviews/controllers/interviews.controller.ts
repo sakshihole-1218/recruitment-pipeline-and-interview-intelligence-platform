@@ -53,6 +53,7 @@ export class InterviewsController {
   constructor(private readonly interviewsService: InterviewsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Schedule interview' })
   @ApiBody({ type: ScheduleInterviewDto })
@@ -70,6 +71,7 @@ export class InterviewsController {
   }
 
   @Post(':id/reschedule')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reschedule interview (creates a new interview)' })
   @ApiParam({ name: 'id', description: 'Interview UUID to reschedule' })
@@ -89,6 +91,7 @@ export class InterviewsController {
   }
 
   @Post(':id/cancel')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cancel interview' })
   @ApiParam({ name: 'id', description: 'Interview UUID to cancel' })
@@ -108,6 +111,7 @@ export class InterviewsController {
   }
 
   @Post(':id/complete')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark interview as completed' })
   @ApiParam({ name: 'id', description: 'Interview UUID to complete' })
@@ -127,6 +131,7 @@ export class InterviewsController {
   }
 
   @Put(':id/panel-members')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Replace interview panel members' })
   @ApiParam({ name: 'id', description: 'Interview UUID' })
@@ -148,8 +153,11 @@ export class InterviewsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List interviews (offset or cursor pagination)' })
   @ApiInterviewsPaginatedResponse(InterviewResponseDto, 'Interviews fetched successfully')
-  async list(@Query() query: ListInterviewsQueryDto) {
-    const result = await this.interviewsService.listInterviews(query);
+  async list(
+    @Query() query: ListInterviewsQueryDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.interviewsService.listInterviews(query, actor);
 
     if (result.mode === 'cursor') {
       return ResponseUtil.success('Interviews fetched successfully', {
@@ -174,8 +182,8 @@ export class InterviewsController {
   @ApiOperation({ summary: 'Get interview by id' })
   @ApiParam({ name: 'id', description: 'Interview UUID' })
   @ApiStandardResponse(InterviewResponseDto, 'Interview fetched successfully')
-  async findById(@Param('id') id: string) {
-    const interview = await this.interviewsService.findInterviewById(id);
+  async findById(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
+    const interview = await this.interviewsService.findInterviewById(id, actor);
 
     return ResponseUtil.success(
       'Interview fetched successfully',

@@ -11,6 +11,7 @@ import { AssignInterviewPanelMembersDto } from '../../dto/assign-interview-panel
 import { SubmitInterviewFeedbackDto } from '../../dto/submit-interview-feedback.dto';
 import { ListInterviewsQueryDto } from '../../dto/list-interviews.query.dto';
 import { ListInterviewFeedbackQueryDto } from '../../dto/list-interview-feedback.query.dto';
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 import { CreateInterviewRoundUseCase } from '../../application/use-cases/create-interview-round.usecase';
 import { UpdateInterviewRoundUseCase } from '../../application/use-cases/update-interview-round.usecase';
 import { ListInterviewRoundsByJobOpeningUseCase } from '../../application/use-cases/list-interview-rounds-by-job-opening.usecase';
@@ -75,23 +76,31 @@ export class InterviewsService {
     return this.replacePanelMembersUseCase.execute(id, dto);
   }
 
-  async findInterviewById(id: string) {
-    return this.findInterviewByIdUseCase.execute(id);
+  async findInterviewById(id: string, actor?: AuthJwtPayload) {
+    return this.findInterviewByIdUseCase.execute(id, actor);
   }
 
-  async listInterviews(query: ListInterviewsQueryDto) {
-    return this.listInterviewsUseCase.execute(query);
+  async listInterviews(query: ListInterviewsQueryDto, actor?: AuthJwtPayload) {
+    return this.listInterviewsUseCase.execute(query, actor);
   }
 
   async submitFeedback(interviewId: string, dto: SubmitInterviewFeedbackDto, actorUserId: string) {
     return this.submitFeedbackUseCase.execute(interviewId, dto, actorUserId);
   }
 
-  async listFeedbackByInterview(interviewId: string, query: ListInterviewFeedbackQueryDto) {
-    return this.listFeedbackByInterviewUseCase.execute(interviewId, query);
+  async listFeedbackByInterview(
+    interviewId: string,
+    query: ListInterviewFeedbackQueryDto,
+    actor?: AuthJwtPayload,
+  ) {
+    return this.listFeedbackByInterviewUseCase.execute(interviewId, query, actor);
   }
 
-  async listFeedbackByApplication(applicationId: string, query: ListInterviewFeedbackQueryDto) {
-    return this.listFeedbackByApplicationUseCase.execute(applicationId, query);
+  async listFeedbackByApplication(
+    applicationId: string,
+    query: ListInterviewFeedbackQueryDto,
+    actor?: AuthJwtPayload,
+  ) {
+    return this.listFeedbackByApplicationUseCase.execute(applicationId, query, actor);
   }
 }

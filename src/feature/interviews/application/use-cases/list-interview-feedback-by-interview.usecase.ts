@@ -8,6 +8,8 @@ import {
   InterviewFeedbackListResult,
   InterviewFeedbackRepository,
 } from '../../repositories/interview-feedback.repository';
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
+import { SystemRoleCode } from '../../../accessControl/enums/system-role-code.enum';
 
 @Injectable()
 export class ListInterviewFeedbackByInterviewUseCase {
@@ -20,10 +22,25 @@ export class ListInterviewFeedbackByInterviewUseCase {
   async execute(
     interviewId: string,
     query: ListInterviewFeedbackQueryDto,
+    actor?: AuthJwtPayload,
   ): Promise<InterviewFeedbackListResult> {
+    const roles = actor?.roles ?? [];
+    const isInterviewerOnly =
+      roles.includes(SystemRoleCode.INTERVIEWER) &&
+      !roles.includes(SystemRoleCode.ADMIN) &&
+      !roles.includes(SystemRoleCode.RECRUITER) &&
+      !roles.includes(SystemRoleCode.HIRING_MANAGER);
+
+    const effectiveQuery: ListInterviewFeedbackQueryDto = isInterviewerOnly
+      ? {
+          ...query,
+          interviewer_user_id: actor?.sub,
+        }
+      : query;
+
     this.paginationHelper.ensureCursorCompatibleSort({
-      cursor: query.cursor,
-      sort_by: query.sort_by,
+      cursor: effectiveQuery.cursor,
+      sort_by: effectiveQuery.sort_by,
     });
 
     const interview = await this.dataSource
@@ -41,7 +58,7 @@ export class ListInterviewFeedbackByInterviewUseCase {
     }
 
     return this.feedbackRepository.list({
-      ...query,
+      ...effectiveQuery,
       interview_id: interviewId,
       application_id: undefined,
     });
