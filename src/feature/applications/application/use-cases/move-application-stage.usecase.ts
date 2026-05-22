@@ -13,6 +13,9 @@ import { ApplicationStatus } from '../../enums/application-status.enum';
 import { ApplicationsValidationHelper } from '../../helpers/applications-validation.helper';
 import { ApplicationRepository } from '../../repositories/application.repository';
 import { ApplicationStageHistoryRepository } from '../../repositories/application-stage-history.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class MoveApplicationStageUseCase {
@@ -21,6 +24,7 @@ export class MoveApplicationStageUseCase {
     private readonly applicationRepository: ApplicationRepository,
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly validationHelper: ApplicationsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -89,6 +93,21 @@ export class MoveApplicationStageUseCase {
           change_reason: dto.change_reason ?? null,
           changed_at: now,
         },
+        { manager },
+      );
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.stageChange({
+          entityType: ActivityEntityType.APPLICATION,
+          entityId: app.id,
+          fromStage,
+          toStage: dto.to_stage,
+          reason: dto.change_reason ?? null,
+          actorUserId,
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
         { manager },
       );
 

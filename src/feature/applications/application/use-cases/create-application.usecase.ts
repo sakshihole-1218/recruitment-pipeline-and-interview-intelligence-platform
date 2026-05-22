@@ -13,6 +13,10 @@ import { ApplicationsValidationHelper } from '../../helpers/applications-validat
 import { ApplicationRepository } from '../../repositories/application.repository';
 import { ApplicationReferenceRepository } from '../../repositories/application-reference.repository';
 import { ApplicationStageHistoryRepository } from '../../repositories/application-stage-history.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class CreateApplicationUseCase {
@@ -22,6 +26,7 @@ export class CreateApplicationUseCase {
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly referenceRepository: ApplicationReferenceRepository,
     private readonly validationHelper: ApplicationsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(dto: CreateApplicationDto, actorUserId?: string): Promise<ApplicationEntity> {
@@ -153,6 +158,31 @@ export class CreateApplicationUseCase {
           code: 'APPLICATION_POST_CREATE_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.APPLICATION,
+          entityId: loaded.id,
+          actionType: ActivityActionType.CREATE,
+          actorUserId,
+          oldValues: null,
+          newValues: {
+            application_number: loaded.application_number,
+            candidate_id: loaded.candidate_id,
+            job_opening_id: loaded.job_opening_id,
+            current_stage: loaded.current_stage,
+            application_status: loaded.application_status,
+            is_priority: loaded.is_priority,
+            assigned_recruiter_user_id: loaded.assigned_recruiter_user_id,
+            assigned_hiring_manager_user_id: loaded.assigned_hiring_manager_user_id,
+            applied_at: loaded.applied_at?.toISOString?.() ?? null,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

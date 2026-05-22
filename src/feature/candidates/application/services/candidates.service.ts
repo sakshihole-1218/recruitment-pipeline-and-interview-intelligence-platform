@@ -56,16 +56,20 @@ export class CandidatesService {
     return this.softDeleteUseCase.execute(id, actorUserId);
   }
 
-  async upsertSkills(candidateId: string, dto: UpsertCandidateSkillsDto) {
-    return this.upsertSkillsUseCase.execute(candidateId, dto.skills);
+  async upsertSkills(
+    candidateId: string,
+    dto: UpsertCandidateSkillsDto,
+    actorUserId?: string,
+  ) {
+    return this.upsertSkillsUseCase.execute(candidateId, dto.skills, actorUserId);
   }
 
   async listSkills(candidateId: string) {
     return this.listSkillsUseCase.execute(candidateId);
   }
 
-  async removeSkill(candidateId: string, skillId: string) {
-    return this.removeSkillUseCase.execute(candidateId, skillId);
+  async removeSkill(candidateId: string, skillId: string, actorUserId?: string) {
+    return this.removeSkillUseCase.execute(candidateId, skillId, actorUserId);
   }
 
   async uploadDocument(

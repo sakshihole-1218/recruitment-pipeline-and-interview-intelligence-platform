@@ -10,6 +10,10 @@ import { CandidateDocumentType } from '../../enums/candidate-document-type.enum'
 import { CandidateRepository } from '../../repositories/candidate.repository';
 import { CandidateDocumentRepository } from '../../repositories/candidate-document.repository';
 import { CandidatesValidationHelper } from '../../helpers/candidates-validation.helper';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 export type UploadedCandidateFile = {
   originalname: string;
@@ -25,6 +29,7 @@ export class UploadCandidateDocumentUseCase {
     private readonly candidateRepository: CandidateRepository,
     private readonly candidateDocumentRepository: CandidateDocumentRepository,
     private readonly validationHelper: CandidatesValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -53,6 +58,7 @@ export class UploadCandidateDocumentUseCase {
     });
 
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const candidate = await this.candidateRepository.findById(candidateId, {
         manager,
       });
@@ -74,7 +80,7 @@ export class UploadCandidateDocumentUseCase {
 
       const fileUrl = `/uploads/candidates/${candidateId}/${file.filename}`;
 
-      return this.candidateDocumentRepository.createAndSave(
+      const created = await this.candidateDocumentRepository.createAndSave(
         {
           candidate_id: candidateId,
           document_type: dto.document_type,
@@ -82,13 +88,36 @@ export class UploadCandidateDocumentUseCase {
           file_url: fileUrl,
           file_size: String(file.size),
           mime_type: file.mimetype,
-          uploaded_at: new Date(),
+          uploaded_at: now,
           is_latest: isLatest,
           created_by_user_id: actorUserId ?? null,
           updated_by_user_id: actorUserId ?? null,
         },
         { manager },
       );
+
+      if (actorUserId) {
+        await this.activityWriter.log(
+          ActivityLogBuilder.build({
+            entityType: ActivityEntityType.CANDIDATE,
+            entityId: candidateId,
+            actionType: ActivityActionType.UPDATE,
+            actorUserId,
+            oldValues: { changed_fields: ['documents'] },
+            newValues: {
+              changed_fields: ['documents'],
+              document_type: dto.document_type,
+              is_latest: isLatest,
+            },
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
+      }
+
+      return created;
     });
   }
 }

@@ -11,6 +11,10 @@ import { InterviewEntity } from '../../entities/interview.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
 import { InterviewsValidationHelper } from '../../helpers/interviews-validation.helper';
 import { InterviewRepository } from '../../repositories/interview.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class CompleteInterviewUseCase {
@@ -18,6 +22,7 @@ export class CompleteInterviewUseCase {
     private readonly dataSource: DataSource,
     private readonly interviewRepository: InterviewRepository,
     private readonly validationHelper: InterviewsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -33,6 +38,7 @@ export class CompleteInterviewUseCase {
     }
 
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const interview = await this.interviewRepository.findById(interviewId, {
         manager,
         withRelations: true,
@@ -69,6 +75,7 @@ export class CompleteInterviewUseCase {
         completedAt,
       });
 
+      const oldStatus = interview.interview_status;
       interview.interview_status = InterviewStatus.COMPLETED;
       interview.completed_at = completedAt;
       interview.updated_by_user_id = actorUserId;
@@ -86,6 +93,24 @@ export class CompleteInterviewUseCase {
           code: 'INTERVIEW_POST_COMPLETE_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.INTERVIEW,
+          entityId: loaded.id,
+          actionType: ActivityActionType.STATUS_CHANGE,
+          actorUserId,
+          oldValues: { interview_status: oldStatus },
+          newValues: {
+            interview_status: loaded.interview_status,
+            completed_at: loaded.completed_at?.toISOString?.() ?? null,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

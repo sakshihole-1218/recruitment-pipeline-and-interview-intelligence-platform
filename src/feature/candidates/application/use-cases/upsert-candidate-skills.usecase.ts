@@ -10,6 +10,10 @@ import { CandidateSkillRepository } from '../../repositories/candidate-skill.rep
 import { CandidateReferenceRepository } from '../../repositories/candidate-reference.repository';
 import { CandidatesValidationHelper } from '../../helpers/candidates-validation.helper';
 import { CandidateSkillInputDto } from '../../dto/candidate-skill.input.dto';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class UpsertCandidateSkillsUseCase {
@@ -19,13 +23,16 @@ export class UpsertCandidateSkillsUseCase {
     private readonly candidateSkillRepository: CandidateSkillRepository,
     private readonly referenceRepository: CandidateReferenceRepository,
     private readonly validationHelper: CandidatesValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
     candidateId: string,
     skills: CandidateSkillInputDto[],
+    actorUserId?: string,
   ) {
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const candidate = await this.candidateRepository.findById(candidateId, { manager });
       if (!candidate) {
         throw new NotFoundException({
@@ -78,7 +85,26 @@ export class UpsertCandidateSkillsUseCase {
         }
       }
 
-      return this.candidateSkillRepository.listByCandidateId(candidateId, { manager });
+      const result = await this.candidateSkillRepository.listByCandidateId(candidateId, { manager });
+
+      if (actorUserId) {
+        await this.activityWriter.log(
+          ActivityLogBuilder.build({
+            entityType: ActivityEntityType.CANDIDATE,
+            entityId: candidateId,
+            actionType: ActivityActionType.UPDATE,
+            actorUserId,
+            oldValues: { changed_fields: ['skills'] },
+            newValues: { changed_fields: ['skills'] },
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
+      }
+
+      return result;
     });
   }
 }

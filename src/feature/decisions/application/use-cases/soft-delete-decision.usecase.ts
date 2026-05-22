@@ -7,6 +7,10 @@ import { DataSource } from 'typeorm';
 
 import { UserRepository } from '../../../accessControl/repositories/user.repository';
 import { ApplicationDecisionRepository } from '../../repositories/application-decision.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class SoftDeleteDecisionUseCase {
@@ -14,6 +18,7 @@ export class SoftDeleteDecisionUseCase {
     private readonly dataSource: DataSource,
     private readonly decisionRepository: ApplicationDecisionRepository,
     private readonly userRepository: UserRepository,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(id: string, actorUserId: string): Promise<void> {
@@ -41,11 +46,28 @@ export class SoftDeleteDecisionUseCase {
         });
       }
 
-      decision.deleted_at = new Date();
+      const now = new Date();
+
+      decision.deleted_at = now;
       decision.deleted_by_user_id = actor.id;
       decision.updated_by_user_id = actor.id;
 
       await this.decisionRepository.save(decision, { manager });
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.DECISION,
+          entityId: decision.id,
+          actionType: ActivityActionType.DELETE,
+          actorUserId: actor.id,
+          oldValues: { deleted_at: null },
+          newValues: { deleted_at: now.toISOString() },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
     });
   }
 }

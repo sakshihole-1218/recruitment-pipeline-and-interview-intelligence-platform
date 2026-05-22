@@ -11,6 +11,10 @@ import { InterviewEntity } from '../../entities/interview.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
 import { InterviewsValidationHelper } from '../../helpers/interviews-validation.helper';
 import { InterviewRepository } from '../../repositories/interview.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class RescheduleInterviewUseCase {
@@ -18,6 +22,7 @@ export class RescheduleInterviewUseCase {
     private readonly dataSource: DataSource,
     private readonly interviewRepository: InterviewRepository,
     private readonly validationHelper: InterviewsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -33,6 +38,7 @@ export class RescheduleInterviewUseCase {
     }
 
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const current = await this.interviewRepository.findById(interviewId, {
         manager,
       });
@@ -89,6 +95,7 @@ export class RescheduleInterviewUseCase {
         locationDetails,
       });
 
+      const oldStatus = current.interview_status;
       current.interview_status = InterviewStatus.RESCHEDULED;
       current.reschedule_reason = String(dto.reschedule_reason).trim();
       current.updated_by_user_id = actorUserId;
@@ -129,6 +136,48 @@ export class RescheduleInterviewUseCase {
           code: 'INTERVIEW_POST_RESCHEDULE_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.INTERVIEW,
+          entityId: current.id,
+          actionType: ActivityActionType.STATUS_CHANGE,
+          actorUserId,
+          oldValues: { interview_status: oldStatus },
+          newValues: {
+            interview_status: current.interview_status,
+            reschedule_reason_present: Boolean(dto.reschedule_reason),
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.INTERVIEW,
+          entityId: loaded.id,
+          actionType: ActivityActionType.CREATE,
+          actorUserId,
+          oldValues: null,
+          newValues: {
+            application_id: loaded.application_id,
+            interview_round_id: loaded.interview_round_id,
+            interview_status: loaded.interview_status,
+            interview_mode: loaded.interview_mode,
+            scheduled_start_at: loaded.scheduled_start_at?.toISOString?.() ?? null,
+            scheduled_end_at: loaded.scheduled_end_at?.toISOString?.() ?? null,
+            rescheduled_from_interview_id: loaded.rescheduled_from_interview_id,
+            reschedule_reason_present: Boolean(dto.reschedule_reason),
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

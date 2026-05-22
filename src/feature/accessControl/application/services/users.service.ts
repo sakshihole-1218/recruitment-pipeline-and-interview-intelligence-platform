@@ -42,13 +42,13 @@ export class UsersService {
     return this.listUsersUseCase.execute(query);
   }
 
-  async assignRole(userId: string, roleId: string) {
-    await this.assignRoleUseCase.execute(userId, roleId);
+  async assignRole(userId: string, roleId: string, actorUserId: string) {
+    await this.assignRoleUseCase.execute(userId, roleId, actorUserId);
     return this.findUserByIdUseCase.execute(userId);
   }
 
-  async removeRole(userId: string, roleId: string) {
-    await this.removeRoleUseCase.execute(userId, roleId);
+  async removeRole(userId: string, roleId: string, actorUserId: string) {
+    await this.removeRoleUseCase.execute(userId, roleId, actorUserId);
     return this.findUserByIdUseCase.execute(userId);
   }
 }

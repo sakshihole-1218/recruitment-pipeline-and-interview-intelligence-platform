@@ -9,6 +9,10 @@ import { UserRoleEntity } from '../../entities/user-role.entity';
 import { RoleRepository } from '../../repositories/role.repository';
 import { UserRepository } from '../../repositories/user.repository';
 import { UserRoleRepository } from '../../repositories/user-role.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class AssignRoleToUserUseCase {
@@ -17,10 +21,12 @@ export class AssignRoleToUserUseCase {
     private readonly userRepository: UserRepository,
     private readonly roleRepository: RoleRepository,
     private readonly userRoleRepository: UserRoleRepository,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(userId: string, roleId: string): Promise<UserRoleEntity> {
+  async execute(userId: string, roleId: string, actorUserId: string): Promise<UserRoleEntity> {
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const user = await this.userRepository.findById(userId, { manager });
       if (!user) {
         throw new NotFoundException({
@@ -54,6 +60,29 @@ export class AssignRoleToUserUseCase {
         existing.deleted_at = null;
         const restored = await this.userRoleRepository.save(existing, { manager });
         restored.role = role;
+
+        if (actorUserId) {
+          await this.activityWriter.log(
+            ActivityLogBuilder.build({
+              entityType: ActivityEntityType.USER,
+              entityId: userId,
+              actionType: ActivityActionType.UPDATE,
+              actorUserId,
+              oldValues: { role_id: roleId, assigned: false },
+              newValues: {
+                role_id: roleId,
+                role_code: role.code,
+                assigned: true,
+                changed_fields: ['roles'],
+              },
+              actionAt: now,
+              ipAddress: null,
+              userAgent: null,
+            }),
+            { manager },
+          );
+        }
+
         return restored;
       }
 
@@ -67,6 +96,29 @@ export class AssignRoleToUserUseCase {
       );
 
       created.role = role;
+
+      if (actorUserId) {
+        await this.activityWriter.log(
+          ActivityLogBuilder.build({
+            entityType: ActivityEntityType.USER,
+            entityId: userId,
+            actionType: ActivityActionType.UPDATE,
+            actorUserId,
+            oldValues: { role_id: roleId, assigned: false },
+            newValues: {
+              role_id: roleId,
+              role_code: role.code,
+              assigned: true,
+              changed_fields: ['roles'],
+            },
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
+      }
+
       return created;
     });
   }

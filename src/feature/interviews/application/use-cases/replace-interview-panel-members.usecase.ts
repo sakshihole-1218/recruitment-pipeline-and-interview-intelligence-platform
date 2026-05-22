@@ -12,6 +12,10 @@ import { InterviewPanelMemberEntity } from '../../entities/interview-panel-membe
 import { InterviewsValidationHelper } from '../../helpers/interviews-validation.helper';
 import { InterviewRepository } from '../../repositories/interview.repository';
 import { InterviewPanelMemberRepository } from '../../repositories/interview-panel-member.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class ReplaceInterviewPanelMembersUseCase {
@@ -20,10 +24,19 @@ export class ReplaceInterviewPanelMembersUseCase {
     private readonly interviewRepository: InterviewRepository,
     private readonly panelMemberRepository: InterviewPanelMemberRepository,
     private readonly validationHelper: InterviewsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(interviewId: string, dto: AssignInterviewPanelMembersDto) {
+  async execute(interviewId: string, dto: AssignInterviewPanelMembersDto, actorUserId: string) {
+    if (!actorUserId) {
+      throw new BadRequestException({
+        message: 'Actor user is required',
+        code: 'ACTOR_USER_REQUIRED',
+      });
+    }
+
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const interview = await this.interviewRepository.findById(interviewId, {
         manager,
       });
@@ -61,6 +74,11 @@ export class ReplaceInterviewPanelMembersUseCase {
       const existingAll = await manager
         .getRepository(InterviewPanelMemberEntity)
         .find({ where: { interview_id: interviewId }, withDeleted: true });
+
+      const oldActivePanelUserIds = existingAll
+        .filter((m) => !m.deleted_at)
+        .map((m) => m.user_id)
+        .sort();
 
       const existingByUserId = new Map(existingAll.map((m) => [m.user_id, m] as const));
       const desiredUserIds = new Set(userIds);
@@ -121,6 +139,31 @@ export class ReplaceInterviewPanelMembersUseCase {
           code: 'INTERVIEW_NOT_FOUND',
         });
       }
+
+      const newActivePanelUserIds = updated
+        .filter((m) => !m.deleted_at)
+        .map((m) => m.user_id)
+        .sort();
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.INTERVIEW,
+          entityId: updatedInterview.id,
+          actionType: ActivityActionType.UPDATE,
+          actorUserId,
+          oldValues: {
+            panel_member_user_ids: oldActivePanelUserIds,
+          },
+          newValues: {
+            panel_member_user_ids: newActivePanelUserIds,
+            changed_fields: ['panel_members'],
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return updatedInterview;
     });

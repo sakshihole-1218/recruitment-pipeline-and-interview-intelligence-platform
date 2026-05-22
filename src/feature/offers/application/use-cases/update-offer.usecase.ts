@@ -10,6 +10,10 @@ import { UpdateOfferDto } from '../../dto/update-offer.dto';
 import { OfferEntity } from '../../entities/offer.entity';
 import { OffersValidationHelper } from '../../helpers/offers-validation.helper';
 import { OfferRepository } from '../../repositories/offer.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class UpdateOfferUseCase {
@@ -17,10 +21,15 @@ export class UpdateOfferUseCase {
     private readonly dataSource: DataSource,
     private readonly offerRepository: OfferRepository,
     private readonly validationHelper: OffersValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(id: string, dto: UpdateOfferDto, actorUserId?: string): Promise<OfferEntity> {
     this.validationHelper.ensureActorUserRequired(actorUserId);
+
+    const changedFields = Object.keys(dto).filter(
+      (key) => (dto as Record<string, unknown>)[key] !== undefined,
+    );
 
     if (!dto || Object.keys(dto).length === 0) {
       throw new BadRequestException({
@@ -30,6 +39,7 @@ export class UpdateOfferUseCase {
     }
 
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const offer = await this.offerRepository.findById(id, { manager });
       if (!offer) {
         throw new NotFoundException({
@@ -100,6 +110,21 @@ export class UpdateOfferUseCase {
           code: 'OFFER_POST_UPDATE_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.OFFER,
+          entityId: loaded.id,
+          actionType: ActivityActionType.UPDATE,
+          actorUserId: actorUserId!,
+          oldValues: { changed_fields: changedFields },
+          newValues: { changed_fields: changedFields },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

@@ -14,6 +14,10 @@ import { OfferEntity } from '../../entities/offer.entity';
 import { OfferStatus } from '../../enums/offer-status.enum';
 import { OffersValidationHelper } from '../../helpers/offers-validation.helper';
 import { OfferRepository } from '../../repositories/offer.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class SendOfferUseCase {
@@ -24,6 +28,7 @@ export class SendOfferUseCase {
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly applicationsValidationHelper: ApplicationsValidationHelper,
     private readonly offersValidationHelper: OffersValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(id: string, actorUserId?: string): Promise<OfferEntity> {
@@ -49,6 +54,11 @@ export class SendOfferUseCase {
       );
 
       const now = new Date();
+
+      const oldOfferValues = {
+        offer_status: offer.offer_status,
+        offered_at: offer.offered_at ? offer.offered_at.toISOString() : null,
+      };
 
       offer.offer_status = OfferStatus.SENT;
       offer.offered_at = now;
@@ -92,6 +102,21 @@ export class SendOfferUseCase {
           },
           { manager },
         );
+
+        await this.activityWriter.log(
+          ActivityLogBuilder.stageChange({
+            entityType: ActivityEntityType.APPLICATION,
+            entityId: app.id,
+            fromStage,
+            toStage: ApplicationCurrentStage.OFFER,
+            reason: 'Offer sent',
+            actorUserId: actorUserId!,
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
       }
 
       const loaded = await this.offerRepository.findById(offer.id, { manager });
@@ -101,6 +126,24 @@ export class SendOfferUseCase {
           code: 'OFFER_POST_SEND_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.OFFER,
+          entityId: loaded.id,
+          actionType: ActivityActionType.SEND,
+          actorUserId: actorUserId!,
+          oldValues: oldOfferValues,
+          newValues: {
+            offer_status: loaded.offer_status,
+            offered_at: loaded.offered_at ? loaded.offered_at.toISOString() : null,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

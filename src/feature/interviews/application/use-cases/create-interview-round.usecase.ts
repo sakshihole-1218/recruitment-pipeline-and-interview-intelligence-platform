@@ -5,16 +5,22 @@ import { JobOpeningEntity } from '../../../job-openings/entities/job-opening.ent
 import { CreateInterviewRoundDto } from '../../dto/create-interview-round.dto';
 import { InterviewRoundEntity } from '../../entities/interview-round.entity';
 import { InterviewRoundRepository } from '../../repositories/interview-round.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class CreateInterviewRoundUseCase {
   constructor(
     private readonly dataSource: DataSource,
     private readonly interviewRoundRepository: InterviewRoundRepository,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(dto: CreateInterviewRoundDto, actorUserId?: string): Promise<InterviewRoundEntity> {
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const jobOpening = await manager
         .getRepository(JobOpeningEntity)
         .createQueryBuilder('job_openings')
@@ -65,6 +71,31 @@ export class CreateInterviewRoundUseCase {
           });
         }
 
+        if (actorUserId) {
+          await this.activityWriter.log(
+            ActivityLogBuilder.build({
+              entityType: ActivityEntityType.JOB_OPENING,
+              entityId: restored.job_opening_id,
+              actionType: ActivityActionType.UPDATE,
+              actorUserId,
+              oldValues: { round_id: restored.id, deleted_at_present: true },
+              newValues: {
+                round_id: restored.id,
+                sequence_number: restored.sequence_number,
+                round_type: restored.round_type,
+                is_mandatory: restored.is_mandatory,
+                max_score: restored.max_score,
+                deleted_at_present: false,
+                changed_fields: ['interview_rounds'],
+              },
+              actionAt: now,
+              ipAddress: null,
+              userAgent: null,
+            }),
+            { manager },
+          );
+        }
+
         return restored;
       }
 
@@ -91,6 +122,30 @@ export class CreateInterviewRoundUseCase {
           message: 'We could not complete the request. Please try again',
           code: 'INTERVIEW_ROUND_POST_CREATE_LOAD_FAILED',
         });
+      }
+
+      if (actorUserId) {
+        await this.activityWriter.log(
+          ActivityLogBuilder.build({
+            entityType: ActivityEntityType.JOB_OPENING,
+            entityId: dto.job_opening_id,
+            actionType: ActivityActionType.CREATE,
+            actorUserId,
+            oldValues: null,
+            newValues: {
+              round_id: loaded.id,
+              sequence_number: loaded.sequence_number,
+              round_type: loaded.round_type,
+              is_mandatory: loaded.is_mandatory,
+              max_score: loaded.max_score,
+              changed_fields: ['interview_rounds'],
+            },
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
       }
 
       return loaded;

@@ -4,12 +4,17 @@ import { UpdateCandidateDto } from '../../dto/update-candidate.dto';
 import { CandidateEntity } from '../../entities/candidate.entity';
 import { CandidatesValidationHelper } from '../../helpers/candidates-validation.helper';
 import { CandidateRepository } from '../../repositories/candidate.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class UpdateCandidateUseCase {
   constructor(
     private readonly candidateRepository: CandidateRepository,
     private readonly validationHelper: CandidatesValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -17,6 +22,10 @@ export class UpdateCandidateUseCase {
     dto: UpdateCandidateDto,
     actorUserId?: string,
   ): Promise<CandidateEntity> {
+    const changedFields = Object.keys(dto).filter(
+      (key) => (dto as Record<string, unknown>)[key] !== undefined,
+    );
+
     const candidate = await this.candidateRepository.findById(id);
     if (!candidate) {
       throw new NotFoundException({
@@ -84,6 +93,23 @@ export class UpdateCandidateUseCase {
       candidate.updated_by_user_id = actorUserId;
     }
 
-    return this.candidateRepository.save(candidate);
+    const updated = await this.candidateRepository.save(candidate);
+
+    if (actorUserId) {
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.CANDIDATE,
+          entityId: updated.id,
+          actionType: ActivityActionType.UPDATE,
+          actorUserId,
+          oldValues: { changed_fields: changedFields },
+          newValues: { changed_fields: changedFields },
+          ipAddress: null,
+          userAgent: null,
+        }),
+      );
+    }
+
+    return updated;
   }
 }

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
+
 import { SkillsController } from './controllers/skills.controller';
 import { SkillsService } from './application/services/skills.service';
 import { SkillEntity } from './entities/skill.entity';
@@ -15,7 +17,7 @@ import { ListSkillsUseCase } from './application/use-cases/list-skills.usecase';
 import { SoftDeleteSkillUseCase } from './application/use-cases/soft-delete-skill.usecase';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SkillEntity])],
+  imports: [TypeOrmModule.forFeature([SkillEntity]), ActivityLogsModule],
   controllers: [SkillsController],
   providers: [
     SkillRepository,

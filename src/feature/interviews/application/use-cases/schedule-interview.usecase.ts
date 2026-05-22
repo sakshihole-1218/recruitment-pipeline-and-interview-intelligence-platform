@@ -16,6 +16,10 @@ import { InterviewsValidationHelper } from '../../helpers/interviews-validation.
 import { InterviewPanelMemberRepository } from '../../repositories/interview-panel-member.repository';
 import { InterviewRepository } from '../../repositories/interview.repository';
 import { InterviewRoundRepository } from '../../repositories/interview-round.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class ScheduleInterviewUseCase {
@@ -25,6 +29,7 @@ export class ScheduleInterviewUseCase {
     private readonly interviewRoundRepository: InterviewRoundRepository,
     private readonly panelMemberRepository: InterviewPanelMemberRepository,
     private readonly validationHelper: InterviewsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(dto: ScheduleInterviewDto, actorUserId: string): Promise<InterviewEntity> {
@@ -36,6 +41,7 @@ export class ScheduleInterviewUseCase {
     }
 
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const application = await manager
         .getRepository(ApplicationEntity)
         .createQueryBuilder('applications')
@@ -182,6 +188,29 @@ export class ScheduleInterviewUseCase {
           code: 'INTERVIEW_POST_CREATE_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.INTERVIEW,
+          entityId: loaded.id,
+          actionType: ActivityActionType.CREATE,
+          actorUserId,
+          oldValues: null,
+          newValues: {
+            application_id: loaded.application_id,
+            interview_round_id: loaded.interview_round_id,
+            interview_status: loaded.interview_status,
+            interview_mode: loaded.interview_mode,
+            scheduled_start_at: loaded.scheduled_start_at?.toISOString?.() ?? null,
+            scheduled_end_at: loaded.scheduled_end_at?.toISOString?.() ?? null,
+            panel_members_count: loaded.panel_members?.length ?? null,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

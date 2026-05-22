@@ -140,8 +140,9 @@ export class InterviewsController {
   async replacePanelMembers(
     @Param('id') id: string,
     @Body() dto: AssignInterviewPanelMembersDto,
+    @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const interview = await this.interviewsService.assignPanelMembers(id, dto);
+    const interview = await this.interviewsService.assignPanelMembers(id, dto, actor?.sub);
 
     return ResponseUtil.success(
       'Interview panel updated successfully',

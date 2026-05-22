@@ -9,6 +9,10 @@ import { LoginDto } from '../../dto/login.dto';
 import { AuthMapper } from '../../helpers/auth.mapper';
 import { JwtPayloadHelper } from '../../helpers/jwt-payload.helper';
 import { AuthPasswordHashingHelper } from '../../helpers/password-hashing.helper';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class LoginUseCase {
@@ -16,6 +20,7 @@ export class LoginUseCase {
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(dto: LoginDto): Promise<AuthResponseDto> {
@@ -66,6 +71,20 @@ export class LoginUseCase {
     user.updated_by_user_id = user.id;
 
     await this.userRepository.save(user);
+
+    await this.activityWriter.log(
+      ActivityLogBuilder.build({
+        entityType: ActivityEntityType.USER,
+        entityId: user.id,
+        actionType: ActivityActionType.LOGIN,
+        actorUserId: user.id,
+        oldValues: null,
+        newValues: { last_login_at: user.last_login_at?.toISOString?.() ?? null },
+        actionAt: user.last_login_at,
+        ipAddress: null,
+        userAgent: null,
+      }),
+    );
 
     const reloaded = await this.userRepository.findById(user.id);
     if (!reloaded) {

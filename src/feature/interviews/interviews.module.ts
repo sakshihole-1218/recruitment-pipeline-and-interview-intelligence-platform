@@ -28,6 +28,7 @@ import { InterviewFeedbackRepository } from './repositories/interview-feedback.r
 import { InterviewPanelMemberRepository } from './repositories/interview-panel-member.repository';
 import { InterviewRoundRepository } from './repositories/interview-round.repository';
 import { InterviewRepository } from './repositories/interview.repository';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { InterviewRepository } from './repositories/interview.repository';
       InterviewPanelMemberEntity,
       InterviewFeedbackEntity,
     ]),
+    ActivityLogsModule,
   ],
   controllers: [
     InterviewRoundsController,

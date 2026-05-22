@@ -26,6 +26,7 @@ import { ListCandidateSkillsUseCase } from './application/use-cases/list-candida
 import { ListCandidateDocumentsUseCase } from './application/use-cases/list-candidate-documents.usecase';
 import { MarkLatestCandidateResumeUseCase } from './application/use-cases/mark-latest-candidate-resume.usecase';
 import { UploadCandidateDocumentUseCase } from './application/use-cases/upload-candidate-document.usecase';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UploadCandidateDocumentUseCase } from './application/use-cases/upload-c
       CandidateDocumentEntity,
       SkillEntity,
     ]),
+    ActivityLogsModule,
   ],
   controllers: [CandidatesController],
   providers: [

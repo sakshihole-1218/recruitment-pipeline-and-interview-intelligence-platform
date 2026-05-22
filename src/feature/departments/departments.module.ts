@@ -13,9 +13,10 @@ import { FindDepartmentByIdUseCase } from './application/use-cases/find-departme
 import { ListDepartmentsUseCase } from './application/use-cases/list-departments.usecase';
 import { SoftDeleteDepartmentUseCase } from './application/use-cases/soft-delete-department.usecase';
 import { UpdateDepartmentStatusUseCase } from './application/use-cases/update-department-status.usecase';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DepartmentEntity])],
+  imports: [TypeOrmModule.forFeature([DepartmentEntity]), ActivityLogsModule],
   controllers: [DepartmentsController],
   providers: [
     DepartmentRepository,

@@ -26,6 +26,7 @@ import { ListApplicationStageHistoryUseCase } from './application/use-cases/list
 import { CandidateEntity } from '../candidates/entities/candidate.entity';
 import { JobOpeningEntity } from '../job-openings/entities/job-opening.entity';
 import { UserEntity } from '../accessControl/entities/user.entity';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { UserEntity } from '../accessControl/entities/user.entity';
       JobOpeningEntity,
       UserEntity,
     ]),
+    ActivityLogsModule,
   ],
   controllers: [ApplicationsController],
   providers: [

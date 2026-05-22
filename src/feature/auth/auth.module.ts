@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 import { AccessControlModule } from '../accessControl/access-control.module';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 import { AuthService } from './application/services/auth.service';
 import { GetProfileUseCase } from './application/use-cases/get-profile.use-case';
 import { LoginUseCase } from './application/use-cases/login.use-case';
@@ -13,7 +14,12 @@ import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
-  imports: [AccessControlModule, PassportModule, JwtModule.register({})],
+  imports: [
+    AccessControlModule,
+    ActivityLogsModule,
+    PassportModule,
+    JwtModule.register({}),
+  ],
   controllers: [AuthController],
   providers: [
     LoginUseCase,

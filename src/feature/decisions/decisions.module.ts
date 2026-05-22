@@ -19,6 +19,7 @@ import { FindDecisionByIdUseCase } from './application/use-cases/find-decision-b
 import { FindDecisionByApplicationIdUseCase } from './application/use-cases/find-decision-by-application-id.usecase';
 import { ListDecisionsUseCase } from './application/use-cases/list-decisions.usecase';
 import { SoftDeleteDecisionUseCase } from './application/use-cases/soft-delete-decision.usecase';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SoftDeleteDecisionUseCase } from './application/use-cases/soft-delete-d
       ApplicationStageHistoryEntity,
       UserEntity,
     ]),
+    ActivityLogsModule,
   ],
   controllers: [DecisionsController],
   providers: [

@@ -13,6 +13,10 @@ import { ApplicationStatus } from '../../enums/application-status.enum';
 import { ApplicationsValidationHelper } from '../../helpers/applications-validation.helper';
 import { ApplicationRepository } from '../../repositories/application.repository';
 import { ApplicationStageHistoryRepository } from '../../repositories/application-stage-history.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class WithdrawApplicationUseCase {
@@ -21,6 +25,7 @@ export class WithdrawApplicationUseCase {
     private readonly applicationRepository: ApplicationRepository,
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly validationHelper: ApplicationsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -45,6 +50,7 @@ export class WithdrawApplicationUseCase {
       }
 
       const fromStage = app.current_stage;
+      const fromStatus = app.application_status;
 
       if (app.current_stage === ApplicationCurrentStage.WITHDRAWN) {
         throw new ConflictException({
@@ -88,6 +94,28 @@ export class WithdrawApplicationUseCase {
           code: 'APPLICATION_POST_UPDATE_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.APPLICATION,
+          entityId: loaded.id,
+          actionType: ActivityActionType.STAGE_CHANGE,
+          actorUserId,
+          oldValues: {
+            from_stage: fromStage,
+            application_status: fromStatus,
+          },
+          newValues: {
+            to_stage: loaded.current_stage,
+            application_status: loaded.application_status,
+            reason_present: Boolean(dto.withdrawal_reason),
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });
