@@ -189,8 +189,12 @@ export class CandidatesController {
       ],
     },
   })
-  async upsertSkills(@Param('id') id: string, @Body() dto: UpsertCandidateSkillsDto) {
-    const skills = await this.candidatesService.upsertSkills(id, dto);
+  async upsertSkills(
+    @Param('id') id: string,
+    @Body() dto: UpsertCandidateSkillsDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const skills = await this.candidatesService.upsertSkills(id, dto, actor?.sub);
     return ResponseUtil.success(
       'Candidate skills updated successfully',
       skills.map(CandidatesMapper.toSkillResponse),
@@ -236,8 +240,12 @@ export class CandidatesController {
     RemoveCandidateSkillResponseDto,
     'Candidate skill removed successfully',
   )
-  async removeSkill(@Param('id') id: string, @Param('skillId') skillId: string) {
-    await this.candidatesService.removeSkill(id, skillId);
+  async removeSkill(
+    @Param('id') id: string,
+    @Param('skillId') skillId: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    await this.candidatesService.removeSkill(id, skillId, actor?.sub);
     return ResponseUtil.success('Candidate skill removed successfully', {
       candidate_id: id,
       skill_id: skillId,

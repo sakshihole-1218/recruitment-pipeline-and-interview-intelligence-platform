@@ -659,6 +659,727 @@
         ]
       }
     },
+    "/api/activity-logs/{id}": {
+      "get": {
+        "operationId": "ActivityLogsController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Activity log UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activity log fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ActivityLogResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get activity log by id",
+        "tags": [
+          "Activity Logs"
+        ]
+      }
+    },
+    "/api/activity-logs": {
+      "get": {
+        "operationId": "ActivityLogsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "action_at",
+                "entity_type",
+                "action_type"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "USER",
+                "ROLE",
+                "DEPARTMENT",
+                "SKILL",
+                "JOB_OPENING",
+                "CANDIDATE",
+                "APPLICATION",
+                "INTERVIEW",
+                "DECISION",
+                "OFFER",
+                "NOTE"
+              ]
+            }
+          },
+          {
+            "name": "entity_id",
+            "required": false,
+            "in": "query",
+            "description": "Entity UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action_type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CREATE",
+                "UPDATE",
+                "DELETE",
+                "STATUS_CHANGE",
+                "STAGE_CHANGE",
+                "LOGIN",
+                "LOGOUT",
+                "SEND",
+                "ACCEPT",
+                "DECLINE",
+                "APPROVE",
+                "REJECT"
+              ]
+            }
+          },
+          {
+            "name": "action_by_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Actor user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter by action_at from (inclusive)",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "action_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter by action_at to (inclusive)",
+            "schema": {
+              "example": "2026-01-31T23:59:59.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activity logs fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ActivityLogResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/ActivityLogResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List activity logs (offset or cursor pagination)",
+        "tags": [
+          "Activity Logs"
+        ]
+      }
+    },
+    "/api/applications/{applicationId}/notes": {
+      "post": {
+        "operationId": "ApplicationNotesController_create",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationNoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Note created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationNoteResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create application note",
+        "tags": [
+          "Application Notes"
+        ]
+      },
+      "get": {
+        "operationId": "ApplicationNotesController_list",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "note_type",
+                "is_private"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "user_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by note author user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "note_type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "RECRUITER_NOTE",
+                "INTERVIEWER_NOTE",
+                "HIRING_MANAGER_NOTE",
+                "SYSTEM_NOTE"
+              ]
+            }
+          },
+          {
+            "name": "is_private",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notes fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ApplicationNoteResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/ApplicationNoteResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List application notes by application (offset or cursor pagination)",
+        "tags": [
+          "Application Notes"
+        ]
+      }
+    },
+    "/api/application-notes/{id}": {
+      "get": {
+        "operationId": "ApplicationNotesManagementController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Note UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Note fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationNoteResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get application note by id",
+        "tags": [
+          "Application Notes"
+        ]
+      },
+      "patch": {
+        "operationId": "ApplicationNotesManagementController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Note UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApplicationNoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Note updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationNoteResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update application note",
+        "tags": [
+          "Application Notes"
+        ]
+      },
+      "delete": {
+        "operationId": "ApplicationNotesManagementController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Note UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Note deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SoftDeleteApplicationNoteResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete application note",
+        "tags": [
+          "Application Notes"
+        ]
+      }
+    },
     "/api/auth/login": {
       "post": {
         "operationId": "AuthController_login",
@@ -1490,6 +2211,8 @@
                 "DATABASE",
                 "DEVOPS",
                 "CLOUD",
+                "TECHNICAL",
+                "TOOL",
                 "OTHER"
               ]
             }
@@ -7001,6 +7724,209 @@
           "pagination"
         ]
       },
+      "ActivityLogResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Activity log UUID"
+          },
+          "entity_type": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ROLE",
+              "DEPARTMENT",
+              "SKILL",
+              "JOB_OPENING",
+              "CANDIDATE",
+              "APPLICATION",
+              "INTERVIEW",
+              "DECISION",
+              "OFFER",
+              "NOTE"
+            ]
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "Entity UUID"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE",
+              "STATUS_CHANGE",
+              "STAGE_CHANGE",
+              "LOGIN",
+              "LOGOUT",
+              "SEND",
+              "ACCEPT",
+              "DECLINE",
+              "APPROVE",
+              "REJECT"
+            ]
+          },
+          "old_values": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          },
+          "new_values": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          },
+          "action_by_user_id": {
+            "type": "string",
+            "description": "Actor user UUID"
+          },
+          "action_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ip_address": {
+            "type": "object",
+            "nullable": true
+          },
+          "user_agent": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "entity_type",
+          "entity_id",
+          "action_type",
+          "old_values",
+          "new_values",
+          "action_by_user_id",
+          "action_at",
+          "ip_address",
+          "user_agent",
+          "created_at"
+        ]
+      },
+      "ApplicationNoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Note UUID"
+          },
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Author user UUID"
+          },
+          "note_type": {
+            "type": "string",
+            "enum": [
+              "RECRUITER_NOTE",
+              "INTERVIEWER_NOTE",
+              "HIRING_MANAGER_NOTE",
+              "SYSTEM_NOTE"
+            ]
+          },
+          "note_text": {
+            "type": "string"
+          },
+          "is_private": {
+            "type": "boolean",
+            "example": false
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "application_id",
+          "user_id",
+          "note_type",
+          "note_text",
+          "is_private",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateApplicationNoteDto": {
+        "type": "object",
+        "properties": {
+          "note_type": {
+            "type": "string",
+            "enum": [
+              "RECRUITER_NOTE",
+              "INTERVIEWER_NOTE",
+              "HIRING_MANAGER_NOTE",
+              "SYSTEM_NOTE"
+            ],
+            "example": "RECRUITER_NOTE"
+          },
+          "note_text": {
+            "type": "string",
+            "example": "Candidate seems strong in system design. Follow up on leadership experience."
+          },
+          "is_private": {
+            "type": "boolean",
+            "example": false,
+            "default": false
+          }
+        },
+        "required": [
+          "note_type",
+          "note_text"
+        ]
+      },
+      "UpdateApplicationNoteDto": {
+        "type": "object",
+        "properties": {
+          "note_type": {
+            "type": "string",
+            "enum": [
+              "RECRUITER_NOTE",
+              "INTERVIEWER_NOTE",
+              "HIRING_MANAGER_NOTE",
+              "SYSTEM_NOTE"
+            ],
+            "example": "INTERVIEWER_NOTE"
+          },
+          "note_text": {
+            "type": "string",
+            "example": "Updated note text"
+          },
+          "is_private": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "SoftDeleteApplicationNoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Deleted note UUID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
       "ProfileResponseDto": {
         "type": "object",
         "properties": {
@@ -7277,6 +8203,8 @@
               "DATABASE",
               "DEVOPS",
               "CLOUD",
+              "TECHNICAL",
+              "TOOL",
               "OTHER"
             ],
             "example": "LANGUAGE"
@@ -7330,6 +8258,8 @@
               "DATABASE",
               "DEVOPS",
               "CLOUD",
+              "TECHNICAL",
+              "TOOL",
               "OTHER"
             ],
             "example": "LANGUAGE"
@@ -7369,6 +8299,8 @@
               "DATABASE",
               "DEVOPS",
               "CLOUD",
+              "TECHNICAL",
+              "TOOL",
               "OTHER"
             ],
             "example": "LANGUAGE"

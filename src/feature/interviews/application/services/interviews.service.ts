@@ -72,8 +72,8 @@ export class InterviewsService {
     return this.completeInterviewUseCase.execute(id, dto, actorUserId);
   }
 
-  async assignPanelMembers(id: string, dto: AssignInterviewPanelMembersDto) {
-    return this.replacePanelMembersUseCase.execute(id, dto);
+  async assignPanelMembers(id: string, dto: AssignInterviewPanelMembersDto, actorUserId: string) {
+    return this.replacePanelMembersUseCase.execute(id, dto, actorUserId);
   }
 
   async findInterviewById(id: string, actor?: AuthJwtPayload) {

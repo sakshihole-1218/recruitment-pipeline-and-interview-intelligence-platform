@@ -14,6 +14,10 @@ import { ApplicationDecisionEntity } from '../../entities/application-decision.e
 import { ApplicationDecisionRepository } from '../../repositories/application-decision.repository';
 import { DecisionsValidationHelper } from '../../helpers/decisions-validation.helper';
 import { DecisionsApplicationStageHelper } from '../../helpers/decisions-application-stage.helper';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class UpdateApplicationDecisionUseCase {
@@ -24,6 +28,7 @@ export class UpdateApplicationDecisionUseCase {
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly userRepository: UserRepository,
     private readonly validationHelper: DecisionsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -128,6 +133,42 @@ export class UpdateApplicationDecisionUseCase {
           code: 'DECISION_POST_UPDATE_LOAD_FAILED',
         });
       }
+
+      if (fromStage !== toStage) {
+        await this.activityWriter.log(
+          ActivityLogBuilder.stageChange({
+            entityType: ActivityEntityType.APPLICATION,
+            entityId: application.id,
+            fromStage,
+            toStage,
+            reason: null,
+            actorUserId: actor.id,
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
+      }
+
+      const changedFields = [] as string[];
+      if (dto.decision_status !== undefined) changedFields.push('decision_status');
+      if (dto.decision_reason !== undefined) changedFields.push('decision_reason');
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.DECISION,
+          entityId: loaded.id,
+          actionType: ActivityActionType.UPDATE,
+          actorUserId: actor.id,
+          oldValues: { changed_fields: changedFields },
+          newValues: { changed_fields: changedFields },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

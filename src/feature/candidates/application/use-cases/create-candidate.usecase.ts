@@ -4,12 +4,17 @@ import { CreateCandidateDto } from '../../dto/create-candidate.dto';
 import { CandidateEntity } from '../../entities/candidate.entity';
 import { CandidatesValidationHelper } from '../../helpers/candidates-validation.helper';
 import { CandidateRepository } from '../../repositories/candidate.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class CreateCandidateUseCase {
   constructor(
     private readonly candidateRepository: CandidateRepository,
     private readonly validationHelper: CandidatesValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(dto: CreateCandidateDto, actorUserId?: string): Promise<CandidateEntity> {
@@ -21,7 +26,7 @@ export class CreateCandidateUseCase {
       await this.validationHelper.ensureUniquePhone({ phone });
     }
 
-    return this.candidateRepository.createAndSave({
+    const created = await this.candidateRepository.createAndSave({
       first_name: dto.first_name,
       last_name: dto.last_name,
       email,
@@ -55,5 +60,22 @@ export class CreateCandidateUseCase {
       created_by_user_id: actorUserId ?? null,
       updated_by_user_id: actorUserId ?? null,
     });
+
+    if (actorUserId) {
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.CANDIDATE,
+          entityId: created.id,
+          actionType: ActivityActionType.CREATE,
+          actorUserId,
+          oldValues: null,
+          newValues: { is_active: created.is_active },
+          ipAddress: null,
+          userAgent: null,
+        }),
+      );
+    }
+
+    return created;
   }
 }

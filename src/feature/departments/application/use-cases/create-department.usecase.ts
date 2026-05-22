@@ -5,6 +5,10 @@ import { CreateDepartmentDto } from '../../dto/create-department.dto';
 import { DepartmentEntity } from '../../entities/department.entity';
 import { DepartmentRepository } from '../../repositories/department.repository';
 import { DepartmentsValidationHelper } from '../../helpers/departments-validation.helper';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class CreateDepartmentUseCase {
@@ -12,6 +16,7 @@ export class CreateDepartmentUseCase {
     private readonly dataSource: DataSource,
     private readonly departmentRepository: DepartmentRepository,
     private readonly validationHelper: DepartmentsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -19,6 +24,7 @@ export class CreateDepartmentUseCase {
     actorUserId?: string,
   ): Promise<DepartmentEntity> {
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const code = this.validationHelper.normalizeCode(dto.code);
       const name = this.validationHelper.normalizeName(dto.name);
 
@@ -48,6 +54,27 @@ export class CreateDepartmentUseCase {
           message: 'We could not complete the request. Please try again',
           code: 'DEPARTMENT_POST_CREATE_LOAD_FAILED',
         });
+      }
+
+      if (actorUserId) {
+        await this.activityWriter.log(
+          ActivityLogBuilder.build({
+            entityType: ActivityEntityType.DEPARTMENT,
+            entityId: loaded.id,
+            actionType: ActivityActionType.CREATE,
+            actorUserId,
+            oldValues: null,
+            newValues: {
+              name: loaded.name,
+              code: loaded.code,
+              is_active: loaded.is_active,
+            },
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
       }
 
       return loaded;

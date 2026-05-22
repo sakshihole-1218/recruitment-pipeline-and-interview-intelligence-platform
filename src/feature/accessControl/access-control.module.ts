@@ -20,9 +20,13 @@ import { RoleRepository } from './repositories/role.repository';
 import { UserRepository } from './repositories/user.repository';
 import { UserRoleRepository } from './repositories/user-role.repository';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, RoleEntity, UserRoleEntity])],
+  imports: [
+    TypeOrmModule.forFeature([UserEntity, RoleEntity, UserRoleEntity]),
+    ActivityLogsModule,
+  ],
   controllers: [UsersController, RolesController],
   providers: [
     UserRepository,

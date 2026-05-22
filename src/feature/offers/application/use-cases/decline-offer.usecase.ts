@@ -10,6 +10,10 @@ import { OfferEntity } from '../../entities/offer.entity';
 import { OfferStatus } from '../../enums/offer-status.enum';
 import { OffersValidationHelper } from '../../helpers/offers-validation.helper';
 import { OfferRepository } from '../../repositories/offer.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class DeclineOfferUseCase {
@@ -17,6 +21,7 @@ export class DeclineOfferUseCase {
     private readonly dataSource: DataSource,
     private readonly offerRepository: OfferRepository,
     private readonly offersValidationHelper: OffersValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(id: string, dto: DeclineOfferDto, actorUserId?: string): Promise<OfferEntity> {
@@ -38,6 +43,11 @@ export class DeclineOfferUseCase {
       );
 
       const now = new Date();
+
+      const oldOfferValues = {
+        offer_status: offer.offer_status,
+        declined_at: offer.declined_at ? offer.declined_at.toISOString() : null,
+      };
       offer.offer_status = OfferStatus.DECLINED;
       offer.declined_at = now;
       offer.decline_reason = dto.decline_reason;
@@ -52,6 +62,26 @@ export class DeclineOfferUseCase {
           code: 'OFFER_POST_DECLINE_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.OFFER,
+          entityId: loaded.id,
+          actionType: ActivityActionType.DECLINE,
+          actorUserId: actorUserId!,
+          oldValues: oldOfferValues,
+          newValues: {
+            offer_status: loaded.offer_status,
+            declined_at: loaded.declined_at
+              ? loaded.declined_at.toISOString()
+              : null,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

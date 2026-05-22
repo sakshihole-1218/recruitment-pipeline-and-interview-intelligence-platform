@@ -20,9 +20,13 @@ import { OpenJobOpeningUseCase } from './application/use-cases/open-job-opening.
 import { CloseJobOpeningUseCase } from './application/use-cases/close-job-opening.usecase';
 import { ReplaceJobOpeningSkillsUseCase } from './application/use-cases/replace-job-opening-skills.usecase';
 import { SoftDeleteJobOpeningUseCase } from './application/use-cases/soft-delete-job-opening.usecase';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([JobOpeningEntity, JobOpeningSkillEntity])],
+  imports: [
+    TypeOrmModule.forFeature([JobOpeningEntity, JobOpeningSkillEntity]),
+    ActivityLogsModule,
+  ],
   controllers: [JobOpeningsController],
   providers: [
     JobOpeningRepository,

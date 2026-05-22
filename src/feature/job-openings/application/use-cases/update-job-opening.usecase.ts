@@ -11,6 +11,10 @@ import { JobOpeningEntity } from '../../entities/job-opening.entity';
 import { JobOpeningRepository } from '../../repositories/job-opening.repository';
 import { JobOpeningReferenceRepository } from '../../repositories/job-opening-reference.repository';
 import { JobOpeningsValidationHelper } from '../../helpers/job-openings-validation.helper';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class UpdateJobOpeningUseCase {
@@ -19,6 +23,7 @@ export class UpdateJobOpeningUseCase {
     private readonly jobOpeningRepository: JobOpeningRepository,
     private readonly referenceRepository: JobOpeningReferenceRepository,
     private readonly validationHelper: JobOpeningsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -27,6 +32,7 @@ export class UpdateJobOpeningUseCase {
     actorUserId?: string,
   ): Promise<JobOpeningEntity> {
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const opening = await this.jobOpeningRepository.findById(id, { manager });
       if (!opening) {
         throw new NotFoundException({
@@ -170,6 +176,27 @@ export class UpdateJobOpeningUseCase {
           message: 'We could not complete the request. Please try again',
           code: 'JOB_OPENING_POST_UPDATE_LOAD_FAILED',
         });
+      }
+
+      if (actorUserId) {
+        const changedFields = Object.keys(dto).filter(
+          (key) => (dto as Record<string, unknown>)[key] !== undefined,
+        );
+
+        await this.activityWriter.log(
+          ActivityLogBuilder.build({
+            entityType: ActivityEntityType.JOB_OPENING,
+            entityId: updated.id,
+            actionType: ActivityActionType.UPDATE,
+            actorUserId,
+            oldValues: { changed_fields: changedFields },
+            newValues: { changed_fields: changedFields },
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
       }
 
       return updated;

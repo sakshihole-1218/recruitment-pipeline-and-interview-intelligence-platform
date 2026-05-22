@@ -15,6 +15,10 @@ import { ApplicationDecisionEntity } from '../../entities/application-decision.e
 import { ApplicationDecisionRepository } from '../../repositories/application-decision.repository';
 import { DecisionsValidationHelper } from '../../helpers/decisions-validation.helper';
 import { DecisionsApplicationStageHelper } from '../../helpers/decisions-application-stage.helper';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class CreateApplicationDecisionUseCase {
@@ -25,6 +29,7 @@ export class CreateApplicationDecisionUseCase {
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly userRepository: UserRepository,
     private readonly validationHelper: DecisionsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -159,6 +164,41 @@ export class CreateApplicationDecisionUseCase {
           code: 'DECISION_POST_CREATE_LOAD_FAILED',
         });
       }
+
+      if (fromStage !== toStage) {
+        await this.activityWriter.log(
+          ActivityLogBuilder.stageChange({
+            entityType: ActivityEntityType.APPLICATION,
+            entityId: application.id,
+            fromStage,
+            toStage,
+            reason: null,
+            actorUserId: actor.id,
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
+      }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.DECISION,
+          entityId: loaded.id,
+          actionType: ActivityActionType.CREATE,
+          actorUserId: actor.id,
+          oldValues: null,
+          newValues: {
+            application_id: loaded.application_id,
+            decision_status: loaded.decision_status,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

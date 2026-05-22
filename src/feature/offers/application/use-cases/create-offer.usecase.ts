@@ -10,6 +10,10 @@ import { OfferEntity } from '../../entities/offer.entity';
 import { OfferStatus } from '../../enums/offer-status.enum';
 import { OffersValidationHelper } from '../../helpers/offers-validation.helper';
 import { OfferRepository } from '../../repositories/offer.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class CreateOfferUseCase {
@@ -17,6 +21,7 @@ export class CreateOfferUseCase {
     private readonly dataSource: DataSource,
     private readonly offerRepository: OfferRepository,
     private readonly validationHelper: OffersValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(dto: CreateOfferDto, actorUserId?: string): Promise<OfferEntity> {
@@ -99,6 +104,23 @@ export class CreateOfferUseCase {
           code: 'OFFER_POST_CREATE_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.OFFER,
+          entityId: loaded.id,
+          actionType: ActivityActionType.CREATE,
+          actorUserId: actorUserId!,
+          oldValues: null,
+          newValues: {
+            application_id: loaded.application_id,
+            offer_status: loaded.offer_status,
+          },
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

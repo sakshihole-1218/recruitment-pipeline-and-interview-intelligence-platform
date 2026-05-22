@@ -125,8 +125,12 @@ export class UsersController {
   @ApiParam({ name: 'id', description: 'User UUID' })
   @ApiParam({ name: 'roleId', description: 'Role UUID' })
   @ApiStandardResponse(UserResponseDto, 'Role assigned successfully')
-  async assignRole(@Param('id') id: string, @Param('roleId') roleId: string) {
-    const user = await this.usersService.assignRole(id, roleId);
+  async assignRole(
+    @Param('id') id: string,
+    @Param('roleId') roleId: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const user = await this.usersService.assignRole(id, roleId, actor.sub);
 
     return ResponseUtil.success(
       'Role assigned successfully',
@@ -141,8 +145,12 @@ export class UsersController {
   @ApiParam({ name: 'id', description: 'User UUID' })
   @ApiParam({ name: 'roleId', description: 'Role UUID' })
   @ApiStandardResponse(UserResponseDto, 'Role removed successfully')
-  async removeRole(@Param('id') id: string, @Param('roleId') roleId: string) {
-    const user = await this.usersService.removeRole(id, roleId);
+  async removeRole(
+    @Param('id') id: string,
+    @Param('roleId') roleId: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const user = await this.usersService.removeRole(id, roleId, actor.sub);
 
     return ResponseUtil.success(
       'Role removed successfully',

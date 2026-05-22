@@ -15,6 +15,10 @@ import { OfferEntity } from '../../entities/offer.entity';
 import { OfferStatus } from '../../enums/offer-status.enum';
 import { OffersValidationHelper } from '../../helpers/offers-validation.helper';
 import { OfferRepository } from '../../repositories/offer.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class AcceptOfferUseCase {
@@ -25,6 +29,7 @@ export class AcceptOfferUseCase {
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly applicationsValidationHelper: ApplicationsValidationHelper,
     private readonly offersValidationHelper: OffersValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(id: string, actorUserId?: string): Promise<OfferEntity> {
@@ -46,6 +51,11 @@ export class AcceptOfferUseCase {
       );
 
       const now = new Date();
+
+      const oldOfferValues = {
+        offer_status: offer.offer_status,
+        accepted_at: offer.accepted_at ? offer.accepted_at.toISOString() : null,
+      };
       offer.offer_status = OfferStatus.ACCEPTED;
       offer.accepted_at = now;
       offer.updated_by_user_id = actorUserId;
@@ -90,6 +100,21 @@ export class AcceptOfferUseCase {
         { manager },
       );
 
+      await this.activityWriter.log(
+        ActivityLogBuilder.stageChange({
+          entityType: ActivityEntityType.APPLICATION,
+          entityId: app.id,
+          fromStage,
+          toStage: ApplicationCurrentStage.HIRED,
+          reason: 'Offer accepted',
+          actorUserId: actorUserId!,
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
+
       const loaded = await this.offerRepository.findById(offer.id, { manager });
       if (!loaded) {
         throw new ConflictException({
@@ -97,6 +122,26 @@ export class AcceptOfferUseCase {
           code: 'OFFER_POST_ACCEPT_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.OFFER,
+          entityId: loaded.id,
+          actionType: ActivityActionType.ACCEPT,
+          actorUserId: actorUserId!,
+          oldValues: oldOfferValues,
+          newValues: {
+            offer_status: loaded.offer_status,
+            accepted_at: loaded.accepted_at
+              ? loaded.accepted_at.toISOString()
+              : null,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

@@ -12,6 +12,10 @@ import { PasswordHashingHelper } from '../../helpers/password-hashing.helper';
 import { RoleRepository } from '../../repositories/role.repository';
 import { UserRepository } from '../../repositories/user.repository';
 import { UserRoleRepository } from '../../repositories/user-role.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class CreateUserUseCase {
@@ -20,12 +24,14 @@ export class CreateUserUseCase {
     private readonly userRepository: UserRepository,
     private readonly roleRepository: RoleRepository,
     private readonly userRoleRepository: UserRoleRepository,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(dto: CreateUserDto, actorUserId?: string): Promise<UserEntity> {
     const normalizedEmail = normalizeEmail(dto.email);
 
     return this.dataSource.transaction(async (manager) => {
+      const now = new Date();
       const existing = await this.userRepository.findByNormalizedEmail(normalizedEmail, {
         includeDeleted: true,
         manager,
@@ -55,6 +61,8 @@ export class CreateUserUseCase {
         { manager },
       );
 
+      const assignedRoleCodes: string[] = [];
+
       if (dto.role_codes && dto.role_codes.length > 0) {
         const uniqueCodes = Array.from(new Set(dto.role_codes));
 
@@ -78,6 +86,8 @@ export class CreateUserUseCase {
             },
             { manager },
           );
+
+          assignedRoleCodes.push(role.code);
         }
       }
 
@@ -88,6 +98,27 @@ export class CreateUserUseCase {
           message: 'We could not complete the request. Please try again',
           code: 'USER_POST_CREATE_LOAD_FAILED',
         });
+      }
+
+      if (actorUserId) {
+        await this.activityWriter.log(
+          ActivityLogBuilder.build({
+            entityType: ActivityEntityType.USER,
+            entityId: created.id,
+            actionType: ActivityActionType.CREATE,
+            actorUserId,
+            oldValues: null,
+            newValues: {
+              is_active: created.is_active,
+              has_phone: Boolean(created.phone),
+              role_codes: assignedRoleCodes,
+            },
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
       }
 
       return created;

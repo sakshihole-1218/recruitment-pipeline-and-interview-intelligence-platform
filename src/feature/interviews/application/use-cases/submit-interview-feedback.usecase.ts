@@ -14,6 +14,10 @@ import { InterviewsValidationHelper } from '../../helpers/interviews-validation.
 import { InterviewFeedbackRepository } from '../../repositories/interview-feedback.repository';
 import { InterviewPanelMemberRepository } from '../../repositories/interview-panel-member.repository';
 import { InterviewRepository } from '../../repositories/interview.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
 
 @Injectable()
 export class SubmitInterviewFeedbackUseCase {
@@ -23,6 +27,7 @@ export class SubmitInterviewFeedbackUseCase {
     private readonly panelMemberRepository: InterviewPanelMemberRepository,
     private readonly feedbackRepository: InterviewFeedbackRepository,
     private readonly validationHelper: InterviewsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
   async execute(
@@ -86,6 +91,7 @@ export class SubmitInterviewFeedbackUseCase {
       const overall = this.validationHelper.computeOverallScore(dto);
 
       if (existing && existing.deleted_at) {
+        const feedbackId = existing.id;
         existing.deleted_at = null;
         existing.deleted_by_user_id = null;
         existing.updated_by_user_id = actorUserId;
@@ -113,6 +119,29 @@ export class SubmitInterviewFeedbackUseCase {
             code: 'INTERVIEW_FEEDBACK_POST_SUBMIT_LOAD_FAILED',
           });
         }
+
+        await this.activityWriter.log(
+          ActivityLogBuilder.build({
+            entityType: ActivityEntityType.INTERVIEW,
+            entityId: interviewId,
+            actionType: ActivityActionType.UPDATE,
+            actorUserId,
+            oldValues: { feedback_id: feedbackId, deleted_at_present: true },
+            newValues: {
+              feedback_id: loaded.id,
+              interviewer_user_id: loaded.interviewer_user_id,
+              submitted_at: loaded.submitted_at?.toISOString?.() ?? null,
+              overall_score: loaded.overall_score,
+              recommendation: loaded.recommendation,
+              deleted_at_present: false,
+              changed_fields: ['feedback'],
+            },
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
 
         return loaded;
       }
@@ -151,6 +180,28 @@ export class SubmitInterviewFeedbackUseCase {
           code: 'INTERVIEW_FEEDBACK_POST_SUBMIT_LOAD_FAILED',
         });
       }
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.INTERVIEW,
+          entityId: interviewId,
+          actionType: ActivityActionType.CREATE,
+          actorUserId,
+          oldValues: null,
+          newValues: {
+            feedback_id: loaded.id,
+            interviewer_user_id: loaded.interviewer_user_id,
+            submitted_at: loaded.submitted_at?.toISOString?.() ?? null,
+            overall_score: loaded.overall_score,
+            recommendation: loaded.recommendation,
+            changed_fields: ['feedback'],
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
 
       return loaded;
     });

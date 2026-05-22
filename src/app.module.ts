@@ -16,6 +16,7 @@ import { ApplicationsModule } from './feature/applications/applications.module';
 import { InterviewsModule } from './feature/interviews/interviews.module';
 import { DecisionsModule } from './feature/decisions/decisions.module';
 import { OffersModule } from './feature/offers/offers.module';
+import { ActivityLogsModule } from './feature/activityLogs/activity-logs.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { OffersModule } from './feature/offers/offers.module';
     InterviewsModule,
     DecisionsModule,
     OffersModule,
+    ActivityLogsModule,
   ],
 })
 export class AppModule {}

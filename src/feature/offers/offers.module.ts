@@ -25,6 +25,7 @@ import { DeclineOfferUseCase } from './application/use-cases/decline-offer.useca
 import { CancelOfferUseCase } from './application/use-cases/cancel-offer.usecase';
 import { ExpireOfferUseCase } from './application/use-cases/expire-offer.usecase';
 import { SoftDeleteOfferUseCase } from './application/use-cases/soft-delete-offer.usecase';
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SoftDeleteOfferUseCase } from './application/use-cases/soft-delete-offe
       ApplicationEntity,
       ApplicationStageHistoryEntity,
     ]),
+    ActivityLogsModule,
   ],
   controllers: [OffersController],
   providers: [
