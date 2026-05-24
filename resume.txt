@@ -1,0 +1,49 @@
+SAKSHI HOLE
+Software Engineer
+holesakshi12@gmail.com | www.linkedin.com/in/sakshihole | Mumbai, India
+
+PROFESSIONAL SUMMARY
+Software Engineer with 1 year of experience developing scalable web applications and backend systems using TypeScript,
+Node.js, NestJS, React.js, Next.js, and PostgreSQL. Skilled in REST API development, JWT-based authentication and
+authorization, and enterprise application development. Familiar with Agile methodologies, GitHub, GitLab, and Redmine.
+
+TECHNICAL SKILLS
+Frontend: React.js, Next.js ​
+Backend: Node.js, NestJS, JavaScript,TypeScript, REST API Design, JWT Authentication, Role-Based Access Control (RBAC)
+Database: PostgreSQL, TypeORM
+Tools & Platforms: Git, GitHub, GitLab, VS Code,Swagger
+Others: Agile/Scrum, Redmine
+
+WORK EXPERIENCE
+Software Engineer | ELYX Digital Pvt. Ltd | April 2025 - Present
+•​ Developed and maintained backend APIs and frontend features using Node.js, NestJS,TypeScript, PostgreSQL, React.js
+and Next.js.
+•​ Built reusable React.js components and integrated them with backend APIs to deliver dynamic UIs.
+•​ Designed and implemented RESTful APIs for business-critical modules.
+•​ Designed database schemas and wrote optimized queries.
+•​ Implemented JWT-based authentication and role-based access control for secure user management.
+•​ Collaborated with cross-functional teams in an Agile environment, participating in sprint planning, stand-ups, and code
+reviews.
+•​ Used Git and GitHub for version control and maintained clean, well-documented codebases.
+
+KEY PROJECTS
+Canteen Management System - VIBGYOR Group of Schools
+•​ Developed scalable RESTful APIs using Node.js, NestJS and TypeScript.
+•​ Designed and maintained PostgreSQL database schemas using TypeORM.
+•​ Implemented JWT-based authentication and role based authorization.
+•​ Built frontend modules using React.js and Next.js for menu planning, menu subscriptions, food ordering and approval
+workflows.
+•​ Developed features such as QR code-based meal serving, filtering, pagination and drill-down reports.
+Recruitment Pipeline & Interview Intelligence Platform - Internal Project (In Progress)
+•​ Building backend architecture using NestJS, TypeScript, PostgreSQL and TypeORM.
+•​ Implementing JWT authentication and role-based access control.
+•​ Designing modules for candidates, skills, interviews and recruitment pipeline stages.
+
+EDUCATION
+Bachelor of Engineering (B.E.) - Computer Engineering - University of Mumbai | 2020 – 2024
+
+​
+CERTIFICATIONS
+•​ CDAC - PG Diploma in Advanced Computing (DAC) | 2024–2025
+
+
