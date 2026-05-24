@@ -4583,73 +4583,6 @@
         ]
       }
     },
-    "/api/applications/{id}/move-stage": {
-      "post": {
-        "operationId": "ApplicationsController_moveStage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Application UUID",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MoveApplicationStageDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Application stage updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/BaseResponseDto"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/ApplicationResponseDto"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "security": [
-          {
-            "JWT-auth": []
-          }
-        ],
-        "summary": "Move application stage (controlled transitions)",
-        "tags": [
-          "Applications"
-        ]
-      }
-    },
     "/api/applications/{id}/reject": {
       "post": {
         "operationId": "ApplicationsController_reject",
@@ -10382,33 +10315,6 @@
         "required": [
           "candidate_id",
           "job_opening_id"
-        ]
-      },
-      "MoveApplicationStageDto": {
-        "type": "object",
-        "properties": {
-          "to_stage": {
-            "type": "string",
-            "enum": [
-              "APPLIED",
-              "SCREENING",
-              "SHORTLISTED",
-              "INTERVIEW",
-              "DECISION",
-              "OFFER",
-              "HIRED",
-              "REJECTED",
-              "WITHDRAWN",
-              "ON_HOLD"
-            ]
-          },
-          "change_reason": {
-            "type": "string",
-            "example": "Screening completed"
-          }
-        },
-        "required": [
-          "to_stage"
         ]
       },
       "RejectApplicationDto": {

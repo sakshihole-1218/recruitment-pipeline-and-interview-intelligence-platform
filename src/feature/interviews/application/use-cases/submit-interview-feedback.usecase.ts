@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { ApplicationEntity } from '../../../applications/entities/application.entity';
+import { ApplicationCurrentStage } from '../../../applications/enums/application-current-stage.enum';
 import { SubmitInterviewFeedbackDto } from '../../dto/submit-interview-feedback.dto';
 import { InterviewFeedbackEntity } from '../../entities/interview-feedback.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
@@ -58,6 +60,28 @@ export class SubmitInterviewFeedbackUseCase {
         throw new ConflictException({
           message: 'Feedback can only be submitted for completed interviews',
           code: 'INTERVIEW_FEEDBACK_INVALID_STATUS',
+        });
+      }
+
+      const application = await manager
+        .getRepository(ApplicationEntity)
+        .createQueryBuilder('applications')
+        .where('applications.id = :id', { id: interview.application_id })
+        .andWhere('applications.deleted_at IS NULL')
+        .getOne();
+
+      if (!application) {
+        throw new NotFoundException({
+          message: 'Application not found',
+          code: 'APPLICATION_NOT_FOUND',
+        });
+      }
+
+      if (application.current_stage !== ApplicationCurrentStage.INTERVIEW) {
+        throw new ConflictException({
+          message: 'Feedback can only be submitted when application is in INTERVIEW stage',
+          code: 'APPLICATION_NOT_IN_INTERVIEW_STAGE_FOR_FEEDBACK',
+          meta: { current_stage: application.current_stage },
         });
       }
 

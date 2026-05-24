@@ -5,6 +5,11 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { ApplicationCurrentStage } from '../../../applications/enums/application-current-stage.enum';
+import { ApplicationStatus } from '../../../applications/enums/application-status.enum';
+import { ApplicationRepository } from '../../../applications/repositories/application.repository';
+import { ApplicationStageHistoryRepository } from '../../../applications/repositories/application-stage-history.repository';
+import { ApplicationsValidationHelper } from '../../../applications/helpers/applications-validation.helper';
 import { OfferEntity } from '../../entities/offer.entity';
 import { OfferStatus } from '../../enums/offer-status.enum';
 import { OffersValidationHelper } from '../../helpers/offers-validation.helper';
@@ -19,6 +24,9 @@ export class CancelOfferUseCase {
   constructor(
     private readonly dataSource: DataSource,
     private readonly offerRepository: OfferRepository,
+    private readonly applicationRepository: ApplicationRepository,
+    private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
+    private readonly applicationsValidationHelper: ApplicationsValidationHelper,
     private readonly offersValidationHelper: OffersValidationHelper,
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
@@ -50,6 +58,61 @@ export class CancelOfferUseCase {
       offer.updated_by_user_id = actorUserId ?? null;
 
       await this.offerRepository.save(offer, { manager });
+
+      const app = await this.applicationRepository.findById(offer.application_id, {
+        manager,
+      });
+      if (!app) {
+        throw new ConflictException({
+          message: 'Offer is linked to an invalid application',
+          code: 'OFFER_APPLICATION_INVALID',
+        });
+      }
+
+      this.applicationsValidationHelper.ensureNotTerminalStage(app.current_stage);
+
+      const targetStage = ApplicationCurrentStage.OFFER;
+      const fromStage = app.current_stage;
+      if (fromStage !== targetStage) {
+        this.applicationsValidationHelper.ensureStageTransitionAllowed({
+          from: fromStage,
+          to: targetStage,
+        });
+
+        await this.stageHistoryRepository.createAndSave(
+          {
+            application_id: app.id,
+            from_stage: fromStage,
+            to_stage: targetStage,
+            changed_by_user_id: actorUserId!,
+            change_reason: 'Offer cancelled',
+            changed_at: now,
+          },
+          { manager },
+        );
+
+        app.current_stage = targetStage;
+        app.last_stage_changed_at = now;
+
+        await this.activityWriter.log(
+          ActivityLogBuilder.stageChange({
+            entityType: ActivityEntityType.APPLICATION,
+            entityId: app.id,
+            fromStage,
+            toStage: targetStage,
+            reason: 'Offer cancelled',
+            actorUserId: actorUserId!,
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
+      }
+
+      app.application_status = ApplicationStatus.CLOSED;
+      app.updated_by_user_id = actorUserId ?? null;
+      await this.applicationRepository.save(app, { manager });
 
       const loaded = await this.offerRepository.findById(offer.id, { manager });
       if (!loaded) {
