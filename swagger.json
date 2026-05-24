@@ -7451,6 +7451,855 @@
           "Offers"
         ]
       }
+    },
+    "/api/ai-insights/resume-analyses": {
+      "post": {
+        "operationId": "ResumeAiAnalysesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateResumeAiAnalysisDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resume AI analysis created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ResumeAiAnalysisResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create resume AI analysis",
+        "tags": [
+          "AI Insights - Resume Analyses"
+        ]
+      },
+      "get": {
+        "operationId": "ResumeAiAnalysesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "analyzed_at",
+                "analysis_status"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidate_document_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by candidate document UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "analysis_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "PROCESSING",
+                "COMPLETED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "analyzed_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter analyses with analyzed_at >= this date (ISO)",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "analyzed_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter analyses with analyzed_at <= this date (ISO)",
+            "schema": {
+              "example": "2026-12-31T23:59:59.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume AI analyses fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/ResumeAiAnalysisResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/ResumeAiAnalysisResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List resume AI analyses (offset or cursor pagination)",
+        "tags": [
+          "AI Insights - Resume Analyses"
+        ]
+      }
+    },
+    "/api/ai-insights/resume-analyses/by-document/{candidateDocumentId}/regenerate": {
+      "post": {
+        "operationId": "ResumeAiAnalysesController_regenerate",
+        "parameters": [
+          {
+            "name": "candidateDocumentId",
+            "required": true,
+            "in": "path",
+            "description": "Candidate document UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegenerateResumeAiAnalysisDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resume AI analysis regenerated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ResumeAiAnalysisResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Regenerate resume AI analysis for a candidate document",
+        "tags": [
+          "AI Insights - Resume Analyses"
+        ]
+      }
+    },
+    "/api/ai-insights/resume-analyses/{id}": {
+      "get": {
+        "operationId": "ResumeAiAnalysesController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Resume AI analysis UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume AI analysis fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ResumeAiAnalysisResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get resume AI analysis by id",
+        "tags": [
+          "AI Insights - Resume Analyses"
+        ]
+      }
+    },
+    "/api/ai-insights/resume-analyses/by-document/{candidateDocumentId}": {
+      "get": {
+        "operationId": "ResumeAiAnalysesController_findByCandidateDocumentId",
+        "parameters": [
+          {
+            "name": "candidateDocumentId",
+            "required": true,
+            "in": "path",
+            "description": "Candidate document UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume AI analysis fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ResumeAiAnalysisResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get resume AI analysis by candidate document id",
+        "tags": [
+          "AI Insights - Resume Analyses"
+        ]
+      }
+    },
+    "/api/ai-insights/feedback-summaries": {
+      "post": {
+        "operationId": "FeedbackAiSummariesController_generate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateFeedbackAiSummaryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback AI summary generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FeedbackAiSummaryResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Generate feedback AI summary for an application",
+        "tags": [
+          "AI Insights - Feedback Summaries"
+        ]
+      },
+      "get": {
+        "operationId": "FeedbackAiSummariesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "generated_at",
+                "final_ai_recommendation"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "final_ai_recommendation",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STRONGLY_REJECT",
+                "REJECT",
+                "HOLD",
+                "SELECT",
+                "STRONGLY_SELECT"
+              ]
+            }
+          },
+          {
+            "name": "generated_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter summaries with generated_at >= this date (ISO)",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "generated_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter summaries with generated_at <= this date (ISO)",
+            "schema": {
+              "example": "2026-12-31T23:59:59.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback AI summaries fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/FeedbackAiSummaryResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/FeedbackAiSummaryResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List feedback AI summaries (offset or cursor pagination)",
+        "tags": [
+          "AI Insights - Feedback Summaries"
+        ]
+      }
+    },
+    "/api/ai-insights/feedback-summaries/by-application/{applicationId}/regenerate": {
+      "post": {
+        "operationId": "FeedbackAiSummariesController_regenerate",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback AI summary regenerated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FeedbackAiSummaryResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Regenerate feedback AI summary for an application",
+        "tags": [
+          "AI Insights - Feedback Summaries"
+        ]
+      }
+    },
+    "/api/ai-insights/feedback-summaries/{id}": {
+      "get": {
+        "operationId": "FeedbackAiSummariesController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Feedback AI summary UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback AI summary fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FeedbackAiSummaryResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get feedback AI summary by id",
+        "tags": [
+          "AI Insights - Feedback Summaries"
+        ]
+      }
+    },
+    "/api/ai-insights/feedback-summaries/by-application/{applicationId}": {
+      "get": {
+        "operationId": "FeedbackAiSummariesController_findByApplicationId",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback AI summary fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FeedbackAiSummaryResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get feedback AI summary by application id",
+        "tags": [
+          "AI Insights - Feedback Summaries"
+        ]
+      }
     }
   },
   "info": {
@@ -10561,6 +11410,176 @@
         },
         "required": [
           "id"
+        ]
+      },
+      "ResumeAiAnalysisResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "candidate_document_id": {
+            "type": "string"
+          },
+          "extracted_text": {
+            "type": "string",
+            "description": "Extracted resume text used for analysis"
+          },
+          "skills_extracted": {
+            "type": "object",
+            "description": "JSON payload of extracted skills",
+            "additionalProperties": true,
+            "example": {
+              "skills": [
+                "TYPESCRIPT",
+                "NESTJS",
+                "POSTGRESQL"
+              ],
+              "total": 3
+            }
+          },
+          "experience_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "education_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "ai_fit_score": {
+            "type": "object",
+            "nullable": true,
+            "description": "0-100 numeric fit score"
+          },
+          "analysis_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "analyzed_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "candidate_document_id",
+          "extracted_text",
+          "skills_extracted",
+          "experience_summary",
+          "education_summary",
+          "ai_fit_score",
+          "analysis_status",
+          "analyzed_at",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateResumeAiAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "candidate_document_id": {
+            "type": "string",
+            "description": "Candidate document UUID (must be RESUME type)"
+          },
+          "extracted_text": {
+            "type": "string",
+            "description": "Extracted text from the resume document. (AI provider integration will replace this later.)",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "candidate_document_id",
+          "extracted_text"
+        ]
+      },
+      "RegenerateResumeAiAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "extracted_text": {
+            "type": "string",
+            "description": "Optional new extracted text. If omitted, regeneration uses the currently stored extracted_text.",
+            "minLength": 1
+          }
+        }
+      },
+      "FeedbackAiSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "application_id": {
+            "type": "string"
+          },
+          "summary_text": {
+            "type": "string"
+          },
+          "strengths_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "concerns_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "final_ai_recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ]
+          },
+          "generated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "application_id",
+          "summary_text",
+          "strengths_summary",
+          "concerns_summary",
+          "final_ai_recommendation",
+          "generated_at",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "GenerateFeedbackAiSummaryDto": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          }
+        },
+        "required": [
+          "application_id"
         ]
       }
     }
