@@ -14,6 +14,10 @@ import {
 } from '../../providers/ai-insights-provider';
 import { AiInsightsReferenceRepository } from '../../repositories/ai-insights-reference.repository';
 import { FeedbackAiSummaryRepository } from '../../repositories/feedback-ai-summary.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
 
 @Injectable()
 export class RegenerateFeedbackAiSummaryUseCase {
@@ -22,6 +26,7 @@ export class RegenerateFeedbackAiSummaryUseCase {
     private readonly feedbackAiSummaryRepository: FeedbackAiSummaryRepository,
     private readonly referenceRepository: AiInsightsReferenceRepository,
     private readonly validationHelper: AiInsightsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
     @Inject(AI_INSIGHTS_PROVIDER)
     private readonly aiProvider: AiInsightsProvider,
   ) {}
@@ -51,6 +56,11 @@ export class RegenerateFeedbackAiSummaryUseCase {
           code: 'FEEDBACK_AI_SUMMARY_NOT_FOUND',
         });
       }
+
+      const oldValues = {
+        final_ai_recommendation: existing.final_ai_recommendation,
+        generated_at: existing.generated_at.toISOString(),
+      };
 
       const feedbacks =
         await this.referenceRepository.listInterviewFeedbackByApplicationId({
@@ -85,7 +95,28 @@ export class RegenerateFeedbackAiSummaryUseCase {
         manager,
       });
 
-      return loaded ?? existing;
+      const resultEntity = loaded ?? existing;
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.FEEDBACK_AI_SUMMARY,
+          entityId: resultEntity.id,
+          actionType: ActivityActionType.REGENERATE,
+          actorUserId: actorId,
+          oldValues,
+          newValues: {
+            application_id: resultEntity.application_id,
+            final_ai_recommendation: resultEntity.final_ai_recommendation,
+            generated_at: resultEntity.generated_at.toISOString(),
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
+
+      return resultEntity;
     });
   }
 }
