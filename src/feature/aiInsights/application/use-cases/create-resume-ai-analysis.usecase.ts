@@ -9,6 +9,10 @@ import { ResumeAiAnalysisStatus } from '../../enums/resume-ai-analysis-status.en
 import { AiInsightsValidationHelper } from '../../helpers/ai-insights-validation.helper';
 import { AI_INSIGHTS_PROVIDER, AiInsightsProvider } from '../../providers/ai-insights-provider';
 import { ResumeAiAnalysisRepository } from '../../repositories/resume-ai-analysis.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
 
 @Injectable()
 export class CreateResumeAiAnalysisUseCase {
@@ -16,6 +20,7 @@ export class CreateResumeAiAnalysisUseCase {
     private readonly dataSource: DataSource,
     private readonly resumeAiAnalysisRepository: ResumeAiAnalysisRepository,
     private readonly validationHelper: AiInsightsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
     @Inject(AI_INSIGHTS_PROVIDER)
     private readonly aiProvider: AiInsightsProvider,
   ) {}
@@ -83,7 +88,33 @@ export class CreateResumeAiAnalysisUseCase {
         manager,
       });
 
-      return loaded ?? created;
+      const result = loaded ?? created;
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.RESUME_AI_ANALYSIS,
+          entityId: result.id,
+          actionType: ActivityActionType.GENERATE,
+          actorUserId: actorId,
+          oldValues: null,
+          newValues: {
+            candidate_document_id: result.candidate_document_id,
+            analysis_status: result.analysis_status,
+            analyzed_at: result.analyzed_at ? result.analyzed_at.toISOString() : null,
+            ai_fit_score: result.ai_fit_score,
+            extracted_text_length: dto.extracted_text.length,
+            skills_extracted_count: Array.isArray(result.skills_extracted)
+              ? result.skills_extracted.length
+              : null,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
+
+      return result;
     });
   }
 }

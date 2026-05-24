@@ -36,6 +36,8 @@ import { FindFeedbackAiSummaryByIdUseCase } from './application/use-cases/find-f
 import { FindFeedbackAiSummaryByApplicationIdUseCase } from './application/use-cases/find-feedback-ai-summary-by-application-id.usecase';
 import { ListFeedbackAiSummariesUseCase } from './application/use-cases/list-feedback-ai-summaries.usecase';
 
+import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -46,6 +48,7 @@ import { ListFeedbackAiSummariesUseCase } from './application/use-cases/list-fee
       InterviewEntity,
       InterviewFeedbackEntity,
     ]),
+    ActivityLogsModule,
   ],
   controllers: [ResumeAiAnalysesController, FeedbackAiSummariesController],
   providers: [

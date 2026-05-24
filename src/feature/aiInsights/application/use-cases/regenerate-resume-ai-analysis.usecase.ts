@@ -7,6 +7,10 @@ import { ResumeAiAnalysisStatus } from '../../enums/resume-ai-analysis-status.en
 import { AiInsightsValidationHelper } from '../../helpers/ai-insights-validation.helper';
 import { AI_INSIGHTS_PROVIDER, AiInsightsProvider } from '../../providers/ai-insights-provider';
 import { ResumeAiAnalysisRepository } from '../../repositories/resume-ai-analysis.repository';
+import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
+import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
+import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
+import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
 
 @Injectable()
 export class RegenerateResumeAiAnalysisUseCase {
@@ -14,6 +18,7 @@ export class RegenerateResumeAiAnalysisUseCase {
     private readonly dataSource: DataSource,
     private readonly resumeAiAnalysisRepository: ResumeAiAnalysisRepository,
     private readonly validationHelper: AiInsightsValidationHelper,
+    private readonly activityWriter: ActivityLogsWriterService,
     @Inject(AI_INSIGHTS_PROVIDER)
     private readonly aiProvider: AiInsightsProvider,
   ) {}
@@ -39,6 +44,16 @@ export class RegenerateResumeAiAnalysisUseCase {
           code: 'RESUME_AI_ANALYSIS_NOT_FOUND',
         });
       }
+
+      const oldValues = {
+        analysis_status: existing.analysis_status,
+        analyzed_at: existing.analyzed_at ? existing.analyzed_at.toISOString() : null,
+        ai_fit_score: existing.ai_fit_score,
+      };
+
+      const extractedTextChanged =
+        typeof options.dto.extracted_text === 'string' &&
+        options.dto.extracted_text !== existing.extracted_text;
 
       const extractedText = options.dto.extracted_text ?? existing.extracted_text;
       this.validationHelper.ensureExtractedTextAvailable(extractedText);
@@ -72,7 +87,34 @@ export class RegenerateResumeAiAnalysisUseCase {
       const loaded = await this.resumeAiAnalysisRepository.findById(existing.id, {
         manager,
       });
-      return loaded ?? existing;
+
+      const result = loaded ?? existing;
+
+      await this.activityWriter.log(
+        ActivityLogBuilder.build({
+          entityType: ActivityEntityType.RESUME_AI_ANALYSIS,
+          entityId: result.id,
+          actionType: ActivityActionType.REGENERATE,
+          actorUserId: actorId,
+          oldValues,
+          newValues: {
+            candidate_document_id: result.candidate_document_id,
+            analysis_status: result.analysis_status,
+            analyzed_at: result.analyzed_at ? result.analyzed_at.toISOString() : null,
+            ai_fit_score: result.ai_fit_score,
+            extracted_text_changed: extractedTextChanged,
+            skills_extracted_count: Array.isArray(result.skills_extracted)
+              ? result.skills_extracted.length
+              : null,
+          },
+          actionAt: now,
+          ipAddress: null,
+          userAgent: null,
+        }),
+        { manager },
+      );
+
+      return result;
     });
   }
 }

@@ -797,7 +797,9 @@
                 "INTERVIEW",
                 "DECISION",
                 "OFFER",
-                "NOTE"
+                "NOTE",
+                "RESUME_AI_ANALYSIS",
+                "FEEDBACK_AI_SUMMARY"
               ]
             }
           },
@@ -822,6 +824,8 @@
                 "DELETE",
                 "STATUS_CHANGE",
                 "STAGE_CHANGE",
+                "GENERATE",
+                "REGENERATE",
                 "LOGIN",
                 "LOGOUT",
                 "SEND",
@@ -8526,7 +8530,9 @@
               "INTERVIEW",
               "DECISION",
               "OFFER",
-              "NOTE"
+              "NOTE",
+              "RESUME_AI_ANALYSIS",
+              "FEEDBACK_AI_SUMMARY"
             ]
           },
           "entity_id": {
@@ -8541,6 +8547,8 @@
               "DELETE",
               "STATUS_CHANGE",
               "STAGE_CHANGE",
+              "GENERATE",
+              "REGENERATE",
               "LOGIN",
               "LOGOUT",
               "SEND",
