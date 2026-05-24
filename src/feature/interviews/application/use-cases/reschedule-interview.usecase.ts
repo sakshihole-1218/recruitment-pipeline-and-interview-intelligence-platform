@@ -6,6 +6,10 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { ApplicationEntity } from '../../../applications/entities/application.entity';
+import { ApplicationStageHistoryEntity } from '../../../applications/entities/application-stage-history.entity';
+import { ApplicationCurrentStage } from '../../../applications/enums/application-current-stage.enum';
+import { ApplicationStatus } from '../../../applications/enums/application-status.enum';
 import { RescheduleInterviewDto } from '../../dto/reschedule-interview.dto';
 import { InterviewEntity } from '../../entities/interview.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
@@ -57,6 +61,48 @@ export class RescheduleInterviewUseCase {
         });
       }
 
+      const application = await manager
+        .getRepository(ApplicationEntity)
+        .createQueryBuilder('applications')
+        .where('applications.id = :id', { id: current.application_id })
+        .andWhere('applications.deleted_at IS NULL')
+        .setLock('pessimistic_write')
+        .getOne();
+
+      if (!application) {
+        throw new NotFoundException({
+          message: 'Application not found',
+          code: 'APPLICATION_NOT_FOUND',
+        });
+      }
+
+      if (
+        [
+          ApplicationStatus.REJECTED,
+          ApplicationStatus.WITHDRAWN,
+          ApplicationStatus.HIRED,
+        ].includes(application.application_status)
+      ) {
+        throw new BadRequestException({
+          message: 'Interview cannot be rescheduled for this application status',
+          code: 'APPLICATION_NOT_ELIGIBLE_FOR_INTERVIEW',
+        });
+      }
+
+      const allowedStages = new Set<ApplicationCurrentStage>([
+        ApplicationCurrentStage.SHORTLISTED,
+        ApplicationCurrentStage.INTERVIEW,
+      ]);
+
+      if (!allowedStages.has(application.current_stage)) {
+        throw new ConflictException({
+          message:
+            'Interview can only be rescheduled when application is in SHORTLISTED or INTERVIEW stage',
+          code: 'APPLICATION_NOT_ELIGIBLE_FOR_INTERVIEW_STAGE',
+          meta: { current_stage: application.current_stage },
+        });
+      }
+
       const startAt = new Date(dto.scheduled_start_at);
       const endAt = new Date(dto.scheduled_end_at);
 
@@ -77,6 +123,43 @@ export class RescheduleInterviewUseCase {
           code: 'INTERVIEW_DUPLICATE_SCHEDULE',
           meta: { interview_id: duplicate.id },
         });
+      }
+
+      if (application.current_stage === ApplicationCurrentStage.SHORTLISTED) {
+        const fromStage = application.current_stage;
+        const toStage = ApplicationCurrentStage.INTERVIEW;
+
+        await manager.getRepository(ApplicationStageHistoryEntity).save(
+          manager.getRepository(ApplicationStageHistoryEntity).create({
+            application_id: application.id,
+            from_stage: fromStage,
+            to_stage: toStage,
+            changed_by_user_id: actorUserId,
+            change_reason: null,
+            changed_at: now,
+            deleted_at: null,
+          }),
+        );
+
+        application.current_stage = toStage;
+        application.last_stage_changed_at = now;
+        application.updated_by_user_id = actorUserId;
+        await manager.getRepository(ApplicationEntity).save(application);
+
+        await this.activityWriter.log(
+          ActivityLogBuilder.stageChange({
+            entityType: ActivityEntityType.APPLICATION,
+            entityId: application.id,
+            fromStage,
+            toStage,
+            reason: null,
+            actorUserId,
+            actionAt: now,
+            ipAddress: null,
+            userAgent: null,
+          }),
+          { manager },
+        );
       }
 
       const meetingLink =

@@ -36,7 +36,6 @@ import { ApiApplicationsPaginatedResponse } from '../decorators/api-applications
 import { CreateApplicationDto } from '../dto/create-application.dto';
 import { ApplicationResponseDto } from '../dto/application.response.dto';
 import { ListApplicationsQueryDto } from '../dto/list-applications.query.dto';
-import { MoveApplicationStageDto } from '../dto/move-application-stage.dto';
 import { RejectApplicationDto } from '../dto/reject-application.dto';
 import { HoldApplicationDto } from '../dto/hold-application.dto';
 import { WithdrawApplicationDto } from '../dto/withdraw-application.dto';
@@ -108,25 +107,6 @@ export class ApplicationsController {
       result.page,
       result.limit,
       result.total_records,
-    );
-  }
-
-  @Post(':id/move-stage')
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Move application stage (controlled transitions)' })
-  @ApiParam({ name: 'id', description: 'Application UUID' })
-  @ApiBody({ type: MoveApplicationStageDto })
-  @ApiStandardResponse(ApplicationResponseDto, 'Application stage updated successfully')
-  async moveStage(
-    @Param('id') id: string,
-    @Body() dto: MoveApplicationStageDto,
-    @CurrentUser() actor: AuthJwtPayload,
-  ) {
-    const app = await this.applicationsService.moveStage(id, dto, actor?.sub);
-    return ResponseUtil.success(
-      'Application stage updated successfully',
-      ApplicationsMapper.toApplicationResponse(app),
     );
   }
 

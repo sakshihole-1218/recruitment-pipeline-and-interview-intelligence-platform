@@ -52,20 +52,6 @@ export class ApplicationsValidationHelper {
     }
   }
 
-  ensureMoveStageEndpointSupported(toStage: ApplicationCurrentStage): void {
-    if (
-      toStage === ApplicationCurrentStage.REJECTED ||
-      toStage === ApplicationCurrentStage.WITHDRAWN ||
-      toStage === ApplicationCurrentStage.ON_HOLD
-    ) {
-      throw new BadRequestException({
-        message:
-          'This stage change requires a dedicated action endpoint (reject/withdraw/hold)',
-        code: 'UNSUPPORTED_STAGE_ACTION',
-      });
-    }
-  }
-
   ensureStageTransitionAllowed(options: {
     from: ApplicationCurrentStage;
     to: ApplicationCurrentStage;

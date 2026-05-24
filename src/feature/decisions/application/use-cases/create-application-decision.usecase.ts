@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 
 import { UserRepository } from '../../../accessControl/repositories/user.repository';
 import { ApplicationRepository } from '../../../applications/repositories/application.repository';
@@ -15,6 +15,9 @@ import { ApplicationDecisionEntity } from '../../entities/application-decision.e
 import { ApplicationDecisionRepository } from '../../repositories/application-decision.repository';
 import { DecisionsValidationHelper } from '../../helpers/decisions-validation.helper';
 import { DecisionsApplicationStageHelper } from '../../helpers/decisions-application-stage.helper';
+import { InterviewEntity } from '../../../interviews/entities/interview.entity';
+import { InterviewRoundEntity } from '../../../interviews/entities/interview-round.entity';
+import { InterviewStatus } from '../../../interviews/enums/interview-status.enum';
 import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
 import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
 import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
@@ -56,10 +59,16 @@ export class CreateApplicationDecisionUseCase {
         });
       }
 
-      if (application.current_stage !== ApplicationCurrentStage.DECISION) {
+      const eligibleStages = [
+        ApplicationCurrentStage.INTERVIEW,
+        ApplicationCurrentStage.DECISION,
+      ];
+
+      if (!eligibleStages.includes(application.current_stage)) {
         throw new ConflictException({
-          message: 'Decision can only be created when application is in DECISION stage',
-          code: 'APPLICATION_NOT_IN_DECISION_STAGE',
+          message:
+            'Decision can only be created when application is in INTERVIEW or DECISION stage',
+          code: 'APPLICATION_NOT_ELIGIBLE_FOR_DECISION',
           meta: { current_stage: application.current_stage },
         });
       }
@@ -90,6 +99,12 @@ export class CreateApplicationDecisionUseCase {
       this.validationHelper.ensureReasonRules({
         decision_status: dto.decision_status,
         decision_reason: decisionReason,
+      });
+
+      await this.ensureMandatoryRoundsCompleted({
+        applicationId: application.id,
+        jobOpeningId: application.job_opening_id,
+        manager,
       });
 
       const now = new Date();
@@ -127,6 +142,36 @@ export class CreateApplicationDecisionUseCase {
         },
       );
 
+      const stageChanges: Array<{
+        from: ApplicationCurrentStage;
+        to: ApplicationCurrentStage;
+        reason: string | null;
+      }> = [];
+
+      if (application.current_stage === ApplicationCurrentStage.INTERVIEW) {
+        await this.stageHistoryRepository.createAndSave(
+          {
+            application_id: application.id,
+            from_stage: ApplicationCurrentStage.INTERVIEW,
+            to_stage: ApplicationCurrentStage.DECISION,
+            changed_by_user_id: actor.id,
+            change_reason: null,
+            changed_at: now,
+            deleted_at: null,
+          },
+          { manager },
+        );
+
+        stageChanges.push({
+          from: ApplicationCurrentStage.INTERVIEW,
+          to: ApplicationCurrentStage.DECISION,
+          reason: null,
+        });
+
+        application.current_stage = ApplicationCurrentStage.DECISION;
+        application.last_stage_changed_at = now;
+      }
+
       const fromStage = application.current_stage;
       const toStage = mapped.current_stage;
 
@@ -143,6 +188,8 @@ export class CreateApplicationDecisionUseCase {
           },
           { manager },
         );
+
+        stageChanges.push({ from: fromStage, to: toStage, reason: created.decision_reason });
 
         application.current_stage = toStage;
         application.last_stage_changed_at = now;
@@ -165,14 +212,14 @@ export class CreateApplicationDecisionUseCase {
         });
       }
 
-      if (fromStage !== toStage) {
+      for (const sc of stageChanges) {
         await this.activityWriter.log(
           ActivityLogBuilder.stageChange({
             entityType: ActivityEntityType.APPLICATION,
             entityId: application.id,
-            fromStage,
-            toStage,
-            reason: null,
+            fromStage: sc.from,
+            toStage: sc.to,
+            reason: sc.reason,
             actorUserId: actor.id,
             actionAt: now,
             ipAddress: null,
@@ -202,5 +249,53 @@ export class CreateApplicationDecisionUseCase {
 
       return loaded;
     });
+  }
+
+  private async ensureMandatoryRoundsCompleted(options: {
+    applicationId: string;
+    jobOpeningId: string;
+    manager: EntityManager;
+  }): Promise<void> {
+    const rounds = await options.manager
+      .getRepository(InterviewRoundEntity)
+      .createQueryBuilder('rounds')
+      .where('rounds.job_opening_id = :jobOpeningId', {
+        jobOpeningId: options.jobOpeningId,
+      })
+      .andWhere('rounds.is_mandatory = true')
+      .andWhere('rounds.deleted_at IS NULL')
+      .getMany();
+
+    if (!rounds.length) return;
+
+    const completedRows = await options.manager
+      .getRepository(InterviewEntity)
+      .createQueryBuilder('interviews')
+      .select('DISTINCT interviews.interview_round_id', 'interview_round_id')
+      .where('interviews.application_id = :applicationId', {
+        applicationId: options.applicationId,
+      })
+      .andWhere('interviews.interview_status = :status', {
+        status: InterviewStatus.COMPLETED,
+      })
+      .andWhere('interviews.deleted_at IS NULL')
+      .getRawMany<{ interview_round_id: string }>();
+
+    const completed = new Set(completedRows.map((r) => r.interview_round_id));
+    const missing = rounds
+      .filter((r) => !completed.has(r.id))
+      .map((r) => ({
+        id: r.id,
+        round_name: r.round_name,
+        sequence_number: r.sequence_number,
+      }));
+
+    if (missing.length) {
+      throw new ConflictException({
+        message: 'Mandatory interview rounds are not completed',
+        code: 'DECISION_MANDATORY_ROUNDS_INCOMPLETE',
+        meta: { missing_rounds: missing },
+      });
+    }
   }
 }

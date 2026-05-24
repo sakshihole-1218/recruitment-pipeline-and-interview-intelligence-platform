@@ -17,7 +17,6 @@ import { ApplicationsValidationHelper } from './helpers/applications-validation.
 import { CreateApplicationUseCase } from './application/use-cases/create-application.usecase';
 import { FindApplicationByIdUseCase } from './application/use-cases/find-application-by-id.usecase';
 import { ListApplicationsUseCase } from './application/use-cases/list-applications.usecase';
-import { MoveApplicationStageUseCase } from './application/use-cases/move-application-stage.usecase';
 import { RejectApplicationUseCase } from './application/use-cases/reject-application.usecase';
 import { HoldApplicationUseCase } from './application/use-cases/hold-application.usecase';
 import { WithdrawApplicationUseCase } from './application/use-cases/withdraw-application.usecase';
@@ -52,7 +51,6 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     CreateApplicationUseCase,
     FindApplicationByIdUseCase,
     ListApplicationsUseCase,
-    MoveApplicationStageUseCase,
     RejectApplicationUseCase,
     HoldApplicationUseCase,
     WithdrawApplicationUseCase,

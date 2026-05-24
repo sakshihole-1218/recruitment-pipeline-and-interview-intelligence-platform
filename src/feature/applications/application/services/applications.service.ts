@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 
 import { CreateApplicationDto } from '../../dto/create-application.dto';
 import { ListApplicationsQueryDto } from '../../dto/list-applications.query.dto';
-import { MoveApplicationStageDto } from '../../dto/move-application-stage.dto';
 import { RejectApplicationDto } from '../../dto/reject-application.dto';
 import { HoldApplicationDto } from '../../dto/hold-application.dto';
 import { WithdrawApplicationDto } from '../../dto/withdraw-application.dto';
@@ -10,7 +9,6 @@ import { WithdrawApplicationDto } from '../../dto/withdraw-application.dto';
 import { CreateApplicationUseCase } from '../use-cases/create-application.usecase';
 import { FindApplicationByIdUseCase } from '../use-cases/find-application-by-id.usecase';
 import { ListApplicationsUseCase } from '../use-cases/list-applications.usecase';
-import { MoveApplicationStageUseCase } from '../use-cases/move-application-stage.usecase';
 import { RejectApplicationUseCase } from '../use-cases/reject-application.usecase';
 import { HoldApplicationUseCase } from '../use-cases/hold-application.usecase';
 import { WithdrawApplicationUseCase } from '../use-cases/withdraw-application.usecase';
@@ -22,7 +20,6 @@ export class ApplicationsService {
     private readonly createUseCase: CreateApplicationUseCase,
     private readonly findByIdUseCase: FindApplicationByIdUseCase,
     private readonly listUseCase: ListApplicationsUseCase,
-    private readonly moveStageUseCase: MoveApplicationStageUseCase,
     private readonly rejectUseCase: RejectApplicationUseCase,
     private readonly holdUseCase: HoldApplicationUseCase,
     private readonly withdrawUseCase: WithdrawApplicationUseCase,
@@ -39,10 +36,6 @@ export class ApplicationsService {
 
   async list(query: ListApplicationsQueryDto) {
     return this.listUseCase.execute(query);
-  }
-
-  async moveStage(id: string, dto: MoveApplicationStageDto, actorUserId?: string) {
-    return this.moveStageUseCase.execute(id, dto, actorUserId);
   }
 
   async reject(id: string, dto: RejectApplicationDto, actorUserId?: string) {
