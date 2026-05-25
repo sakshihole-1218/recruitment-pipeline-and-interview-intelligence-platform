@@ -4587,6 +4587,234 @@
         ]
       }
     },
+    "/api/applications/bulk/move-stage": {
+      "post": {
+        "operationId": "ApplicationsController_bulkMoveStage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkMoveApplicationStageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk stage move processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkOperationResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk move application stage (partial success)",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/bulk/reject": {
+      "post": {
+        "operationId": "ApplicationsController_bulkReject",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkRejectApplicationsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk rejection processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkOperationResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk reject applications (partial success)",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/bulk/assign-recruiter": {
+      "post": {
+        "operationId": "ApplicationsController_bulkAssignRecruiter",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignRecruiterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk recruiter assignment processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkOperationResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk assign recruiter to applications (partial success)",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/bulk/assign-hiring-manager": {
+      "post": {
+        "operationId": "ApplicationsController_bulkAssignHiringManager",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignHiringManagerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk hiring manager assignment processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkOperationResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk assign hiring manager to applications (partial success)",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
     "/api/applications/{id}/reject": {
       "post": {
         "operationId": "ApplicationsController_reject",
@@ -10323,6 +10551,154 @@
         "required": [
           "candidate_id",
           "job_opening_id"
+        ]
+      },
+      "BulkOperationFailureDto": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Invalid stage transition"
+          }
+        },
+        "required": [
+          "application_id",
+          "reason"
+        ]
+      },
+      "BulkOperationResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "success_count": {
+            "type": "number",
+            "example": 95
+          },
+          "failed_count": {
+            "type": "number",
+            "example": 5
+          },
+          "successful_ids": {
+            "example": [
+              "b3b0b2b0-8f5a-4b0a-a7a9-0f3dd1f9d4f0"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkOperationFailureDto"
+            }
+          }
+        },
+        "required": [
+          "success_count",
+          "failed_count",
+          "successful_ids",
+          "failures"
+        ]
+      },
+      "BulkMoveApplicationStageDto": {
+        "type": "object",
+        "properties": {
+          "application_ids": {
+            "description": "Application UUIDs",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "target_stage": {
+            "type": "string",
+            "description": "Target application stage",
+            "enum": [
+              "APPLIED",
+              "SCREENING",
+              "SHORTLISTED",
+              "INTERVIEW",
+              "DECISION",
+              "OFFER",
+              "HIRED",
+              "REJECTED",
+              "WITHDRAWN",
+              "ON_HOLD"
+            ]
+          },
+          "change_reason": {
+            "type": "string",
+            "example": "Moving to interview after shortlist review"
+          }
+        },
+        "required": [
+          "application_ids",
+          "target_stage",
+          "change_reason"
+        ]
+      },
+      "BulkRejectApplicationsDto": {
+        "type": "object",
+        "properties": {
+          "application_ids": {
+            "description": "Application UUIDs",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rejection_reason": {
+            "type": "string",
+            "example": "Not a fit for current requirements"
+          }
+        },
+        "required": [
+          "application_ids",
+          "rejection_reason"
+        ]
+      },
+      "BulkAssignRecruiterDto": {
+        "type": "object",
+        "properties": {
+          "application_ids": {
+            "description": "Application UUIDs",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recruiter_user_id": {
+            "type": "string",
+            "description": "Recruiter user UUID"
+          }
+        },
+        "required": [
+          "application_ids",
+          "recruiter_user_id"
+        ]
+      },
+      "BulkAssignHiringManagerDto": {
+        "type": "object",
+        "properties": {
+          "application_ids": {
+            "description": "Application UUIDs",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hiring_manager_user_id": {
+            "type": "string",
+            "description": "Hiring manager user UUID"
+          }
+        },
+        "required": [
+          "application_ids",
+          "hiring_manager_user_id"
         ]
       },
       "RejectApplicationDto": {

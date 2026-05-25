@@ -39,7 +39,12 @@ import { ListApplicationsQueryDto } from '../dto/list-applications.query.dto';
 import { RejectApplicationDto } from '../dto/reject-application.dto';
 import { HoldApplicationDto } from '../dto/hold-application.dto';
 import { WithdrawApplicationDto } from '../dto/withdraw-application.dto';
+import { BulkMoveApplicationStageDto } from '../dto/bulk-move-application-stage.dto';
+import { BulkRejectApplicationsDto } from '../dto/bulk-reject-applications.dto';
+import { BulkAssignRecruiterDto } from '../dto/bulk-assign-recruiter.dto';
+import { BulkAssignHiringManagerDto } from '../dto/bulk-assign-hiring-manager.dto';
 import { ApplicationStageHistoryResponseDto } from '../dto/application-stage-history.response.dto';
+import { BulkOperationResultResponseDto } from '../dto/bulk-operation-result.response.dto';
 import { ApplicationsMapper } from '../helpers/applications.mapper';
 
 @ApiTags('Applications')
@@ -108,6 +113,62 @@ export class ApplicationsController {
       result.limit,
       result.total_records,
     );
+  }
+
+  @Post('bulk/move-stage')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk move application stage (partial success)' })
+  @ApiBody({ type: BulkMoveApplicationStageDto })
+  @ApiStandardResponse(BulkOperationResultResponseDto, 'Bulk stage move processed')
+  async bulkMoveStage(
+    @Body() dto: BulkMoveApplicationStageDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.applicationsService.bulkMoveStage(dto, actor?.sub);
+    return ResponseUtil.success('Bulk stage move processed', result);
+  }
+
+  @Post('bulk/reject')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk reject applications (partial success)' })
+  @ApiBody({ type: BulkRejectApplicationsDto })
+  @ApiStandardResponse(BulkOperationResultResponseDto, 'Bulk rejection processed')
+  async bulkReject(
+    @Body() dto: BulkRejectApplicationsDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.applicationsService.bulkReject(dto, actor?.sub);
+    return ResponseUtil.success('Bulk rejection processed', result);
+  }
+
+  @Post('bulk/assign-recruiter')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk assign recruiter to applications (partial success)' })
+  @ApiBody({ type: BulkAssignRecruiterDto })
+  @ApiStandardResponse(BulkOperationResultResponseDto, 'Bulk recruiter assignment processed')
+  async bulkAssignRecruiter(
+    @Body() dto: BulkAssignRecruiterDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.applicationsService.bulkAssignRecruiter(dto, actor?.sub);
+    return ResponseUtil.success('Bulk recruiter assignment processed', result);
+  }
+
+  @Post('bulk/assign-hiring-manager')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk assign hiring manager to applications (partial success)' })
+  @ApiBody({ type: BulkAssignHiringManagerDto })
+  @ApiStandardResponse(BulkOperationResultResponseDto, 'Bulk hiring manager assignment processed')
+  async bulkAssignHiringManager(
+    @Body() dto: BulkAssignHiringManagerDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.applicationsService.bulkAssignHiringManager(dto, actor?.sub);
+    return ResponseUtil.success('Bulk hiring manager assignment processed', result);
   }
 
   @Post(':id/reject')
