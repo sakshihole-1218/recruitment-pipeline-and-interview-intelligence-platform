@@ -11,6 +11,9 @@ import { AssignInterviewPanelMembersDto } from '../../dto/assign-interview-panel
 import { SubmitInterviewFeedbackDto } from '../../dto/submit-interview-feedback.dto';
 import { ListInterviewsQueryDto } from '../../dto/list-interviews.query.dto';
 import { ListInterviewFeedbackQueryDto } from '../../dto/list-interview-feedback.query.dto';
+import { BulkScheduleInterviewsDto } from '../../dto/bulk-schedule-interviews.dto';
+import { BulkAssignPanelMembersDto } from '../../dto/bulk-assign-panel-members.dto';
+import { BulkCancelInterviewsDto } from '../../dto/bulk-cancel-interviews.dto';
 import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 import { CreateInterviewRoundUseCase } from '../../application/use-cases/create-interview-round.usecase';
 import { UpdateInterviewRoundUseCase } from '../../application/use-cases/update-interview-round.usecase';
@@ -20,6 +23,9 @@ import { RescheduleInterviewUseCase } from '../../application/use-cases/reschedu
 import { CancelInterviewUseCase } from '../../application/use-cases/cancel-interview.usecase';
 import { CompleteInterviewUseCase } from '../../application/use-cases/complete-interview.usecase';
 import { ReplaceInterviewPanelMembersUseCase } from '../../application/use-cases/replace-interview-panel-members.usecase';
+import { BulkScheduleInterviewsUseCase } from '../../application/use-cases/bulk-schedule-interviews.use-case';
+import { BulkAssignPanelMembersUseCase } from '../../application/use-cases/bulk-assign-panel-members.use-case';
+import { BulkCancelInterviewsUseCase } from '../../application/use-cases/bulk-cancel-interviews.use-case';
 import { FindInterviewByIdUseCase } from '../../application/use-cases/find-interview-by-id.usecase';
 import { ListInterviewsUseCase } from '../../application/use-cases/list-interviews.usecase';
 import { SubmitInterviewFeedbackUseCase } from '../../application/use-cases/submit-interview-feedback.usecase';
@@ -37,6 +43,9 @@ export class InterviewsService {
     private readonly cancelInterviewUseCase: CancelInterviewUseCase,
     private readonly completeInterviewUseCase: CompleteInterviewUseCase,
     private readonly replacePanelMembersUseCase: ReplaceInterviewPanelMembersUseCase,
+    private readonly bulkScheduleInterviewsUseCase: BulkScheduleInterviewsUseCase,
+    private readonly bulkAssignPanelMembersUseCase: BulkAssignPanelMembersUseCase,
+    private readonly bulkCancelInterviewsUseCase: BulkCancelInterviewsUseCase,
     private readonly findInterviewByIdUseCase: FindInterviewByIdUseCase,
     private readonly listInterviewsUseCase: ListInterviewsUseCase,
     private readonly submitFeedbackUseCase: SubmitInterviewFeedbackUseCase,
@@ -74,6 +83,18 @@ export class InterviewsService {
 
   async assignPanelMembers(id: string, dto: AssignInterviewPanelMembersDto, actorUserId: string) {
     return this.replacePanelMembersUseCase.execute(id, dto, actorUserId);
+  }
+
+  async bulkSchedule(dto: BulkScheduleInterviewsDto, actorUserId: string) {
+    return this.bulkScheduleInterviewsUseCase.execute(dto, actorUserId);
+  }
+
+  async bulkAssignPanelMembers(dto: BulkAssignPanelMembersDto, actorUserId: string) {
+    return this.bulkAssignPanelMembersUseCase.execute(dto, actorUserId);
+  }
+
+  async bulkCancel(dto: BulkCancelInterviewsDto, actorUserId: string) {
+    return this.bulkCancelInterviewsUseCase.execute(dto, actorUserId);
   }
 
   async findInterviewById(id: string, actor?: AuthJwtPayload) {

@@ -13,6 +13,9 @@ import { RescheduleInterviewUseCase } from './application/use-cases/reschedule-i
 import { CancelInterviewUseCase } from './application/use-cases/cancel-interview.usecase';
 import { CompleteInterviewUseCase } from './application/use-cases/complete-interview.usecase';
 import { ReplaceInterviewPanelMembersUseCase } from './application/use-cases/replace-interview-panel-members.usecase';
+import { BulkScheduleInterviewsUseCase } from './application/use-cases/bulk-schedule-interviews.use-case';
+import { BulkAssignPanelMembersUseCase } from './application/use-cases/bulk-assign-panel-members.use-case';
+import { BulkCancelInterviewsUseCase } from './application/use-cases/bulk-cancel-interviews.use-case';
 import { FindInterviewByIdUseCase } from './application/use-cases/find-interview-by-id.usecase';
 import { ListInterviewsUseCase } from './application/use-cases/list-interviews.usecase';
 import { SubmitInterviewFeedbackUseCase } from './application/use-cases/submit-interview-feedback.usecase';
@@ -65,6 +68,10 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     CancelInterviewUseCase,
     CompleteInterviewUseCase,
     ReplaceInterviewPanelMembersUseCase,
+
+    BulkScheduleInterviewsUseCase,
+    BulkAssignPanelMembersUseCase,
+    BulkCancelInterviewsUseCase,
 
     FindInterviewByIdUseCase,
     ListInterviewsUseCase,

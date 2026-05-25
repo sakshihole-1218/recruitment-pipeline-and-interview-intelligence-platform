@@ -30,12 +30,20 @@ import { SystemRoleCode } from '../../accessControl/enums/system-role-code.enum'
 import { InterviewsService } from '../application/services/interviews.service';
 import { ApiInterviewsPaginatedResponse } from '../decorators/api-interviews-paginated-response.decorator';
 import { AssignInterviewPanelMembersDto } from '../dto/assign-interview-panel-members.dto';
+import { BulkAssignPanelMembersDto } from '../dto/bulk-assign-panel-members.dto';
+import { BulkCancelInterviewsDto } from '../dto/bulk-cancel-interviews.dto';
+import { BulkScheduleInterviewsDto } from '../dto/bulk-schedule-interviews.dto';
 import { CancelInterviewDto } from '../dto/cancel-interview.dto';
 import { CompleteInterviewDto } from '../dto/complete-interview.dto';
 import { InterviewResponseDto } from '../dto/interview.response.dto';
 import { ListInterviewsQueryDto } from '../dto/list-interviews.query.dto';
 import { RescheduleInterviewDto } from '../dto/reschedule-interview.dto';
 import { ScheduleInterviewDto } from '../dto/schedule-interview.dto';
+import {
+  BulkAssignPanelMembersResultResponseDto,
+  BulkCancelInterviewsResultResponseDto,
+  BulkScheduleInterviewsResultResponseDto,
+} from '../dto/bulk-operation-result.response.dto';
 import { InterviewsMapper } from '../helpers/interviews.mapper';
 
 @ApiTags('Interviews')
@@ -51,6 +59,51 @@ import { InterviewsMapper } from '../helpers/interviews.mapper';
 @Controller('interviews')
 export class InterviewsController {
   constructor(private readonly interviewsService: InterviewsService) {}
+
+  @Post('bulk/schedule')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk schedule interviews (partial success)' })
+  @ApiBody({ type: BulkScheduleInterviewsDto })
+  @ApiStandardResponse(BulkScheduleInterviewsResultResponseDto, 'Bulk scheduling processed')
+  async bulkSchedule(
+    @Body() dto: BulkScheduleInterviewsDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.interviewsService.bulkSchedule(dto, actor?.sub);
+    return ResponseUtil.success('Bulk scheduling processed', result);
+  }
+
+  @Post('bulk/assign-panel')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk assign interview panel members (partial success)' })
+  @ApiBody({ type: BulkAssignPanelMembersDto })
+  @ApiStandardResponse(
+    BulkAssignPanelMembersResultResponseDto,
+    'Bulk panel assignment processed',
+  )
+  async bulkAssignPanelMembers(
+    @Body() dto: BulkAssignPanelMembersDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.interviewsService.bulkAssignPanelMembers(dto, actor?.sub);
+    return ResponseUtil.success('Bulk panel assignment processed', result);
+  }
+
+  @Post('bulk/cancel')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk cancel interviews (partial success)' })
+  @ApiBody({ type: BulkCancelInterviewsDto })
+  @ApiStandardResponse(BulkCancelInterviewsResultResponseDto, 'Bulk cancellation processed')
+  async bulkCancel(
+    @Body() dto: BulkCancelInterviewsDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.interviewsService.bulkCancel(dto, actor?.sub);
+    return ResponseUtil.success('Bulk cancellation processed', result);
+  }
 
   @Post()
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)

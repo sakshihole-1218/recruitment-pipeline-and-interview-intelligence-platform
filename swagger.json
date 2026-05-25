@@ -5717,6 +5717,177 @@
         ]
       }
     },
+    "/api/interviews/bulk/schedule": {
+      "post": {
+        "operationId": "InterviewsController_bulkSchedule",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkScheduleInterviewsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk scheduling processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkScheduleInterviewsResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk schedule interviews (partial success)",
+        "tags": [
+          "Interviews"
+        ]
+      }
+    },
+    "/api/interviews/bulk/assign-panel": {
+      "post": {
+        "operationId": "InterviewsController_bulkAssignPanelMembers",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignPanelMembersDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk panel assignment processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkAssignPanelMembersResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk assign interview panel members (partial success)",
+        "tags": [
+          "Interviews"
+        ]
+      }
+    },
+    "/api/interviews/bulk/cancel": {
+      "post": {
+        "operationId": "InterviewsController_bulkCancel",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCancelInterviewsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk cancellation processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkCancelInterviewsResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk cancel interviews (partial success)",
+        "tags": [
+          "Interviews"
+        ]
+      }
+    },
     "/api/interviews": {
       "post": {
         "operationId": "InterviewsController_schedule",
@@ -11105,6 +11276,226 @@
           "problem_solving_score",
           "culture_fit_score",
           "recommendation"
+        ]
+      },
+      "BulkScheduleInterviewsFailureDto": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Application stage invalid"
+          }
+        },
+        "required": [
+          "application_id",
+          "reason"
+        ]
+      },
+      "BulkScheduleInterviewsResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "success_count": {
+            "type": "number",
+            "example": 45
+          },
+          "failed_count": {
+            "type": "number",
+            "example": 3
+          },
+          "successful_ids": {
+            "description": "Successful application IDs (same identifiers as the input array)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkScheduleInterviewsFailureDto"
+            }
+          }
+        },
+        "required": [
+          "success_count",
+          "failed_count",
+          "successful_ids",
+          "failures"
+        ]
+      },
+      "BulkScheduleInterviewsDto": {
+        "type": "object",
+        "properties": {
+          "application_ids": {
+            "description": "Application UUIDs to schedule interviews for",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "interview_round_id": {
+            "type": "string",
+            "description": "Interview round UUID"
+          },
+          "scheduled_start_at": {
+            "type": "string",
+            "example": "2026-01-15T10:30:00.000Z"
+          },
+          "scheduled_end_at": {
+            "type": "string",
+            "example": "2026-01-15T11:30:00.000Z"
+          },
+          "interview_mode": {
+            "type": "string",
+            "enum": [
+              "VIRTUAL",
+              "ONSITE",
+              "TELEPHONIC"
+            ]
+          },
+          "meeting_link": {
+            "type": "string",
+            "example": "https://meet.google.com/xxx-yyyy-zzz"
+          },
+          "location_details": {
+            "type": "string",
+            "example": "Office - Meeting Room A, 3rd floor"
+          }
+        },
+        "required": [
+          "application_ids",
+          "interview_round_id",
+          "scheduled_start_at",
+          "scheduled_end_at",
+          "interview_mode"
+        ]
+      },
+      "BulkInterviewOperationFailureDto": {
+        "type": "object",
+        "properties": {
+          "interview_id": {
+            "type": "string",
+            "description": "Interview UUID"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Interview not found"
+          }
+        },
+        "required": [
+          "interview_id",
+          "reason"
+        ]
+      },
+      "BulkAssignPanelMembersResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "success_count": {
+            "type": "number",
+            "example": 45
+          },
+          "failed_count": {
+            "type": "number",
+            "example": 3
+          },
+          "successful_ids": {
+            "description": "Successful interview IDs (same identifiers as the input array)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkInterviewOperationFailureDto"
+            }
+          }
+        },
+        "required": [
+          "success_count",
+          "failed_count",
+          "successful_ids",
+          "failures"
+        ]
+      },
+      "BulkAssignPanelMembersDto": {
+        "type": "object",
+        "properties": {
+          "interview_ids": {
+            "description": "Interview UUIDs",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "panel_member_user_ids": {
+            "description": "User UUIDs to add as panel members",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "interview_ids",
+          "panel_member_user_ids"
+        ]
+      },
+      "BulkCancelInterviewsResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "success_count": {
+            "type": "number",
+            "example": 45
+          },
+          "failed_count": {
+            "type": "number",
+            "example": 3
+          },
+          "successful_ids": {
+            "description": "Successful interview IDs (same identifiers as the input array)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkInterviewOperationFailureDto"
+            }
+          }
+        },
+        "required": [
+          "success_count",
+          "failed_count",
+          "successful_ids",
+          "failures"
+        ]
+      },
+      "BulkCancelInterviewsDto": {
+        "type": "object",
+        "properties": {
+          "interview_ids": {
+            "description": "Interview UUIDs to cancel",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cancel_reason": {
+            "type": "string",
+            "example": "Interviewer unavailable"
+          }
+        },
+        "required": [
+          "interview_ids",
+          "cancel_reason"
         ]
       },
       "InterviewPanelMemberResponseDto": {
