@@ -21,6 +21,10 @@ import { RejectApplicationUseCase } from './application/use-cases/reject-applica
 import { HoldApplicationUseCase } from './application/use-cases/hold-application.usecase';
 import { WithdrawApplicationUseCase } from './application/use-cases/withdraw-application.usecase';
 import { ListApplicationStageHistoryUseCase } from './application/use-cases/list-application-stage-history.usecase';
+import { BulkMoveApplicationStageUseCase } from './application/use-cases/bulk-move-application-stage.use-case';
+import { BulkRejectApplicationsUseCase } from './application/use-cases/bulk-reject-applications.use-case';
+import { BulkAssignRecruiterUseCase } from './application/use-cases/bulk-assign-recruiter.use-case';
+import { BulkAssignHiringManagerUseCase } from './application/use-cases/bulk-assign-hiring-manager.use-case';
 
 import { CandidateEntity } from '../candidates/entities/candidate.entity';
 import { JobOpeningEntity } from '../job-openings/entities/job-opening.entity';
@@ -55,6 +59,10 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     HoldApplicationUseCase,
     WithdrawApplicationUseCase,
     ListApplicationStageHistoryUseCase,
+    BulkMoveApplicationStageUseCase,
+    BulkRejectApplicationsUseCase,
+    BulkAssignRecruiterUseCase,
+    BulkAssignHiringManagerUseCase,
     // service
     ApplicationsService,
   ],
