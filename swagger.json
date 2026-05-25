@@ -7664,6 +7664,177 @@
         ]
       }
     },
+    "/api/offers/bulk/send": {
+      "post": {
+        "operationId": "OffersController_bulkSend",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkOfferIdsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk send processed (partial success)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkOfferOperationResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk send offers (DRAFT -> SENT) (partial success)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/bulk/expire": {
+      "post": {
+        "operationId": "OffersController_bulkExpire",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkOfferIdsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk expire processed (partial success)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkOfferOperationResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk expire offers (SENT -> EXPIRED) (partial success)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/bulk/cancel": {
+      "post": {
+        "operationId": "OffersController_bulkCancel",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCancelOffersDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk cancel processed (partial success)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkOfferOperationResultResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk cancel offers (DRAFT/SENT -> CANCELLED) (partial success)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
     "/api/offers/{id}/send": {
       "post": {
         "operationId": "OffersController_send",
@@ -12489,6 +12660,97 @@
             "description": "Expected joining date (future date required)"
           }
         }
+      },
+      "BulkOfferOperationFailureDto": {
+        "type": "object",
+        "properties": {
+          "offer_id": {
+            "type": "string",
+            "description": "Offer UUID"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Failure reason message"
+          }
+        },
+        "required": [
+          "offer_id",
+          "reason"
+        ]
+      },
+      "BulkOfferOperationResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "success_count": {
+            "type": "number",
+            "example": 2
+          },
+          "failed_count": {
+            "type": "number",
+            "example": 1
+          },
+          "successful_ids": {
+            "description": "Offer IDs processed successfully",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkOfferOperationFailureDto"
+            }
+          }
+        },
+        "required": [
+          "success_count",
+          "failed_count",
+          "successful_ids",
+          "failures"
+        ]
+      },
+      "BulkOfferIdsDto": {
+        "type": "object",
+        "properties": {
+          "offer_ids": {
+            "description": "Offer UUIDs",
+            "example": [
+              "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "offer_ids"
+        ]
+      },
+      "BulkCancelOffersDto": {
+        "type": "object",
+        "properties": {
+          "offer_ids": {
+            "description": "Offer UUIDs",
+            "example": [
+              "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cancel_reason": {
+            "type": "string",
+            "description": "Reason for cancelling the offer(s)",
+            "example": "Budget approved role is no longer open"
+          }
+        },
+        "required": [
+          "offer_ids",
+          "cancel_reason"
+        ]
       },
       "DeclineOfferDto": {
         "type": "object",
