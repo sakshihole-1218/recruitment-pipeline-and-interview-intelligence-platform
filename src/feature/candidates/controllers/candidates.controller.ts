@@ -47,6 +47,12 @@ import { CreateCandidateDto } from '../dto/create-candidate.dto';
 import { UpdateCandidateDto } from '../dto/update-candidate.dto';
 import { CandidateResponseDto } from '../dto/candidate.response.dto';
 import { SoftDeleteCandidateResponseDto } from '../dto/soft-delete-candidate.response.dto';
+import { BulkCreateCandidatesDto } from '../dto/bulk-create-candidates.dto';
+import { BulkUpdateCandidateStatusDto } from '../dto/bulk-update-candidate-status.dto';
+import { BulkAddSkillsDto } from '../dto/bulk-add-skills.dto';
+import { BulkCreateCandidatesResponseDto } from '../dto/bulk-create-candidates.response.dto';
+import { BulkUpdateCandidateStatusResponseDto } from '../dto/bulk-update-candidate-status.response.dto';
+import { BulkAddSkillsResponseDto } from '../dto/bulk-add-skills.response.dto';
 import { ListCandidatesQueryDto } from '../dto/list-candidates.query.dto';
 import { ApiCandidatesPaginatedResponse } from '../decorators/api-candidates-paginated-response.decorator';
 import { CandidatesMapper } from '../helpers/candidates.mapper';
@@ -93,6 +99,85 @@ export class CandidatesController {
       'Candidate created successfully',
       CandidatesMapper.toCandidateResponse(candidate),
     );
+  }
+
+  @Post('bulk/create')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk create candidate profiles (partial success)' })
+  @ApiBody({ type: BulkCreateCandidatesDto })
+  @ApiStandardResponse(
+    BulkCreateCandidatesResponseDto,
+    'Bulk create processed (partial success)',
+  )
+  async bulkCreate(
+    @Body() dto: BulkCreateCandidatesDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.candidatesService.bulkCreate(dto, actor?.sub);
+
+    return ResponseUtil.success('Bulk create processed', {
+      created: result.created.map(CandidatesMapper.toCandidateResponse),
+      failed: result.failed,
+      summary: {
+        total: Array.isArray(dto.candidates) ? dto.candidates.length : 0,
+        success_count: result.created.length,
+        failed_count: result.failed.length,
+      },
+    });
+  }
+
+  @Post('bulk/update-status')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk update candidate active status (partial success)' })
+  @ApiBody({ type: BulkUpdateCandidateStatusDto })
+  @ApiStandardResponse(
+    BulkUpdateCandidateStatusResponseDto,
+    'Bulk status update processed (partial success)',
+  )
+  async bulkUpdateStatus(
+    @Body() dto: BulkUpdateCandidateStatusDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.candidatesService.bulkUpdateStatus(dto, actor?.sub);
+
+    return ResponseUtil.success('Bulk status update processed', {
+      updated: result.updated,
+      failed: result.failed,
+      summary: {
+        total: Array.isArray(dto.candidate_ids) ? dto.candidate_ids.length : 0,
+        success_count: result.updated.length,
+        failed_count: result.failed.length,
+      },
+    });
+  }
+
+  @Post('bulk/add-skills')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk add skills to candidates (partial success)' })
+  @ApiBody({ type: BulkAddSkillsDto })
+  @ApiStandardResponse(
+    BulkAddSkillsResponseDto,
+    'Bulk skill add processed (partial success)',
+  )
+  async bulkAddSkills(
+    @Body() dto: BulkAddSkillsDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.candidatesService.bulkAddSkills(dto, actor?.sub);
+
+    return ResponseUtil.success('Bulk skill add processed', {
+      invalid_skill_ids: result.invalid_skill_ids,
+      results: result.results,
+      failed: result.failed,
+      summary: {
+        total: Array.isArray(dto.candidate_ids) ? dto.candidate_ids.length : 0,
+        success_count: result.results.length,
+        failed_count: result.failed.length,
+      },
+    });
   }
 
   @Patch(':id')

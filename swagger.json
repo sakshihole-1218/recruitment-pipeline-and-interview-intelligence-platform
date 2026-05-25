@@ -3638,6 +3638,177 @@
         ]
       }
     },
+    "/api/candidates/bulk/create": {
+      "post": {
+        "operationId": "CandidatesController_bulkCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateCandidatesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk create processed (partial success)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkCreateCandidatesResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk create candidate profiles (partial success)",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
+    "/api/candidates/bulk/update-status": {
+      "post": {
+        "operationId": "CandidatesController_bulkUpdateStatus",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpdateCandidateStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk status update processed (partial success)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkUpdateCandidateStatusResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk update candidate active status (partial success)",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
+    "/api/candidates/bulk/add-skills": {
+      "post": {
+        "operationId": "CandidatesController_bulkAddSkills",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAddSkillsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk skill add processed (partial success)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BulkAddSkillsResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk add skills to candidates (partial success)",
+        "tags": [
+          "Candidates"
+        ]
+      }
+    },
     "/api/candidates/{id}": {
       "patch": {
         "operationId": "CandidatesController_update",
@@ -10259,6 +10430,273 @@
           "email"
         ]
       },
+      "BulkOperationFailureDto": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number",
+            "description": "Index of the item in the input array (when applicable)",
+            "example": 0
+          },
+          "candidate_id": {
+            "type": "string",
+            "description": "Candidate UUID",
+            "example": "8f7f3de0-1c2b-4e88-9b26-2f1a4d7c7e33"
+          },
+          "email": {
+            "type": "string",
+            "description": "Candidate email (when applicable)",
+            "example": "sakshi@example.com"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human readable error message",
+            "example": "Candidate not found"
+          },
+          "code": {
+            "type": "string",
+            "description": "Stable error code for clients",
+            "example": "CANDIDATE_NOT_FOUND"
+          },
+          "details": {
+            "type": "object",
+            "description": "Additional error details",
+            "example": [
+              "email must be an email"
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "code"
+        ]
+      },
+      "BulkOperationSummaryDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "example": 10
+          },
+          "success_count": {
+            "type": "number",
+            "example": 7
+          },
+          "failed_count": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "required": [
+          "total",
+          "success_count",
+          "failed_count"
+        ]
+      },
+      "BulkCreateCandidatesResponseDto": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CandidateResponseDto"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkOperationFailureDto"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/BulkOperationSummaryDto"
+          }
+        },
+        "required": [
+          "created",
+          "failed",
+          "summary"
+        ]
+      },
+      "BulkCreateCandidatesDto": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "description": "Candidates to create. Each entry is validated independently (partial success).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateCandidateDto"
+            }
+          }
+        },
+        "required": [
+          "candidates"
+        ]
+      },
+      "BulkUpdateCandidateStatusItemDto": {
+        "type": "object",
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "example": "8f7f3de0-1c2b-4e88-9b26-2f1a4d7c7e33"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "candidate_id",
+          "is_active"
+        ]
+      },
+      "BulkUpdateCandidateStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "updated": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkUpdateCandidateStatusItemDto"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkOperationFailureDto"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/BulkOperationSummaryDto"
+          }
+        },
+        "required": [
+          "updated",
+          "failed",
+          "summary"
+        ]
+      },
+      "BulkUpdateCandidateStatusDto": {
+        "type": "object",
+        "properties": {
+          "candidate_ids": {
+            "description": "Candidate UUIDs. Each entry is processed independently (partial success).",
+            "example": [
+              "8f7f3de0-1c2b-4e88-9b26-2f1a4d7c7e33"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Active flag to apply",
+            "example": true
+          }
+        },
+        "required": [
+          "candidate_ids",
+          "is_active"
+        ]
+      },
+      "BulkAddSkillsCandidateResultDto": {
+        "type": "object",
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "example": "8f7f3de0-1c2b-4e88-9b26-2f1a4d7c7e33"
+          },
+          "added_skill_ids": {
+            "description": "Skill UUIDs newly created for the candidate",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reactivated_skill_ids": {
+            "description": "Skill UUIDs reactivated from soft-deleted mappings",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "skipped_existing_skill_ids": {
+            "description": "Skill UUIDs already present and therefore skipped",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "candidate_id",
+          "added_skill_ids",
+          "reactivated_skill_ids",
+          "skipped_existing_skill_ids"
+        ]
+      },
+      "BulkAddSkillsResponseDto": {
+        "type": "object",
+        "properties": {
+          "invalid_skill_ids": {
+            "description": "Skill UUIDs that were invalid (format or not found) and skipped for all candidates",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkAddSkillsCandidateResultDto"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkOperationFailureDto"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/BulkOperationSummaryDto"
+          }
+        },
+        "required": [
+          "invalid_skill_ids",
+          "results",
+          "failed",
+          "summary"
+        ]
+      },
+      "BulkAddSkillsDto": {
+        "type": "object",
+        "properties": {
+          "candidate_ids": {
+            "description": "Candidate UUIDs. Each entry is processed independently (partial success).",
+            "example": [
+              "8f7f3de0-1c2b-4e88-9b26-2f1a4d7c7e33"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "skill_ids": {
+            "description": "Skill UUIDs to add to each candidate. Invalid skills are reported and skipped.",
+            "example": [
+              "b2a0dc6f-6c34-4a55-9eaf-31557e6b6c2a"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "candidate_ids",
+          "skill_ids"
+        ]
+      },
       "UpdateCandidateDto": {
         "type": "object",
         "properties": {
@@ -10722,23 +11160,6 @@
         "required": [
           "candidate_id",
           "job_opening_id"
-        ]
-      },
-      "BulkOperationFailureDto": {
-        "type": "object",
-        "properties": {
-          "application_id": {
-            "type": "string",
-            "description": "Application UUID"
-          },
-          "reason": {
-            "type": "string",
-            "example": "Invalid stage transition"
-          }
-        },
-        "required": [
-          "application_id",
-          "reason"
         ]
       },
       "BulkOperationResultResponseDto": {
