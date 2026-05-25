@@ -16,6 +16,9 @@ import { DeclineOfferUseCase } from '../use-cases/decline-offer.usecase';
 import { CancelOfferUseCase } from '../use-cases/cancel-offer.usecase';
 import { ExpireOfferUseCase } from '../use-cases/expire-offer.usecase';
 import { SoftDeleteOfferUseCase } from '../use-cases/soft-delete-offer.usecase';
+import { BulkSendOffersUseCase } from '../use-cases/bulk-send-offers.usecase';
+import { BulkExpireOffersUseCase } from '../use-cases/bulk-expire-offers.usecase';
+import { BulkCancelOffersUseCase } from '../use-cases/bulk-cancel-offers.usecase';
 
 @Injectable()
 export class OffersService {
@@ -31,6 +34,9 @@ export class OffersService {
     private readonly cancelUseCase: CancelOfferUseCase,
     private readonly expireUseCase: ExpireOfferUseCase,
     private readonly softDeleteUseCase: SoftDeleteOfferUseCase,
+    private readonly bulkSendUseCase: BulkSendOffersUseCase,
+    private readonly bulkExpireUseCase: BulkExpireOffersUseCase,
+    private readonly bulkCancelUseCase: BulkCancelOffersUseCase,
   ) {}
 
   async create(dto: CreateOfferDto, actorUserId?: string) {
@@ -75,5 +81,23 @@ export class OffersService {
 
   async softDelete(id: string, actorUserId?: string) {
     return this.softDeleteUseCase.execute(id, actorUserId);
+  }
+
+  async bulkSend(offerIds: string[], actorUserId?: string) {
+    return this.bulkSendUseCase.execute({ offer_ids: offerIds }, actorUserId);
+  }
+
+  async bulkExpire(offerIds: string[], actorUserId?: string) {
+    return this.bulkExpireUseCase.execute({ offer_ids: offerIds }, actorUserId);
+  }
+
+  async bulkCancel(offerIds: string[], cancelReason: string, actorUserId?: string) {
+    return this.bulkCancelUseCase.execute(
+      {
+        offer_ids: offerIds,
+        cancel_reason: cancelReason,
+      },
+      actorUserId,
+    );
   }
 }

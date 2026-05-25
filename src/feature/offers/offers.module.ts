@@ -25,6 +25,9 @@ import { DeclineOfferUseCase } from './application/use-cases/decline-offer.useca
 import { CancelOfferUseCase } from './application/use-cases/cancel-offer.usecase';
 import { ExpireOfferUseCase } from './application/use-cases/expire-offer.usecase';
 import { SoftDeleteOfferUseCase } from './application/use-cases/soft-delete-offer.usecase';
+import { BulkSendOffersUseCase } from './application/use-cases/bulk-send-offers.usecase';
+import { BulkExpireOffersUseCase } from './application/use-cases/bulk-expire-offers.usecase';
+import { BulkCancelOffersUseCase } from './application/use-cases/bulk-cancel-offers.usecase';
 import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
@@ -58,6 +61,9 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     CancelOfferUseCase,
     ExpireOfferUseCase,
     SoftDeleteOfferUseCase,
+    BulkSendOffersUseCase,
+    BulkExpireOffersUseCase,
+    BulkCancelOffersUseCase,
     // service
     OffersService,
   ],

@@ -33,8 +33,11 @@ import { OffersService } from '../application/services/offers.service';
 import { ApiOffersPaginatedResponse } from '../decorators/api-offers-paginated-response.decorator';
 import { CreateOfferDto } from '../dto/create-offer.dto';
 import { DeclineOfferDto } from '../dto/decline-offer.dto';
+import { BulkOfferIdsDto } from '../dto/bulk-offer-ids.dto';
+import { BulkCancelOffersDto } from '../dto/bulk-cancel-offers.dto';
 import { ListOffersQueryDto } from '../dto/list-offers.query.dto';
 import { OfferResponseDto } from '../dto/offer.response.dto';
+import { BulkOfferOperationResultResponseDto } from '../dto/bulk-offer-operation-result.response.dto';
 import { SoftDeleteOfferResponseDto } from '../dto/soft-delete-offer.response.dto';
 import { UpdateOfferDto } from '../dto/update-offer.dto';
 import { OffersMapper } from '../helpers/offers.mapper';
@@ -118,6 +121,55 @@ export class OffersController {
       result.limit,
       result.total_records,
     );
+  }
+
+  @Post('bulk/send')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk send offers (DRAFT -> SENT) (partial success)' })
+  @ApiBody({ type: BulkOfferIdsDto })
+  @ApiStandardResponse(
+    BulkOfferOperationResultResponseDto,
+    'Bulk send processed (partial success)',
+  )
+  async bulkSend(@Body() dto: BulkOfferIdsDto, @CurrentUser() actor: AuthJwtPayload) {
+    const result = await this.offersService.bulkSend(dto.offer_ids, actor?.sub);
+    return ResponseUtil.success('Bulk send processed', result);
+  }
+
+  @Post('bulk/expire')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk expire offers (SENT -> EXPIRED) (partial success)' })
+  @ApiBody({ type: BulkOfferIdsDto })
+  @ApiStandardResponse(
+    BulkOfferOperationResultResponseDto,
+    'Bulk expire processed (partial success)',
+  )
+  async bulkExpire(@Body() dto: BulkOfferIdsDto, @CurrentUser() actor: AuthJwtPayload) {
+    const result = await this.offersService.bulkExpire(dto.offer_ids, actor?.sub);
+    return ResponseUtil.success('Bulk expire processed', result);
+  }
+
+  @Post('bulk/cancel')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk cancel offers (DRAFT/SENT -> CANCELLED) (partial success)' })
+  @ApiBody({ type: BulkCancelOffersDto })
+  @ApiStandardResponse(
+    BulkOfferOperationResultResponseDto,
+    'Bulk cancel processed (partial success)',
+  )
+  async bulkCancel(
+    @Body() dto: BulkCancelOffersDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.offersService.bulkCancel(
+      dto.offer_ids,
+      dto.cancel_reason,
+      actor?.sub,
+    );
+    return ResponseUtil.success('Bulk cancel processed', result);
   }
 
   @Post(':id/send')
