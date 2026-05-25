@@ -46,6 +46,29 @@ export class CandidateSkillRepository {
     return qb.getOne();
   }
 
+  async findByCandidateAndSkillIds(options: {
+    candidateId: string;
+    skillIds: string[];
+    includeDeleted?: boolean;
+    manager?: EntityManager;
+  }): Promise<CandidateSkillEntity[]> {
+    const ids = Array.isArray(options.skillIds) ? options.skillIds.filter(Boolean) : [];
+    if (!ids.length) return [];
+
+    const qb = this.repo(options.manager)
+      .createQueryBuilder('candidate_skills')
+      .where('candidate_skills.candidate_id = :candidateId', {
+        candidateId: options.candidateId,
+      })
+      .andWhere('candidate_skills.skill_id IN (:...skillIds)', { skillIds: ids });
+
+    if (!(options.includeDeleted ?? false)) {
+      qb.andWhere('candidate_skills.deleted_at IS NULL');
+    }
+
+    return qb.getMany();
+  }
+
   async listByCandidateId(
     candidateId: string,
     options?: { manager?: EntityManager },

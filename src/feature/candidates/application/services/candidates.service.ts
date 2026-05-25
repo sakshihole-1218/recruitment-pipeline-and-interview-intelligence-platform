@@ -5,6 +5,9 @@ import { UpdateCandidateDto } from '../../dto/update-candidate.dto';
 import { ListCandidatesQueryDto } from '../../dto/list-candidates.query.dto';
 import { UpsertCandidateSkillsDto } from '../../dto/upsert-candidate-skills.dto';
 import { UploadCandidateDocumentDto } from '../../dto/upload-candidate-document.dto';
+import { BulkCreateCandidatesDto } from '../../dto/bulk-create-candidates.dto';
+import { BulkUpdateCandidateStatusDto } from '../../dto/bulk-update-candidate-status.dto';
+import { BulkAddSkillsDto } from '../../dto/bulk-add-skills.dto';
 import { CreateCandidateUseCase } from '../use-cases/create-candidate.usecase';
 import { UpdateCandidateUseCase } from '../use-cases/update-candidate.usecase';
 import { FindCandidateByIdUseCase } from '../use-cases/find-candidate-by-id.usecase';
@@ -19,6 +22,9 @@ import {
   UploadCandidateDocumentUseCase,
   UploadedCandidateFile,
 } from '../use-cases/upload-candidate-document.usecase';
+import { BulkCreateCandidatesUseCase } from '../use-cases/bulk-create-candidates.usecase';
+import { BulkUpdateCandidateStatusUseCase } from '../use-cases/bulk-update-candidate-status.usecase';
+import { BulkAddSkillsUseCase } from '../use-cases/bulk-add-skills.usecase';
 
 @Injectable()
 export class CandidatesService {
@@ -34,6 +40,9 @@ export class CandidatesService {
     private readonly listDocumentsUseCase: ListCandidateDocumentsUseCase,
     private readonly markLatestResumeUseCase: MarkLatestCandidateResumeUseCase,
     private readonly uploadDocumentUseCase: UploadCandidateDocumentUseCase,
+    private readonly bulkCreateUseCase: BulkCreateCandidatesUseCase,
+    private readonly bulkUpdateStatusUseCase: BulkUpdateCandidateStatusUseCase,
+    private readonly bulkAddSkillsUseCase: BulkAddSkillsUseCase,
   ) {}
 
   async create(dto: CreateCandidateDto, actorUserId?: string) {
@@ -91,5 +100,21 @@ export class CandidatesService {
     actorUserId?: string,
   ) {
     return this.markLatestResumeUseCase.execute(candidateId, documentId, actorUserId);
+  }
+
+  async bulkCreate(dto: BulkCreateCandidatesDto, actorUserId?: string) {
+    return this.bulkCreateUseCase.execute(dto.candidates, actorUserId);
+  }
+
+  async bulkUpdateStatus(dto: BulkUpdateCandidateStatusDto, actorUserId?: string) {
+    return this.bulkUpdateStatusUseCase.execute(dto.candidate_ids, dto.is_active, actorUserId);
+  }
+
+  async bulkAddSkills(dto: BulkAddSkillsDto, actorUserId?: string) {
+    return this.bulkAddSkillsUseCase.execute({
+      candidateIds: dto.candidate_ids,
+      skillIds: dto.skill_ids,
+      actorUserId,
+    });
   }
 }

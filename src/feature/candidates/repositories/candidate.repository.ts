@@ -51,6 +51,14 @@ export class CandidateRepository {
       .getOne();
   }
 
+  async findByIdIncludingDeleted(
+    id: string,
+    options?: { manager?: EntityManager },
+  ): Promise<CandidateEntity | null> {
+    const repo = this.repo(options?.manager);
+    return repo.findOne({ where: { id }, withDeleted: true });
+  }
+
   async findByEmail(
     email: string,
     options?: { includeDeleted?: boolean; manager?: EntityManager },
