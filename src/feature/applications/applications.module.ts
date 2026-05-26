@@ -13,6 +13,7 @@ import { ApplicationReferenceRepository } from './repositories/application-refer
 
 import { ApplicationsPaginationHelper } from './helpers/applications-pagination.helper';
 import { ApplicationsValidationHelper } from './helpers/applications-validation.helper';
+import { ApplicationScreeningValidationHelper } from './helpers/application-screening-validation.helper';
 
 import { CreateApplicationUseCase } from './application/use-cases/create-application.usecase';
 import { FindApplicationByIdUseCase } from './application/use-cases/find-application-by-id.usecase';
@@ -25,6 +26,8 @@ import { BulkMoveApplicationStageUseCase } from './application/use-cases/bulk-mo
 import { BulkRejectApplicationsUseCase } from './application/use-cases/bulk-reject-applications.use-case';
 import { BulkAssignRecruiterUseCase } from './application/use-cases/bulk-assign-recruiter.use-case';
 import { BulkAssignHiringManagerUseCase } from './application/use-cases/bulk-assign-hiring-manager.use-case';
+import { StartApplicationScreeningUseCase } from './application/use-cases/start-application-screening.use-case';
+import { CompleteApplicationScreeningUseCase } from './application/use-cases/complete-application-screening.use-case';
 
 import { CandidateEntity } from '../candidates/entities/candidate.entity';
 import { JobOpeningEntity } from '../job-openings/entities/job-opening.entity';
@@ -51,6 +54,7 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     // helpers
     ApplicationsPaginationHelper,
     ApplicationsValidationHelper,
+    ApplicationScreeningValidationHelper,
     // use-cases
     CreateApplicationUseCase,
     FindApplicationByIdUseCase,
@@ -63,6 +67,8 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     BulkRejectApplicationsUseCase,
     BulkAssignRecruiterUseCase,
     BulkAssignHiringManagerUseCase,
+    StartApplicationScreeningUseCase,
+    CompleteApplicationScreeningUseCase,
     // service
     ApplicationsService,
   ],

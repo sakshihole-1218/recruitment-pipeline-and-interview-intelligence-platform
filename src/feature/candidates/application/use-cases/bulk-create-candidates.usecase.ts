@@ -63,10 +63,16 @@ export class BulkCreateCandidatesUseCase {
     ok: false;
     failure: BulkCreateCandidatesFailure;
   }> {
-    const dto = plainToInstance(CreateCandidateDto, input ?? {}, {
+    const plain = typeof input === 'object' && input !== null ? input : {};
+
+    const dto = plainToInstance(CreateCandidateDto, plain, {
       enableImplicitConversion: true,
       exposeDefaultValues: true,
     });
+
+    if (dto && typeof dto === 'object') {
+      Object.setPrototypeOf(dto, CreateCandidateDto.prototype);
+    }
 
     const errors = await validate(dto, {
       whitelist: true,

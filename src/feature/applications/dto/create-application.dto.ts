@@ -2,11 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
-  IsNumber,
   IsOptional,
   IsUUID,
-  Max,
-  Min,
 } from 'class-validator';
 
 export class CreateApplicationDto {
@@ -33,20 +30,4 @@ export class CreateApplicationDto {
   @Type(() => Boolean)
   @IsBoolean()
   is_priority?: boolean;
-
-  @ApiPropertyOptional({ example: 75.5, description: 'Optional screening score (0-100)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Max(100)
-  screening_score?: number;
-
-  @ApiPropertyOptional({ example: 82.25, description: 'Optional fit score (0-100)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Max(100)
-  fit_score?: number;
 }

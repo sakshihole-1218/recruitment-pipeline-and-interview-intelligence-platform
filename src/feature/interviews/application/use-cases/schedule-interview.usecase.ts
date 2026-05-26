@@ -15,6 +15,7 @@ import { ScheduleInterviewDto } from '../../dto/schedule-interview.dto';
 import { InterviewEntity } from '../../entities/interview.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
 import { InterviewsValidationHelper } from '../../helpers/interviews-validation.helper';
+import { CandidateResumeValidationHelper } from '../../helpers/candidate-resume-validation.helper';
 import { InterviewPanelMemberRepository } from '../../repositories/interview-panel-member.repository';
 import { InterviewRepository } from '../../repositories/interview.repository';
 import { InterviewRoundRepository } from '../../repositories/interview-round.repository';
@@ -31,6 +32,7 @@ export class ScheduleInterviewUseCase {
     private readonly interviewRoundRepository: InterviewRoundRepository,
     private readonly panelMemberRepository: InterviewPanelMemberRepository,
     private readonly validationHelper: InterviewsValidationHelper,
+    private readonly resumeValidation: CandidateResumeValidationHelper,
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
@@ -59,16 +61,11 @@ export class ScheduleInterviewUseCase {
         });
       }
 
-      if (
-        [
-          ApplicationStatus.REJECTED,
-          ApplicationStatus.WITHDRAWN,
-          ApplicationStatus.HIRED,
-        ].includes(application.application_status)
-      ) {
-        throw new BadRequestException({
-          message: 'Interview cannot be scheduled for this application status',
-          code: 'APPLICATION_NOT_ELIGIBLE_FOR_INTERVIEW',
+      if (application.application_status !== ApplicationStatus.ACTIVE) {
+        throw new ConflictException({
+          message: 'Interview can only be scheduled for ACTIVE applications',
+          code: 'APPLICATION_NOT_ACTIVE_FOR_INTERVIEW',
+          meta: { application_status: application.application_status },
         });
       }
 
@@ -85,6 +82,11 @@ export class ScheduleInterviewUseCase {
           meta: { current_stage: application.current_stage },
         });
       }
+
+      await this.resumeValidation.ensureLatestResumeExists({
+        candidateId: application.candidate_id,
+        manager,
+      });
 
       const round = await this.interviewRoundRepository.findById(
         dto.interview_round_id,
@@ -128,6 +130,7 @@ export class ScheduleInterviewUseCase {
       if (application.current_stage === ApplicationCurrentStage.SHORTLISTED) {
         const fromStage = application.current_stage;
         const toStage = ApplicationCurrentStage.INTERVIEW;
+        const changeReason = 'Interview scheduled';
 
         await manager.getRepository(ApplicationStageHistoryEntity).save(
           manager.getRepository(ApplicationStageHistoryEntity).create({
@@ -135,7 +138,7 @@ export class ScheduleInterviewUseCase {
             from_stage: fromStage,
             to_stage: toStage,
             changed_by_user_id: actorUserId,
-            change_reason: null,
+            change_reason: changeReason,
             changed_at: now,
             deleted_at: null,
           }),
@@ -152,7 +155,7 @@ export class ScheduleInterviewUseCase {
             entityId: application.id,
             fromStage,
             toStage,
-            reason: null,
+            reason: changeReason,
             actorUserId,
             actionAt: now,
             ipAddress: null,

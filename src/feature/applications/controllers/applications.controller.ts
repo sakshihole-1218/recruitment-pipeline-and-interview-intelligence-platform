@@ -43,6 +43,7 @@ import { BulkMoveApplicationStageDto } from '../dto/bulk-move-application-stage.
 import { BulkRejectApplicationsDto } from '../dto/bulk-reject-applications.dto';
 import { BulkAssignRecruiterDto } from '../dto/bulk-assign-recruiter.dto';
 import { BulkAssignHiringManagerDto } from '../dto/bulk-assign-hiring-manager.dto';
+import { CompleteApplicationScreeningDto } from '../dto/complete-application-screening.dto';
 import { ApplicationStageHistoryResponseDto } from '../dto/application-stage-history.response.dto';
 import { BulkOperationResultResponseDto } from '../dto/bulk-operation-result.response.dto';
 import { ApplicationsMapper } from '../helpers/applications.mapper';
@@ -254,6 +255,42 @@ export class ApplicationsController {
     return ResponseUtil.success(
       'Application stage history fetched successfully',
       rows.map(ApplicationsMapper.toStageHistoryResponse),
+    );
+  }
+
+  @Post(':id/start-screening')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Start application screening (APPLIED -> SCREENING)' })
+  @ApiParam({ name: 'id', description: 'Application UUID' })
+  @ApiStandardResponse(ApplicationResponseDto, 'Screening started successfully')
+  async startScreening(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const app = await this.applicationsService.startScreening(id, actor?.sub);
+    return ResponseUtil.success(
+      'Screening started successfully',
+      ApplicationsMapper.toApplicationResponse(app),
+    );
+  }
+
+  @Post(':id/complete-screening')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Complete application screening (SCREENING -> result stage)' })
+  @ApiParam({ name: 'id', description: 'Application UUID' })
+  @ApiBody({ type: CompleteApplicationScreeningDto })
+  @ApiStandardResponse(ApplicationResponseDto, 'Screening completed successfully')
+  async completeScreening(
+    @Param('id') id: string,
+    @Body() dto: CompleteApplicationScreeningDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const app = await this.applicationsService.completeScreening(id, dto, actor?.sub);
+    return ResponseUtil.success(
+      'Screening completed successfully',
+      ApplicationsMapper.toApplicationResponse(app),
     );
   }
 }

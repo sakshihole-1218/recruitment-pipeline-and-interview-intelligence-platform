@@ -9,6 +9,7 @@ import { BulkMoveApplicationStageDto } from '../../dto/bulk-move-application-sta
 import { BulkRejectApplicationsDto } from '../../dto/bulk-reject-applications.dto';
 import { BulkAssignRecruiterDto } from '../../dto/bulk-assign-recruiter.dto';
 import { BulkAssignHiringManagerDto } from '../../dto/bulk-assign-hiring-manager.dto';
+import { CompleteApplicationScreeningDto } from '../../dto/complete-application-screening.dto';
 
 import { CreateApplicationUseCase } from '../use-cases/create-application.usecase';
 import { FindApplicationByIdUseCase } from '../use-cases/find-application-by-id.usecase';
@@ -21,6 +22,8 @@ import { BulkMoveApplicationStageUseCase } from '../use-cases/bulk-move-applicat
 import { BulkRejectApplicationsUseCase } from '../use-cases/bulk-reject-applications.use-case';
 import { BulkAssignRecruiterUseCase } from '../use-cases/bulk-assign-recruiter.use-case';
 import { BulkAssignHiringManagerUseCase } from '../use-cases/bulk-assign-hiring-manager.use-case';
+import { StartApplicationScreeningUseCase } from '../use-cases/start-application-screening.use-case';
+import { CompleteApplicationScreeningUseCase } from '../use-cases/complete-application-screening.use-case';
 
 @Injectable()
 export class ApplicationsService {
@@ -36,6 +39,8 @@ export class ApplicationsService {
     private readonly bulkRejectUseCase: BulkRejectApplicationsUseCase,
     private readonly bulkAssignRecruiterUseCase: BulkAssignRecruiterUseCase,
     private readonly bulkAssignHiringManagerUseCase: BulkAssignHiringManagerUseCase,
+    private readonly startScreeningUseCase: StartApplicationScreeningUseCase,
+    private readonly completeScreeningUseCase: CompleteApplicationScreeningUseCase,
   ) {}
 
   async create(dto: CreateApplicationDto, actorUserId?: string) {
@@ -80,5 +85,17 @@ export class ApplicationsService {
 
   async bulkAssignHiringManager(dto: BulkAssignHiringManagerDto, actorUserId?: string) {
     return this.bulkAssignHiringManagerUseCase.execute(dto, actorUserId);
+  }
+
+  async startScreening(id: string, actorUserId?: string) {
+    return this.startScreeningUseCase.execute(id, actorUserId);
+  }
+
+  async completeScreening(
+    id: string,
+    dto: CompleteApplicationScreeningDto,
+    actorUserId?: string,
+  ) {
+    return this.completeScreeningUseCase.execute(id, dto, actorUserId);
   }
 }
