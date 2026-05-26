@@ -53,6 +53,25 @@ export class CandidateDocumentRepository {
       .getMany();
   }
 
+  async existsLatestResume(options: {
+    candidateId: string;
+    manager?: EntityManager;
+  }): Promise<boolean> {
+    const row = await this.baseQuery('candidate_documents', options.manager)
+      .andWhere('candidate_documents.candidate_id = :candidateId', {
+        candidateId: options.candidateId,
+      })
+      .andWhere('candidate_documents.document_type = :docType', {
+        docType: CandidateDocumentType.RESUME,
+      })
+      .andWhere('candidate_documents.is_latest = true')
+      .select('candidate_documents.id', 'id')
+      .limit(1)
+      .getRawOne<{ id: string }>();
+
+    return Boolean(row?.id);
+  }
+
   async unsetLatestResume(options: {
     candidateId: string;
     manager?: EntityManager;

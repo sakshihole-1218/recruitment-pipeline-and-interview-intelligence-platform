@@ -27,10 +27,13 @@ import { InterviewRoundEntity } from './entities/interview-round.entity';
 import { InterviewEntity } from './entities/interview.entity';
 import { InterviewsPaginationHelper } from './helpers/interviews-pagination.helper';
 import { InterviewsValidationHelper } from './helpers/interviews-validation.helper';
+import { CandidateResumeValidationHelper } from './helpers/candidate-resume-validation.helper';
 import { InterviewFeedbackRepository } from './repositories/interview-feedback.repository';
 import { InterviewPanelMemberRepository } from './repositories/interview-panel-member.repository';
 import { InterviewRoundRepository } from './repositories/interview-round.repository';
 import { InterviewRepository } from './repositories/interview.repository';
+import { CandidateDocumentEntity } from '../candidates/entities/candidate-document.entity';
+import { CandidateDocumentRepository } from '../candidates/repositories/candidate-document.repository';
 import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
 @Module({
@@ -40,6 +43,7 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
       InterviewEntity,
       InterviewPanelMemberEntity,
       InterviewFeedbackEntity,
+      CandidateDocumentEntity,
     ]),
     ActivityLogsModule,
   ],
@@ -56,8 +60,11 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     InterviewPanelMemberRepository,
     InterviewFeedbackRepository,
 
+    CandidateDocumentRepository,
+
     InterviewsPaginationHelper,
     InterviewsValidationHelper,
+    CandidateResumeValidationHelper,
 
     CreateInterviewRoundUseCase,
     UpdateInterviewRoundUseCase,

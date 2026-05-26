@@ -5241,6 +5241,130 @@
         ]
       }
     },
+    "/api/applications/{id}/start-screening": {
+      "post": {
+        "operationId": "ApplicationsController_startScreening",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Screening started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Start application screening (APPLIED -> SCREENING)",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
+    "/api/applications/{id}/complete-screening": {
+      "post": {
+        "operationId": "ApplicationsController_completeScreening",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteApplicationScreeningDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Screening completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApplicationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Complete application screening (SCREENING -> result stage)",
+        "tags": [
+          "Applications"
+        ]
+      }
+    },
     "/api/interviews/rounds": {
       "post": {
         "operationId": "InterviewRoundsController_create",
@@ -11316,16 +11440,6 @@
             "type": "boolean",
             "example": false,
             "default": false
-          },
-          "screening_score": {
-            "type": "number",
-            "example": 75.5,
-            "description": "Optional screening score (0-100)"
-          },
-          "fit_score": {
-            "type": "number",
-            "example": 82.25,
-            "description": "Optional fit score (0-100)"
           }
         },
         "required": [
@@ -11571,6 +11685,40 @@
           "changed_at",
           "created_at",
           "updated_at"
+        ]
+      },
+      "CompleteApplicationScreeningDto": {
+        "type": "object",
+        "properties": {
+          "screening_score": {
+            "type": "number",
+            "example": 78.5,
+            "description": "Screening score (0-100)"
+          },
+          "fit_score": {
+            "type": "number",
+            "example": 82.25,
+            "description": "Fit score (0-100)"
+          },
+          "screening_remarks": {
+            "type": "string",
+            "example": "Good communication, strong system design fundamentals",
+            "description": "Optional screening remarks (stored as stage change reason and/or rejection reason based on result)"
+          },
+          "screening_result": {
+            "type": "string",
+            "enum": [
+              "SHORTLISTED",
+              "REJECTED",
+              "ON_HOLD"
+            ],
+            "example": "SHORTLISTED"
+          }
+        },
+        "required": [
+          "screening_score",
+          "fit_score",
+          "screening_result"
         ]
       },
       "InterviewRoundResponseDto": {

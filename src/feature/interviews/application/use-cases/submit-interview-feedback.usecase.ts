@@ -9,6 +9,7 @@ import { DataSource } from 'typeorm';
 
 import { ApplicationEntity } from '../../../applications/entities/application.entity';
 import { ApplicationCurrentStage } from '../../../applications/enums/application-current-stage.enum';
+import { ApplicationStatus } from '../../../applications/enums/application-status.enum';
 import { SubmitInterviewFeedbackDto } from '../../dto/submit-interview-feedback.dto';
 import { InterviewFeedbackEntity } from '../../entities/interview-feedback.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
@@ -74,6 +75,14 @@ export class SubmitInterviewFeedbackUseCase {
         throw new NotFoundException({
           message: 'Application not found',
           code: 'APPLICATION_NOT_FOUND',
+        });
+      }
+
+      if (application.application_status !== ApplicationStatus.ACTIVE) {
+        throw new ConflictException({
+          message: 'Feedback can only be submitted for ACTIVE applications',
+          code: 'APPLICATION_NOT_ACTIVE_FOR_FEEDBACK',
+          meta: { application_status: application.application_status },
         });
       }
 

@@ -14,6 +14,7 @@ import { RescheduleInterviewDto } from '../../dto/reschedule-interview.dto';
 import { InterviewEntity } from '../../entities/interview.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
 import { InterviewsValidationHelper } from '../../helpers/interviews-validation.helper';
+import { CandidateResumeValidationHelper } from '../../helpers/candidate-resume-validation.helper';
 import { InterviewRepository } from '../../repositories/interview.repository';
 import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
 import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
@@ -26,6 +27,7 @@ export class RescheduleInterviewUseCase {
     private readonly dataSource: DataSource,
     private readonly interviewRepository: InterviewRepository,
     private readonly validationHelper: InterviewsValidationHelper,
+    private readonly resumeValidation: CandidateResumeValidationHelper,
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
@@ -76,16 +78,11 @@ export class RescheduleInterviewUseCase {
         });
       }
 
-      if (
-        [
-          ApplicationStatus.REJECTED,
-          ApplicationStatus.WITHDRAWN,
-          ApplicationStatus.HIRED,
-        ].includes(application.application_status)
-      ) {
-        throw new BadRequestException({
-          message: 'Interview cannot be rescheduled for this application status',
-          code: 'APPLICATION_NOT_ELIGIBLE_FOR_INTERVIEW',
+      if (application.application_status !== ApplicationStatus.ACTIVE) {
+        throw new ConflictException({
+          message: 'Interview can only be rescheduled for ACTIVE applications',
+          code: 'APPLICATION_NOT_ACTIVE_FOR_INTERVIEW',
+          meta: { application_status: application.application_status },
         });
       }
 
@@ -102,6 +99,11 @@ export class RescheduleInterviewUseCase {
           meta: { current_stage: application.current_stage },
         });
       }
+
+      await this.resumeValidation.ensureLatestResumeExists({
+        candidateId: application.candidate_id,
+        manager,
+      });
 
       const startAt = new Date(dto.scheduled_start_at);
       const endAt = new Date(dto.scheduled_end_at);
@@ -128,6 +130,7 @@ export class RescheduleInterviewUseCase {
       if (application.current_stage === ApplicationCurrentStage.SHORTLISTED) {
         const fromStage = application.current_stage;
         const toStage = ApplicationCurrentStage.INTERVIEW;
+        const changeReason = 'Interview scheduled';
 
         await manager.getRepository(ApplicationStageHistoryEntity).save(
           manager.getRepository(ApplicationStageHistoryEntity).create({
@@ -135,7 +138,7 @@ export class RescheduleInterviewUseCase {
             from_stage: fromStage,
             to_stage: toStage,
             changed_by_user_id: actorUserId,
-            change_reason: null,
+            change_reason: changeReason,
             changed_at: now,
             deleted_at: null,
           }),
@@ -152,7 +155,7 @@ export class RescheduleInterviewUseCase {
             entityId: application.id,
             fromStage,
             toStage,
-            reason: null,
+            reason: changeReason,
             actorUserId,
             actionAt: now,
             ipAddress: null,

@@ -117,14 +117,8 @@ export class CreateApplicationUseCase {
           applied_at: now,
           current_stage: ApplicationCurrentStage.APPLIED,
           application_status: ApplicationStatus.ACTIVE,
-          screening_score:
-            dto.screening_score === undefined || dto.screening_score === null
-              ? null
-              : Number(dto.screening_score).toFixed(2),
-          fit_score:
-            dto.fit_score === undefined || dto.fit_score === null
-              ? null
-              : Number(dto.fit_score).toFixed(2),
+          screening_score: null,
+          fit_score: null,
           assigned_recruiter_user_id: dto.assigned_recruiter_user_id ?? null,
           assigned_hiring_manager_user_id: dto.assigned_hiring_manager_user_id ?? null,
           is_priority: dto.is_priority ?? false,

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { ArrayMinSize, IsArray } from 'class-validator';
 
 import { CreateCandidateDto } from './create-candidate.dto';
@@ -10,5 +11,6 @@ export class BulkCreateCandidatesDto {
   })
   @IsArray()
   @ArrayMinSize(1)
-  candidates: Record<string, unknown>[];
+  @Type(() => CreateCandidateDto)
+  candidates: CreateCandidateDto[];
 }
