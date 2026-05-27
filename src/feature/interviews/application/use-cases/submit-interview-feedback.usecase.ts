@@ -5,13 +5,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 
 import { ApplicationEntity } from '../../../applications/entities/application.entity';
+import { ApplicationStageHistoryEntity } from '../../../applications/entities/application-stage-history.entity';
 import { ApplicationCurrentStage } from '../../../applications/enums/application-current-stage.enum';
 import { ApplicationStatus } from '../../../applications/enums/application-status.enum';
 import { SubmitInterviewFeedbackDto } from '../../dto/submit-interview-feedback.dto';
 import { InterviewFeedbackEntity } from '../../entities/interview-feedback.entity';
+import { InterviewEntity } from '../../entities/interview.entity';
+import { InterviewRoundEntity } from '../../entities/interview-round.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
 import { InterviewsValidationHelper } from '../../helpers/interviews-validation.helper';
 import { InterviewFeedbackRepository } from '../../repositories/interview-feedback.repository';
@@ -69,6 +72,7 @@ export class SubmitInterviewFeedbackUseCase {
         .createQueryBuilder('applications')
         .where('applications.id = :id', { id: interview.application_id })
         .andWhere('applications.deleted_at IS NULL')
+        .setLock('pessimistic_write')
         .getOne();
 
       if (!application) {
@@ -86,10 +90,16 @@ export class SubmitInterviewFeedbackUseCase {
         });
       }
 
-      if (application.current_stage !== ApplicationCurrentStage.INTERVIEW) {
+      if (
+        ![
+          ApplicationCurrentStage.INTERVIEW,
+          ApplicationCurrentStage.DECISION,
+        ].includes(application.current_stage)
+      ) {
         throw new ConflictException({
-          message: 'Feedback can only be submitted when application is in INTERVIEW stage',
-          code: 'APPLICATION_NOT_IN_INTERVIEW_STAGE_FOR_FEEDBACK',
+          message:
+            'Feedback can only be submitted when application is in INTERVIEW or DECISION stage',
+          code: 'APPLICATION_NOT_ELIGIBLE_FOR_FEEDBACK_STAGE',
           meta: { current_stage: application.current_stage },
         });
       }
@@ -176,6 +186,13 @@ export class SubmitInterviewFeedbackUseCase {
           { manager },
         );
 
+        await this.maybeAdvanceApplicationToDecisionAfterFeedback({
+          application,
+          actorUserId,
+          now,
+          manager,
+        });
+
         return loaded;
       }
 
@@ -236,7 +253,104 @@ export class SubmitInterviewFeedbackUseCase {
         { manager },
       );
 
+      await this.maybeAdvanceApplicationToDecisionAfterFeedback({
+        application,
+        actorUserId,
+        now,
+        manager,
+      });
+
       return loaded;
     });
+  }
+
+  private async maybeAdvanceApplicationToDecisionAfterFeedback(options: {
+    application: ApplicationEntity;
+    actorUserId: string;
+    now: Date;
+    manager: EntityManager;
+  }): Promise<void> {
+    const { application, actorUserId, now, manager } = options;
+
+    // Primary flow: feedback is submitted while application is still in INTERVIEW.
+    // If older data already moved the application to DECISION, we keep it there.
+    if (application.current_stage !== ApplicationCurrentStage.INTERVIEW) return;
+
+    const mandatoryRounds = await manager
+      .getRepository(InterviewRoundEntity)
+      .createQueryBuilder('rounds')
+      .where('rounds.job_opening_id = :jobOpeningId', {
+        jobOpeningId: application.job_opening_id,
+      })
+      .andWhere('rounds.is_mandatory = true')
+      .andWhere('rounds.deleted_at IS NULL')
+      .getMany();
+
+    if (!mandatoryRounds.length) return;
+
+    const mandatoryRoundIds = mandatoryRounds.map((r) => r.id);
+
+    const completedWithFeedbackRows = await manager
+      .getRepository(InterviewEntity)
+      .createQueryBuilder('interviews')
+      .select('DISTINCT interviews.interview_round_id', 'interview_round_id')
+      .innerJoin(
+        InterviewFeedbackEntity,
+        'feedback',
+        'feedback.interview_id = interviews.id AND feedback.deleted_at IS NULL',
+      )
+      .where('interviews.application_id = :applicationId', {
+        applicationId: application.id,
+      })
+      .andWhere('interviews.interview_round_id IN (:...roundIds)', {
+        roundIds: mandatoryRoundIds,
+      })
+      .andWhere('interviews.interview_status = :status', {
+        status: InterviewStatus.COMPLETED,
+      })
+      .andWhere('interviews.deleted_at IS NULL')
+      .getRawMany<{ interview_round_id: string }>();
+
+    const completedWithFeedback = new Set(
+      completedWithFeedbackRows.map((r) => r.interview_round_id),
+    );
+
+    const missing = mandatoryRounds.filter((r) => !completedWithFeedback.has(r.id));
+    if (missing.length) return;
+
+    const fromStage = application.current_stage;
+    const toStage = ApplicationCurrentStage.DECISION;
+
+    await manager.getRepository(ApplicationStageHistoryEntity).save(
+      manager.getRepository(ApplicationStageHistoryEntity).create({
+        application_id: application.id,
+        from_stage: fromStage,
+        to_stage: toStage,
+        changed_by_user_id: actorUserId,
+        change_reason: null,
+        changed_at: now,
+        deleted_at: null,
+      }),
+    );
+
+    application.current_stage = toStage;
+    application.last_stage_changed_at = now;
+    application.updated_by_user_id = actorUserId;
+    await manager.getRepository(ApplicationEntity).save(application);
+
+    await this.activityWriter.log(
+      ActivityLogBuilder.stageChange({
+        entityType: ActivityEntityType.APPLICATION,
+        entityId: application.id,
+        fromStage,
+        toStage,
+        reason: null,
+        actorUserId,
+        actionAt: now,
+        ipAddress: null,
+        userAgent: null,
+      }),
+      { manager },
+    );
   }
 }

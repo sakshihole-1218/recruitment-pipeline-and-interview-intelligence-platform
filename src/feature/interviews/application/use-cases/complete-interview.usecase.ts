@@ -4,15 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import { ApplicationEntity } from '../../../applications/entities/application.entity';
-import { ApplicationStageHistoryEntity } from '../../../applications/entities/application-stage-history.entity';
 import { ApplicationCurrentStage } from '../../../applications/enums/application-current-stage.enum';
 import { ApplicationStatus } from '../../../applications/enums/application-status.enum';
 import { CompleteInterviewDto } from '../../dto/complete-interview.dto';
 import { InterviewEntity } from '../../entities/interview.entity';
-import { InterviewRoundEntity } from '../../entities/interview-round.entity';
 import { InterviewStatus } from '../../enums/interview-status.enum';
 import { InterviewsValidationHelper } from '../../helpers/interviews-validation.helper';
 import { InterviewRepository } from '../../repositories/interview.repository';
@@ -159,89 +157,7 @@ export class CompleteInterviewUseCase {
         { manager },
       );
 
-      await this.maybeAdvanceApplicationToDecision({
-        application,
-        actorUserId,
-        now,
-        manager,
-      });
-
       return loaded;
     });
-  }
-
-  private async maybeAdvanceApplicationToDecision(options: {
-    application: ApplicationEntity;
-    actorUserId: string;
-    now: Date;
-    manager: EntityManager;
-  }): Promise<void> {
-    const { application, actorUserId, now, manager } = options;
-
-    if (application.current_stage !== ApplicationCurrentStage.INTERVIEW) return;
-
-    const mandatoryRounds = await manager
-      .getRepository(InterviewRoundEntity)
-      .createQueryBuilder('rounds')
-      .where('rounds.job_opening_id = :jobOpeningId', {
-        jobOpeningId: application.job_opening_id,
-      })
-      .andWhere('rounds.is_mandatory = true')
-      .andWhere('rounds.deleted_at IS NULL')
-      .getMany();
-
-    if (!mandatoryRounds.length) return;
-
-    const completedRows = await manager
-      .getRepository(InterviewEntity)
-      .createQueryBuilder('interviews')
-      .select('DISTINCT interviews.interview_round_id', 'interview_round_id')
-      .where('interviews.application_id = :applicationId', {
-        applicationId: application.id,
-      })
-      .andWhere('interviews.interview_status = :status', {
-        status: InterviewStatus.COMPLETED,
-      })
-      .andWhere('interviews.deleted_at IS NULL')
-      .getRawMany<{ interview_round_id: string }>();
-
-    const completed = new Set(completedRows.map((r) => r.interview_round_id));
-    const missing = mandatoryRounds.filter((r) => !completed.has(r.id));
-    if (missing.length) return;
-
-    const fromStage = application.current_stage;
-    const toStage = ApplicationCurrentStage.DECISION;
-
-    await manager.getRepository(ApplicationStageHistoryEntity).save(
-      manager.getRepository(ApplicationStageHistoryEntity).create({
-        application_id: application.id,
-        from_stage: fromStage,
-        to_stage: toStage,
-        changed_by_user_id: actorUserId,
-        change_reason: null,
-        changed_at: now,
-        deleted_at: null,
-      }),
-    );
-
-    application.current_stage = toStage;
-    application.last_stage_changed_at = now;
-    application.updated_by_user_id = actorUserId;
-    await manager.getRepository(ApplicationEntity).save(application);
-
-    await this.activityWriter.log(
-      ActivityLogBuilder.stageChange({
-        entityType: ActivityEntityType.APPLICATION,
-        entityId: application.id,
-        fromStage,
-        toStage,
-        reason: null,
-        actorUserId,
-        actionAt: now,
-        ipAddress: null,
-        userAgent: null,
-      }),
-      { manager },
-    );
   }
 }
