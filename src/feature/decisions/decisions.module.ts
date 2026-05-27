@@ -7,12 +7,17 @@ import { ApplicationEntity } from '../applications/entities/application.entity';
 import { ApplicationStageHistoryEntity } from '../applications/entities/application-stage-history.entity';
 import { ApplicationRepository } from '../applications/repositories/application.repository';
 import { ApplicationStageHistoryRepository } from '../applications/repositories/application-stage-history.repository';
+import { OfferEntity } from '../offers/entities/offer.entity';
+import { OfferRepository } from '../offers/repositories/offer.repository';
 import { DecisionsController } from './controllers/decisions.controller';
 import { DecisionsService } from './application/services/decisions.service';
 import { ApplicationDecisionEntity } from './entities/application-decision.entity';
 import { ApplicationDecisionRepository } from './repositories/application-decision.repository';
 import { DecisionsPaginationHelper } from './helpers/decisions-pagination.helper';
 import { DecisionsValidationHelper } from './helpers/decisions-validation.helper';
+import { ValidateMandatoryInterviewsHelper } from './helpers/validate-mandatory-interviews.helper';
+import { ValidateInterviewFeedbackHelper } from './helpers/validate-interview-feedback.helper';
+import { DecisionsWorkflowValidationHelper } from './helpers/decisions-workflow-validation.helper';
 import { CreateApplicationDecisionUseCase } from './application/use-cases/create-application-decision.usecase';
 import { UpdateApplicationDecisionUseCase } from './application/use-cases/update-application-decision.usecase';
 import { FindDecisionByIdUseCase } from './application/use-cases/find-decision-by-id.usecase';
@@ -27,6 +32,7 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
       ApplicationDecisionEntity,
       ApplicationEntity,
       ApplicationStageHistoryEntity,
+      OfferEntity,
       UserEntity,
     ]),
     ActivityLogsModule,
@@ -38,9 +44,13 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     ApplicationRepository,
     ApplicationStageHistoryRepository,
     UserRepository,
+    OfferRepository,
     // helpers
     DecisionsPaginationHelper,
     DecisionsValidationHelper,
+    ValidateMandatoryInterviewsHelper,
+    ValidateInterviewFeedbackHelper,
+    DecisionsWorkflowValidationHelper,
     // use-cases
     CreateApplicationDecisionUseCase,
     UpdateApplicationDecisionUseCase,

@@ -4,20 +4,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import { UserRepository } from '../../../accessControl/repositories/user.repository';
 import { ApplicationRepository } from '../../../applications/repositories/application.repository';
 import { ApplicationStageHistoryRepository } from '../../../applications/repositories/application-stage-history.repository';
 import { ApplicationCurrentStage } from '../../../applications/enums/application-current-stage.enum';
+import { ApplicationStatus } from '../../../applications/enums/application-status.enum';
+import { ApplicationEntity } from '../../../applications/entities/application.entity';
 import { CreateApplicationDecisionDto } from '../../dto/create-application-decision.dto';
 import { ApplicationDecisionEntity } from '../../entities/application-decision.entity';
 import { ApplicationDecisionRepository } from '../../repositories/application-decision.repository';
 import { DecisionsValidationHelper } from '../../helpers/decisions-validation.helper';
 import { DecisionsApplicationStageHelper } from '../../helpers/decisions-application-stage.helper';
-import { InterviewEntity } from '../../../interviews/entities/interview.entity';
-import { InterviewRoundEntity } from '../../../interviews/entities/interview-round.entity';
-import { InterviewStatus } from '../../../interviews/enums/interview-status.enum';
+import { ValidateMandatoryInterviewsHelper } from '../../helpers/validate-mandatory-interviews.helper';
+import { ValidateInterviewFeedbackHelper } from '../../helpers/validate-interview-feedback.helper';
 import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
 import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
 import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
@@ -32,6 +33,8 @@ export class CreateApplicationDecisionUseCase {
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly userRepository: UserRepository,
     private readonly validationHelper: DecisionsValidationHelper,
+    private readonly mandatoryInterviewsHelper: ValidateMandatoryInterviewsHelper,
+    private readonly feedbackHelper: ValidateInterviewFeedbackHelper,
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
@@ -47,10 +50,13 @@ export class CreateApplicationDecisionUseCase {
     }
 
     return this.dataSource.transaction(async (manager) => {
-      const application = await this.applicationRepository.findById(
-        dto.application_id,
-        { manager },
-      );
+      const application = await manager
+        .getRepository(ApplicationEntity)
+        .createQueryBuilder('applications')
+        .where('applications.id = :id', { id: dto.application_id })
+        .andWhere('applications.deleted_at IS NULL')
+        .setLock('pessimistic_write')
+        .getOne();
 
       if (!application) {
         throw new NotFoundException({
@@ -70,6 +76,14 @@ export class CreateApplicationDecisionUseCase {
             'Decision can only be created when application is in INTERVIEW or DECISION stage',
           code: 'APPLICATION_NOT_ELIGIBLE_FOR_DECISION',
           meta: { current_stage: application.current_stage },
+        });
+      }
+
+      if (application.application_status !== ApplicationStatus.ACTIVE) {
+        throw new ConflictException({
+          message: 'Decision can only be created for ACTIVE applications',
+          code: 'APPLICATION_NOT_ACTIVE_FOR_DECISION',
+          meta: { application_status: application.application_status },
         });
       }
 
@@ -96,18 +110,59 @@ export class CreateApplicationDecisionUseCase {
       const decisionReason = this.validationHelper.normalizeReason(
         dto.decision_reason,
       );
+
       this.validationHelper.ensureReasonRules({
         decision_status: dto.decision_status,
         decision_reason: decisionReason,
       });
 
-      await this.ensureMandatoryRoundsCompleted({
+      const { mandatoryRoundIds } =
+        await this.mandatoryInterviewsHelper.ensureAllMandatoryRoundsCompleted({
+          applicationId: application.id,
+          jobOpeningId: application.job_opening_id,
+          manager,
+        });
+
+      await this.feedbackHelper.ensureFeedbackExistsForMandatoryRounds({
         applicationId: application.id,
-        jobOpeningId: application.job_opening_id,
+        mandatoryRoundIds,
         manager,
       });
 
       const now = new Date();
+
+      const stageChanges: Array<{
+        from: ApplicationCurrentStage;
+        to: ApplicationCurrentStage;
+        reason: string | null;
+      }> = [];
+
+      
+      if (application.current_stage === ApplicationCurrentStage.INTERVIEW) {
+        await this.stageHistoryRepository.createAndSave(
+          {
+            application_id: application.id,
+            from_stage: ApplicationCurrentStage.INTERVIEW,
+            to_stage: ApplicationCurrentStage.DECISION,
+            changed_by_user_id: actor.id,
+            change_reason: null,
+            changed_at: now,
+            deleted_at: null,
+          },
+          { manager },
+        );
+
+        stageChanges.push({
+          from: ApplicationCurrentStage.INTERVIEW,
+          to: ApplicationCurrentStage.DECISION,
+          reason: null,
+        });
+
+        application.current_stage = ApplicationCurrentStage.DECISION;
+        application.last_stage_changed_at = now;
+        application.updated_by_user_id = actor.id;
+        await this.applicationRepository.save(application, { manager });
+      }
 
       let created: ApplicationDecisionEntity;
       try {
@@ -142,36 +197,6 @@ export class CreateApplicationDecisionUseCase {
         },
       );
 
-      const stageChanges: Array<{
-        from: ApplicationCurrentStage;
-        to: ApplicationCurrentStage;
-        reason: string | null;
-      }> = [];
-
-      if (application.current_stage === ApplicationCurrentStage.INTERVIEW) {
-        await this.stageHistoryRepository.createAndSave(
-          {
-            application_id: application.id,
-            from_stage: ApplicationCurrentStage.INTERVIEW,
-            to_stage: ApplicationCurrentStage.DECISION,
-            changed_by_user_id: actor.id,
-            change_reason: null,
-            changed_at: now,
-            deleted_at: null,
-          },
-          { manager },
-        );
-
-        stageChanges.push({
-          from: ApplicationCurrentStage.INTERVIEW,
-          to: ApplicationCurrentStage.DECISION,
-          reason: null,
-        });
-
-        application.current_stage = ApplicationCurrentStage.DECISION;
-        application.last_stage_changed_at = now;
-      }
-
       const fromStage = application.current_stage;
       const toStage = mapped.current_stage;
 
@@ -189,7 +214,11 @@ export class CreateApplicationDecisionUseCase {
           { manager },
         );
 
-        stageChanges.push({ from: fromStage, to: toStage, reason: created.decision_reason });
+        stageChanges.push({
+          from: fromStage,
+          to: toStage,
+          reason: created.decision_reason,
+        });
 
         application.current_stage = toStage;
         application.last_stage_changed_at = now;
@@ -198,8 +227,8 @@ export class CreateApplicationDecisionUseCase {
       application.application_status = mapped.application_status;
       application.rejection_reason = mapped.rejection_reason;
       application.withdrawal_reason = null;
-
       application.updated_by_user_id = actor.id;
+
       await this.applicationRepository.save(application, { manager });
 
       const loaded = await this.decisionRepository.findById(created.id, {
@@ -249,53 +278,5 @@ export class CreateApplicationDecisionUseCase {
 
       return loaded;
     });
-  }
-
-  private async ensureMandatoryRoundsCompleted(options: {
-    applicationId: string;
-    jobOpeningId: string;
-    manager: EntityManager;
-  }): Promise<void> {
-    const rounds = await options.manager
-      .getRepository(InterviewRoundEntity)
-      .createQueryBuilder('rounds')
-      .where('rounds.job_opening_id = :jobOpeningId', {
-        jobOpeningId: options.jobOpeningId,
-      })
-      .andWhere('rounds.is_mandatory = true')
-      .andWhere('rounds.deleted_at IS NULL')
-      .getMany();
-
-    if (!rounds.length) return;
-
-    const completedRows = await options.manager
-      .getRepository(InterviewEntity)
-      .createQueryBuilder('interviews')
-      .select('DISTINCT interviews.interview_round_id', 'interview_round_id')
-      .where('interviews.application_id = :applicationId', {
-        applicationId: options.applicationId,
-      })
-      .andWhere('interviews.interview_status = :status', {
-        status: InterviewStatus.COMPLETED,
-      })
-      .andWhere('interviews.deleted_at IS NULL')
-      .getRawMany<{ interview_round_id: string }>();
-
-    const completed = new Set(completedRows.map((r) => r.interview_round_id));
-    const missing = rounds
-      .filter((r) => !completed.has(r.id))
-      .map((r) => ({
-        id: r.id,
-        round_name: r.round_name,
-        sequence_number: r.sequence_number,
-      }));
-
-    if (missing.length) {
-      throw new ConflictException({
-        message: 'Mandatory interview rounds are not completed',
-        code: 'DECISION_MANDATORY_ROUNDS_INCOMPLETE',
-        meta: { missing_rounds: missing },
-      });
-    }
   }
 }
