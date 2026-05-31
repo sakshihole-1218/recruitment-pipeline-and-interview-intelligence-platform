@@ -58,9 +58,10 @@ export class ListSkillsQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
-  @Transform(({ value }) => {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
+  @Transform(({ value, obj, key }) => {
+    const raw = (obj as Record<string, unknown> | undefined)?.[String(key)];
+    if (raw === 'true' || raw === true) return true;
+    if (raw === 'false' || raw === false) return false;
     return value;
   })
   @IsBoolean()
