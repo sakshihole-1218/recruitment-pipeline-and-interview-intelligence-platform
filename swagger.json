@@ -10073,6 +10073,12 @@
             "type": "string",
             "description": "Department UUID"
           },
+          "department_name": {
+            "type": "object",
+            "description": "Department name",
+            "nullable": true,
+            "example": "Engineering"
+          },
           "hiring_manager_user_id": {
             "type": "string",
             "description": "Hiring manager user UUID"

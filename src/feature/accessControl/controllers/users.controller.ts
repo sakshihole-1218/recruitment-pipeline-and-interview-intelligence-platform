@@ -93,6 +93,11 @@ export class UsersController {
   }
 
   @Get()
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List users (offset or cursor pagination)' })
