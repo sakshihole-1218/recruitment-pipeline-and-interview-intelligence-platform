@@ -36,6 +36,7 @@ export class JobOpeningRepository {
   private baseQuery(alias = 'job_openings', manager?: EntityManager): SelectQueryBuilder<JobOpeningEntity> {
     return this.repo(manager)
       .createQueryBuilder(alias)
+      .leftJoinAndSelect(`${alias}.department`, 'department', 'department.deleted_at IS NULL')
       .leftJoinAndSelect(
         `${alias}.job_opening_skills`,
         'job_opening_skills',

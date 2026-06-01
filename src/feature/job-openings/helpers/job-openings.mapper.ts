@@ -25,6 +25,7 @@ export class JobOpeningsMapper {
       title: entity.title,
       code: entity.code,
       department_id: entity.department_id,
+      department_name: entity.department?.name ?? null,
       hiring_manager_user_id: entity.hiring_manager_user_id,
       recruiter_user_id: entity.recruiter_user_id,
       employment_type: entity.employment_type,

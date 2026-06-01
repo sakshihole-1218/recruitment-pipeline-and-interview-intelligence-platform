@@ -3,6 +3,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -12,6 +14,7 @@ import { EmploymentType } from '../enums/employment-type.enum';
 import { WorkMode } from '../enums/work-mode.enum';
 import { JobOpeningStatus } from '../enums/job-opening-status.enum';
 import { JobOpeningSkillEntity } from './job-opening-skill.entity';
+import { DepartmentEntity } from '../../departments/entities/department.entity';
 
 @Entity({ name: 'job_openings' })
 export class JobOpeningEntity {
@@ -26,6 +29,10 @@ export class JobOpeningEntity {
 
   @Column({ type: 'uuid' })
   department_id: string;
+
+  @ManyToOne(() => DepartmentEntity, { nullable: true })
+  @JoinColumn({ name: 'department_id' })
+  department?: DepartmentEntity;
 
   @Column({ type: 'uuid' })
   hiring_manager_user_id: string;
