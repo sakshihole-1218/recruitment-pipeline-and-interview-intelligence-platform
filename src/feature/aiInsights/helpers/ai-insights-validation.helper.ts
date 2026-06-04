@@ -90,6 +90,26 @@ export class AiInsightsValidationHelper {
     return app;
   }
 
+  async ensureApplicationBelongsToCandidate(options: {
+    applicationId: string;
+    candidateId: string;
+    manager: EntityManager;
+  }) {
+    const app = await this.ensureApplicationExists({
+      applicationId: options.applicationId,
+      manager: options.manager,
+    });
+
+    if (app.candidate_id !== options.candidateId) {
+      throw new BadRequestException({
+        message: 'Application does not belong to the candidate',
+        code: 'APPLICATION_CANDIDATE_MISMATCH',
+      });
+    }
+
+    return app;
+  }
+
   ensureNoDuplicateActiveResumeAnalysis(existing: ResumeAiAnalysisEntity | null): void {
     if (existing) {
       throw new ConflictException({

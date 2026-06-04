@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -33,6 +35,7 @@ import { CreateResumeAiAnalysisDto } from '../dto/create-resume-ai-analysis.dto'
 import { ListResumeAiAnalysesQueryDto } from '../dto/list-resume-ai-analyses.query.dto';
 import { RegenerateResumeAiAnalysisDto } from '../dto/regenerate-resume-ai-analysis.dto';
 import { ResumeAiAnalysisResponseDto } from '../dto/resume-ai-analysis.response.dto';
+import { UpdateResumeAiAnalysisDto } from '../dto/update-resume-ai-analysis.dto';
 import { AiInsightsMapper } from '../helpers/ai-insights.mapper';
 
 @ApiTags('AI Insights - Resume Analyses')
@@ -57,6 +60,45 @@ export class ResumeAiAnalysesController {
     const row = await this.resumeAiAnalysesService.create(dto, actor?.sub);
     return ResponseUtil.success(
       'Resume AI analysis created successfully',
+      AiInsightsMapper.toResumeAnalysisResponse(row),
+    );
+  }
+
+  @Post(':id/start')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Start resume AI analysis by id' })
+  @ApiParam({ name: 'id', description: 'Resume AI analysis UUID' })
+  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis started successfully')
+  async start(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
+    const row = await this.resumeAiAnalysesService.start(id, actor?.sub);
+    return ResponseUtil.success(
+      'Resume AI analysis started successfully',
+      AiInsightsMapper.toResumeAnalysisResponse(row),
+    );
+  }
+
+  @Post(':id/regenerate')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Regenerate resume AI analysis by id' })
+  @ApiParam({ name: 'id', description: 'Resume AI analysis UUID' })
+  @ApiBody({ type: RegenerateResumeAiAnalysisDto })
+  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis regenerated successfully')
+  async regenerateById(
+    @Param('id') id: string,
+    @Body() dto: RegenerateResumeAiAnalysisDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    // Reuse existing by-document regenerate use-case by loading analysis first
+    const existing = await this.resumeAiAnalysesService.findById(id);
+    const row = await this.resumeAiAnalysesService.regenerate(
+      existing.candidate_document_id,
+      dto,
+      actor?.sub,
+    );
+    return ResponseUtil.success(
+      'Resume AI analysis regenerated successfully',
       AiInsightsMapper.toResumeAnalysisResponse(row),
     );
   }
@@ -113,6 +155,19 @@ export class ResumeAiAnalysesController {
     );
   }
 
+  @Get('candidate/:candidateId/latest')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get latest resume AI analysis by candidate id' })
+  @ApiParam({ name: 'candidateId', description: 'Candidate UUID' })
+  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis fetched successfully')
+  async findLatestByCandidateId(@Param('candidateId') candidateId: string) {
+    const row = await this.resumeAiAnalysesService.findLatestByCandidateId(candidateId);
+    return ResponseUtil.success(
+      'Resume AI analysis fetched successfully',
+      AiInsightsMapper.toResumeAnalysisResponse(row),
+    );
+  }
+
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List resume AI analyses (offset or cursor pagination)' })
@@ -139,5 +194,37 @@ export class ResumeAiAnalysesController {
       result.limit,
       result.total_records,
     );
+  }
+
+  @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update resume AI analysis by id' })
+  @ApiParam({ name: 'id', description: 'Resume AI analysis UUID' })
+  @ApiBody({ type: UpdateResumeAiAnalysisDto })
+  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis updated successfully')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateResumeAiAnalysisDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const row = await this.resumeAiAnalysesService.update(id, dto, actor?.sub);
+    return ResponseUtil.success(
+      'Resume AI analysis updated successfully',
+      AiInsightsMapper.toResumeAnalysisResponse(row),
+    );
+  }
+
+  @Delete(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete (soft) resume AI analysis by id' })
+  @ApiParam({ name: 'id', description: 'Resume AI analysis UUID' })
+  @ApiStandardResponse(Object, 'Resume AI analysis deleted successfully')
+  async remove(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
+    await this.resumeAiAnalysesService.delete(id, actor?.sub);
+    return ResponseUtil.success('Resume AI analysis deleted successfully', {
+      id,
+    });
   }
 }

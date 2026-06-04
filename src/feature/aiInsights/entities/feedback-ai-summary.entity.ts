@@ -12,6 +12,7 @@ import {
 
 import { ApplicationEntity } from '../../applications/entities/application.entity';
 
+import { AiFeedbackSummaryStatus } from '../enums/ai-feedback-summary-status.enum';
 import { FinalAiRecommendation } from '../enums/final-ai-recommendation.enum';
 
 @Entity({ name: 'feedback_ai_summaries' })
@@ -35,11 +36,38 @@ export class FeedbackAiSummaryEntity {
   @Column({ type: 'text', nullable: true })
   concerns_summary: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  technical_summary: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  communication_summary: string | null;
+
+  @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
+  overall_score: string | null;
+
+  @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
+  technical_score: string | null;
+
+  @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
+  communication_score: string | null;
+
+  @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
+  problem_solving_score: string | null;
+
+  @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
+  culture_fit_score: string | null;
+
   @Column({ type: 'varchar', length: 30 })
   final_ai_recommendation: FinalAiRecommendation;
 
-  @Column({ type: 'timestamptz' })
-  generated_at: Date;
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  generation_status: AiFeedbackSummaryStatus | null;
+
+  @Column({ type: 'text', nullable: true })
+  failure_reason: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  generated_at: Date | null;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   created_at: Date;

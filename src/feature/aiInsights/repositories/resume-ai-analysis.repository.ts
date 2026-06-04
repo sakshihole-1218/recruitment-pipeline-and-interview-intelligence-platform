@@ -52,6 +52,84 @@ export class ResumeAiAnalysisRepository {
       .getOne();
   }
 
+  // --- requested method names (wrappers) ---
+  createResumeAnalysis(
+    payload: Partial<ResumeAiAnalysisEntity>,
+    options?: { manager?: EntityManager },
+  ): Promise<ResumeAiAnalysisEntity> {
+    return this.createAndSave(payload, options);
+  }
+
+  findResumeAnalysisById(
+    id: string,
+    options?: { manager?: EntityManager },
+  ): Promise<ResumeAiAnalysisEntity | null> {
+    return this.findById(id, options);
+  }
+
+  findByCandidateDocumentId(
+    candidateDocumentId: string,
+    options?: { manager?: EntityManager },
+  ): Promise<ResumeAiAnalysisEntity | null> {
+    return this.findActiveByCandidateDocumentId(candidateDocumentId, options);
+  }
+
+  async findLatestByCandidateId(
+    candidateId: string,
+    options?: { manager?: EntityManager },
+  ): Promise<ResumeAiAnalysisEntity | null> {
+    return this.baseQuery('resume_ai_analyses', options?.manager)
+      .andWhere('resume_ai_analyses.candidate_id = :candidateId', {
+        candidateId,
+      })
+      .orderBy('resume_ai_analyses.created_at', 'DESC')
+      .addOrderBy('resume_ai_analyses.id', 'ASC')
+      .getOne();
+  }
+
+  findAllResumeAnalysesWithFilters(
+    query: ListResumeAiAnalysesQueryDto,
+  ): Promise<ResumeAiAnalysisListResult> {
+    return this.list(query);
+  }
+
+  async existsActiveAnalysisForDocument(
+    candidateDocumentId: string,
+    options?: { manager?: EntityManager },
+  ): Promise<boolean> {
+    const existing = await this.findActiveByCandidateDocumentId(
+      candidateDocumentId,
+      options,
+    );
+    return Boolean(existing);
+  }
+
+  updateResumeAnalysis(
+    entity: ResumeAiAnalysisEntity,
+    options?: { manager?: EntityManager },
+  ): Promise<ResumeAiAnalysisEntity> {
+    return this.save(entity, options);
+  }
+
+  async softDeleteResumeAnalysis(
+    id: string,
+    options: { actorUserId: string; manager?: EntityManager },
+  ): Promise<void> {
+    const now = new Date();
+    await this.repo(options.manager)
+      .createQueryBuilder()
+      .update(ResumeAiAnalysisEntity)
+      .set({
+        deleted_at: now,
+        deleted_by_user_id: options.actorUserId,
+        updated_at: now,
+        updated_by_user_id: options.actorUserId,
+      })
+      .where('id = :id', { id })
+      .andWhere('deleted_at IS NULL')
+      .execute();
+  }
+
   async findActiveByCandidateDocumentId(
     candidateDocumentId: string,
     options?: { manager?: EntityManager },
@@ -89,6 +167,32 @@ export class ResumeAiAnalysisRepository {
         {
           candidateDocumentId: query.candidate_document_id,
         },
+      );
+    }
+
+    if (query.candidate_id) {
+      qb.andWhere('resume_ai_analyses.candidate_id = :candidateId', {
+        candidateId: query.candidate_id,
+      });
+    }
+
+    if (query.application_id) {
+      qb.andWhere('resume_ai_analyses.application_id = :applicationId', {
+        applicationId: query.application_id,
+      });
+    }
+
+    if (query.search && String(query.search).trim()) {
+      const search = `%${String(query.search).trim()}%`;
+      qb.andWhere(
+        `(
+          COALESCE(resume_ai_analyses.extracted_text, '') ILIKE :search
+          OR COALESCE(resume_ai_analyses.experience_summary, '') ILIKE :search
+          OR COALESCE(resume_ai_analyses.education_summary, '') ILIKE :search
+          OR COALESCE(resume_ai_analyses.project_summary, '') ILIKE :search
+          OR COALESCE(resume_ai_analyses.certification_summary, '') ILIKE :search
+        )`,
+        { search },
       );
     }
 
@@ -144,6 +248,14 @@ export class ResumeAiAnalysisRepository {
     const limit = query.limit || 10;
 
     if (query.cursor) {
+      if ((query.sort_by || 'created_at') !== 'created_at') {
+        throw new BadRequestException({
+          message:
+            'Cursor pagination is only supported with sort_by=created_at',
+          code: 'CURSOR_SORT_BY_REQUIRED',
+        });
+      }
+
       const cursorDate = new Date(query.cursor);
       if (Number.isNaN(cursorDate.getTime())) {
         throw new BadRequestException({

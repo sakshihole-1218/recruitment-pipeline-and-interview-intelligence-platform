@@ -7,7 +7,10 @@ import { CreateResumeAiAnalysisDto } from '../../dto/create-resume-ai-analysis.d
 import { ResumeAiAnalysisEntity } from '../../entities/resume-ai-analysis.entity';
 import { ResumeAiAnalysisStatus } from '../../enums/resume-ai-analysis-status.enum';
 import { AiInsightsValidationHelper } from '../../helpers/ai-insights-validation.helper';
-import { AI_INSIGHTS_PROVIDER, AiInsightsProvider } from '../../providers/ai-insights-provider';
+import {
+  AI_INSIGHTS_PROVIDER,
+  AiInsightsProvider,
+} from '../../providers/ai-insights-provider';
 import { ResumeAiAnalysisRepository } from '../../repositories/resume-ai-analysis.repository';
 import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
 import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
@@ -39,6 +42,14 @@ export class CreateResumeAiAnalysisUseCase {
           manager,
         });
 
+      if (dto.application_id) {
+        await this.validationHelper.ensureApplicationBelongsToCandidate({
+          applicationId: dto.application_id,
+          candidateId: doc.candidate_id,
+          manager,
+        });
+      }
+
       const existing =
         await this.resumeAiAnalysisRepository.findActiveByCandidateDocumentId(
           doc.id,
@@ -50,14 +61,21 @@ export class CreateResumeAiAnalysisUseCase {
 
       const created = await this.resumeAiAnalysisRepository.createAndSave(
         {
+          candidate_id: doc.candidate_id,
           candidate_document_id: doc.id,
-          extracted_text: dto.extracted_text,
+          application_id: dto.application_id ?? null,
+          extracted_text: dto.extracted_text ?? null,
+          parsed_resume_json: null,
           skills_extracted: [],
           experience_summary: null,
           education_summary: null,
+          project_summary: null,
+          certification_summary: null,
+          total_experience_years_detected: null,
           ai_fit_score: null,
-          analysis_status: ResumeAiAnalysisStatus.PROCESSING,
+          analysis_status: ResumeAiAnalysisStatus.PENDING,
           analyzed_at: null,
+          failure_reason: null,
           created_by_user_id: actorId,
           updated_by_user_id: actorId,
           deleted_at: null,
@@ -66,23 +84,51 @@ export class CreateResumeAiAnalysisUseCase {
         { manager },
       );
 
-      try {
-        const result = await this.aiProvider.analyzeResumeText(dto.extracted_text);
-        this.validationHelper.ensureAiFitScoreRange(result.ai_fit_score);
+      // Backward compatibility:
+      // If extracted_text is provided, run analysis immediately (create+start behavior).
+      if (dto.extracted_text && String(dto.extracted_text).trim()) {
+        created.analysis_status = ResumeAiAnalysisStatus.PROCESSING;
+        created.updated_by_user_id = actorId;
+        created.failure_reason = null;
+        await this.resumeAiAnalysisRepository.save(created, { manager });
 
-        created.skills_extracted = result.skills_extracted ?? [];
-        created.experience_summary = result.experience_summary ?? null;
-        created.education_summary = result.education_summary ?? null;
-        created.ai_fit_score = Number(result.ai_fit_score).toFixed(2);
-        created.analysis_status = ResumeAiAnalysisStatus.COMPLETED;
-        created.analyzed_at = now;
-        created.updated_by_user_id = actorId;
-      } catch {
-        created.analysis_status = ResumeAiAnalysisStatus.FAILED;
-        created.updated_by_user_id = actorId;
+        try {
+          const result = await this.aiProvider.analyzeResume({
+            candidateDocumentId: doc.id,
+            candidateId: doc.candidate_id,
+            applicationId: dto.application_id ?? null,
+            extractedText: dto.extracted_text,
+          });
+
+          this.validationHelper.ensureAiFitScoreRange(result.ai_fit_score);
+
+          created.extracted_text = result.extracted_text;
+          created.parsed_resume_json = result.parsed_resume_json ?? null;
+          created.skills_extracted = result.skills_extracted ?? [];
+          created.experience_summary = result.experience_summary ?? null;
+          created.education_summary = result.education_summary ?? null;
+          created.project_summary = result.project_summary ?? null;
+          created.certification_summary = result.certification_summary ?? null;
+          created.total_experience_years_detected =
+            result.total_experience_years_detected !== null &&
+            Number.isFinite(Number(result.total_experience_years_detected))
+              ? Number(result.total_experience_years_detected).toFixed(2)
+              : null;
+          created.ai_fit_score = Number(result.ai_fit_score).toFixed(2);
+          created.analysis_status = ResumeAiAnalysisStatus.COMPLETED;
+          created.analyzed_at = now;
+          created.updated_by_user_id = actorId;
+          created.failure_reason = null;
+        } catch (err) {
+          created.analysis_status = ResumeAiAnalysisStatus.FAILED;
+          created.updated_by_user_id = actorId;
+          created.failure_reason =
+            err instanceof Error ? err.message : 'Resume analysis failed';
+          created.analyzed_at = null;
+        }
+
+        await this.resumeAiAnalysisRepository.save(created, { manager });
       }
-
-      await this.resumeAiAnalysisRepository.save(created, { manager });
 
       const loaded = await this.resumeAiAnalysisRepository.findById(created.id, {
         manager,
@@ -94,18 +140,21 @@ export class CreateResumeAiAnalysisUseCase {
         ActivityLogBuilder.build({
           entityType: ActivityEntityType.RESUME_AI_ANALYSIS,
           entityId: result.id,
-          actionType: ActivityActionType.GENERATE,
+          actionType: ActivityActionType.CREATE,
           actorUserId: actorId,
           oldValues: null,
           newValues: {
+            candidate_id: result.candidate_id,
             candidate_document_id: result.candidate_document_id,
+            application_id: result.application_id ?? null,
             analysis_status: result.analysis_status,
             analyzed_at: result.analyzed_at ? result.analyzed_at.toISOString() : null,
             ai_fit_score: result.ai_fit_score,
-            extracted_text_length: dto.extracted_text.length,
-            skills_extracted_count: Array.isArray(result.skills_extracted)
-              ? result.skills_extracted.length
-              : null,
+            extracted_text_length:
+              typeof result.extracted_text === 'string'
+                ? result.extracted_text.length
+                : null,
+            failure_reason: result.failure_reason ?? null,
           },
           actionAt: now,
           ipAddress: null,
