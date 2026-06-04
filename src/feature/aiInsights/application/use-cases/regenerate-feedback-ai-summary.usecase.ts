@@ -7,6 +7,7 @@ import {
 import { DataSource } from 'typeorm';
 
 import { FeedbackAiSummaryEntity } from '../../entities/feedback-ai-summary.entity';
+import { AiFeedbackSummaryStatus } from '../../enums/ai-feedback-summary-status.enum';
 import { AiInsightsValidationHelper } from '../../helpers/ai-insights-validation.helper';
 import {
   AI_INSIGHTS_PROVIDER,
@@ -59,7 +60,8 @@ export class RegenerateFeedbackAiSummaryUseCase {
 
       const oldValues = {
         final_ai_recommendation: existing.final_ai_recommendation,
-        generated_at: existing.generated_at.toISOString(),
+        generated_at: existing.generated_at ? existing.generated_at.toISOString() : null,
+        generation_status: existing.generation_status ?? null,
       };
 
       const feedbacks =
@@ -77,17 +79,60 @@ export class RegenerateFeedbackAiSummaryUseCase {
       }
 
       const now = new Date();
-      const result = await this.aiProvider.summarizeInterviewFeedback({
-        applicationId: options.applicationId,
-        feedbacks,
-      });
-
-      existing.summary_text = result.summary_text;
-      existing.strengths_summary = result.strengths_summary ?? null;
-      existing.concerns_summary = result.concerns_summary ?? null;
-      existing.final_ai_recommendation = result.final_ai_recommendation;
-      existing.generated_at = now;
+      existing.generation_status = AiFeedbackSummaryStatus.PROCESSING;
+      existing.failure_reason = null;
+      existing.generated_at = null;
       existing.updated_by_user_id = actorId;
+
+      await this.feedbackAiSummaryRepository.save(existing, { manager });
+
+      try {
+        const result = await this.aiProvider.generateFeedbackSummary({
+          applicationId: options.applicationId,
+          feedbacks,
+        });
+
+        existing.summary_text = result.summary_text;
+        existing.strengths_summary = result.strengths_summary ?? null;
+        existing.concerns_summary = result.concerns_summary ?? null;
+        existing.technical_summary = result.technical_summary ?? null;
+        existing.communication_summary = result.communication_summary ?? null;
+        existing.overall_score =
+          result.overall_score !== null && Number.isFinite(Number(result.overall_score))
+            ? Number(result.overall_score).toFixed(2)
+            : null;
+        existing.technical_score =
+          result.technical_score !== null && Number.isFinite(Number(result.technical_score))
+            ? Number(result.technical_score).toFixed(2)
+            : null;
+        existing.communication_score =
+          result.communication_score !== null &&
+          Number.isFinite(Number(result.communication_score))
+            ? Number(result.communication_score).toFixed(2)
+            : null;
+        existing.problem_solving_score =
+          result.problem_solving_score !== null &&
+          Number.isFinite(Number(result.problem_solving_score))
+            ? Number(result.problem_solving_score).toFixed(2)
+            : null;
+        existing.culture_fit_score =
+          result.culture_fit_score !== null &&
+          Number.isFinite(Number(result.culture_fit_score))
+            ? Number(result.culture_fit_score).toFixed(2)
+            : null;
+
+        existing.final_ai_recommendation = result.final_ai_recommendation;
+        existing.generation_status = AiFeedbackSummaryStatus.COMPLETED;
+        existing.failure_reason = null;
+        existing.generated_at = now;
+        existing.updated_by_user_id = actorId;
+      } catch (err) {
+        existing.generation_status = AiFeedbackSummaryStatus.FAILED;
+        existing.failure_reason =
+          err instanceof Error ? err.message : 'Feedback summary regeneration failed';
+        existing.generated_at = null;
+        existing.updated_by_user_id = actorId;
+      }
 
       await this.feedbackAiSummaryRepository.save(existing, { manager });
 
@@ -107,7 +152,11 @@ export class RegenerateFeedbackAiSummaryUseCase {
           newValues: {
             application_id: resultEntity.application_id,
             final_ai_recommendation: resultEntity.final_ai_recommendation,
-            generated_at: resultEntity.generated_at.toISOString(),
+            generation_status: resultEntity.generation_status,
+            generated_at: resultEntity.generated_at
+              ? resultEntity.generated_at.toISOString()
+              : null,
+            failure_reason: resultEntity.failure_reason ?? null,
           },
           actionAt: now,
           ipAddress: null,

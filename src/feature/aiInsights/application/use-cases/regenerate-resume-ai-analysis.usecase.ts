@@ -5,7 +5,10 @@ import { RegenerateResumeAiAnalysisDto } from '../../dto/regenerate-resume-ai-an
 import { ResumeAiAnalysisEntity } from '../../entities/resume-ai-analysis.entity';
 import { ResumeAiAnalysisStatus } from '../../enums/resume-ai-analysis-status.enum';
 import { AiInsightsValidationHelper } from '../../helpers/ai-insights-validation.helper';
-import { AI_INSIGHTS_PROVIDER, AiInsightsProvider } from '../../providers/ai-insights-provider';
+import {
+  AI_INSIGHTS_PROVIDER,
+  AiInsightsProvider,
+} from '../../providers/ai-insights-provider';
 import { ResumeAiAnalysisRepository } from '../../repositories/resume-ai-analysis.repository';
 import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
 import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
@@ -56,30 +59,47 @@ export class RegenerateResumeAiAnalysisUseCase {
         options.dto.extracted_text !== existing.extracted_text;
 
       const extractedText = options.dto.extracted_text ?? existing.extracted_text;
-      this.validationHelper.ensureExtractedTextAvailable(extractedText);
 
       existing.analysis_status = ResumeAiAnalysisStatus.PROCESSING;
       existing.updated_by_user_id = actorId;
+      existing.failure_reason = null;
 
       await this.resumeAiAnalysisRepository.save(existing, { manager });
 
       const now = new Date();
 
       try {
-        const result = await this.aiProvider.analyzeResumeText(extractedText);
+        const result = await this.aiProvider.analyzeResume({
+          candidateDocumentId: existing.candidate_document_id,
+          candidateId: existing.candidate_id,
+          applicationId: existing.application_id ?? null,
+          extractedText: extractedText ?? null,
+        });
+
         this.validationHelper.ensureAiFitScoreRange(result.ai_fit_score);
 
-        existing.extracted_text = extractedText;
+        existing.extracted_text = result.extracted_text;
+        existing.parsed_resume_json = result.parsed_resume_json ?? null;
         existing.skills_extracted = result.skills_extracted ?? [];
         existing.experience_summary = result.experience_summary ?? null;
         existing.education_summary = result.education_summary ?? null;
+        existing.project_summary = result.project_summary ?? null;
+        existing.certification_summary = result.certification_summary ?? null;
+        existing.total_experience_years_detected =
+          result.total_experience_years_detected !== null &&
+          Number.isFinite(Number(result.total_experience_years_detected))
+            ? Number(result.total_experience_years_detected).toFixed(2)
+            : null;
         existing.ai_fit_score = Number(result.ai_fit_score).toFixed(2);
         existing.analysis_status = ResumeAiAnalysisStatus.COMPLETED;
         existing.analyzed_at = now;
         existing.updated_by_user_id = actorId;
+        existing.failure_reason = null;
       } catch {
         existing.analysis_status = ResumeAiAnalysisStatus.FAILED;
         existing.updated_by_user_id = actorId;
+        existing.failure_reason = 'Resume analysis regeneration failed';
+        existing.analyzed_at = null;
       }
 
       await this.resumeAiAnalysisRepository.save(existing, { manager });

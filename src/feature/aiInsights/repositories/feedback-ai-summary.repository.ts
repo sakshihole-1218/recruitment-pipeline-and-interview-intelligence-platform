@@ -52,6 +52,68 @@ export class FeedbackAiSummaryRepository {
       .getOne();
   }
 
+  // --- requested method names (wrappers) ---
+  createFeedbackSummary(
+    payload: Partial<FeedbackAiSummaryEntity>,
+    options?: { manager?: EntityManager },
+  ): Promise<FeedbackAiSummaryEntity> {
+    return this.createAndSave(payload, options);
+  }
+
+  findFeedbackSummaryById(
+    id: string,
+    options?: { manager?: EntityManager },
+  ): Promise<FeedbackAiSummaryEntity | null> {
+    return this.findById(id, options);
+  }
+
+  findByApplicationId(
+    applicationId: string,
+    options?: { manager?: EntityManager },
+  ): Promise<FeedbackAiSummaryEntity | null> {
+    return this.findActiveByApplicationId(applicationId, options);
+  }
+
+  findAllFeedbackSummariesWithFilters(
+    query: ListFeedbackAiSummariesQueryDto,
+  ): Promise<FeedbackAiSummaryListResult> {
+    return this.list(query);
+  }
+
+  async existsActiveSummaryForApplication(
+    applicationId: string,
+    options?: { manager?: EntityManager },
+  ): Promise<boolean> {
+    const existing = await this.findActiveByApplicationId(applicationId, options);
+    return Boolean(existing);
+  }
+
+  updateFeedbackSummary(
+    entity: FeedbackAiSummaryEntity,
+    options?: { manager?: EntityManager },
+  ): Promise<FeedbackAiSummaryEntity> {
+    return this.save(entity, options);
+  }
+
+  async softDeleteFeedbackSummary(
+    id: string,
+    options: { actorUserId: string; manager?: EntityManager },
+  ): Promise<void> {
+    const now = new Date();
+    await this.repo(options.manager)
+      .createQueryBuilder()
+      .update(FeedbackAiSummaryEntity)
+      .set({
+        deleted_at: now,
+        deleted_by_user_id: options.actorUserId,
+        updated_at: now,
+        updated_by_user_id: options.actorUserId,
+      })
+      .where('id = :id', { id })
+      .andWhere('deleted_at IS NULL')
+      .execute();
+  }
+
   async findActiveByApplicationId(
     applicationId: string,
     options?: { manager?: EntityManager },
@@ -96,6 +158,12 @@ export class FeedbackAiSummaryRepository {
           rec: query.final_ai_recommendation,
         },
       );
+    }
+
+    if (query.generation_status) {
+      qb.andWhere('feedback_ai_summaries.generation_status = :status', {
+        status: query.generation_status,
+      });
     }
 
     if (query.generated_from) {
@@ -144,6 +212,14 @@ export class FeedbackAiSummaryRepository {
     const limit = query.limit || 10;
 
     if (query.cursor) {
+      if ((query.sort_by || 'created_at') !== 'created_at') {
+        throw new BadRequestException({
+          message:
+            'Cursor pagination is only supported with sort_by=created_at',
+          code: 'CURSOR_SORT_BY_REQUIRED',
+        });
+      }
+
       const cursorDate = new Date(query.cursor);
       if (Number.isNaN(cursorDate.getTime())) {
         throw new BadRequestException({

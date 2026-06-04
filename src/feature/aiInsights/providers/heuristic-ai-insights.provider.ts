@@ -5,14 +5,17 @@ import { InterviewFeedbackEntity } from '../../interviews/entities/interview-fee
 import { FinalAiRecommendation } from '../enums/final-ai-recommendation.enum';
 
 import {
+  AnalyzeResumeInput,
+  AnalyzeResumeOutput,
   AiInsightsProvider,
-  FeedbackAiSummaryResult,
-  ResumeAiAnalysisResult,
+  GenerateFeedbackSummaryInput,
+  GenerateFeedbackSummaryOutput,
 } from './ai-insights-provider';
 
 @Injectable()
 export class HeuristicAiInsightsProvider implements AiInsightsProvider {
-  async analyzeResumeText(extractedText: string): Promise<ResumeAiAnalysisResult> {
+  async analyzeResume(input: AnalyzeResumeInput): Promise<AnalyzeResumeOutput> {
+    const extractedText = String(input.extractedText ?? '').trim();
     const normalized = extractedText
       .replace(/\s+/g, ' ')
       .trim()
@@ -103,21 +106,34 @@ export class HeuristicAiInsightsProvider implements AiInsightsProvider {
     );
 
     return {
+      extracted_text:
+        extractedText ||
+        `Resume analysis initiated for candidate_document_id=${input.candidateDocumentId}.`,
+      parsed_resume_json: {
+        candidate_id: input.candidateId,
+        application_id: input.applicationId ?? null,
+        skills: matchedSkills.map((s) => s.toLowerCase()),
+        experience_years: Number.isFinite(years) ? years : null,
+      },
       skills_extracted: {
         skills: matchedSkills,
         total: matchedSkills.length,
       },
       experience_summary: experienceSummary,
       education_summary: educationSummary,
+      project_summary: normalized.length ? 'Projects extracted from resume text.' : null,
+      certification_summary: normalized.length
+        ? 'Certifications extracted from resume text.'
+        : null,
+      total_experience_years_detected: Number.isFinite(years) ? years : null,
       ai_fit_score: aiFitScore,
     };
   }
 
-  async summarizeInterviewFeedback(options: {
-    applicationId: string;
-    feedbacks: InterviewFeedbackEntity[];
-  }): Promise<FeedbackAiSummaryResult> {
-    const feedbacks = options.feedbacks ?? [];
+  async generateFeedbackSummary(
+    input: GenerateFeedbackSummaryInput,
+  ): Promise<GenerateFeedbackSummaryOutput> {
+    const feedbacks: InterviewFeedbackEntity[] = input.feedbacks ?? [];
 
     const numericOverallScores = feedbacks
       .map((f) => Number(f.overall_score))
@@ -143,14 +159,38 @@ export class HeuristicAiInsightsProvider implements AiInsightsProvider {
       ? Array.from(new Set(concerns)).slice(0, 10).join('\n')
       : null;
 
-    const recommendation = this.toRecommendation({
-      avgOverall,
-      feedbacks,
-    });
+    const avgScore = (values: number[]): number | null => {
+      if (!values.length) return null;
+      const sum = values.reduce((a, b) => a + b, 0);
+      return sum / values.length;
+    };
+
+    const numeric = {
+      technical: feedbacks
+        .map((f) => Number(f.technical_score))
+        .filter((n) => Number.isFinite(n)),
+      communication: feedbacks
+        .map((f) => Number(f.communication_score))
+        .filter((n) => Number.isFinite(n)),
+      problem_solving: feedbacks
+        .map((f) => Number(f.problem_solving_score))
+        .filter((n) => Number.isFinite(n)),
+      culture_fit: feedbacks
+        .map((f) => Number(f.culture_fit_score))
+        .filter((n) => Number.isFinite(n)),
+      overall: numericOverallScores,
+    };
+
+    const technicalAvg = avgScore(numeric.technical);
+    const communicationAvg = avgScore(numeric.communication);
+    const problemSolvingAvg = avgScore(numeric.problem_solving);
+    const cultureFitAvg = avgScore(numeric.culture_fit);
+
+    const recommendation = this.toRecommendation({ avgOverall, feedbacks });
 
     const summaryTextParts: string[] = [];
     summaryTextParts.push(
-      `AI feedback summary for application ${options.applicationId}.`,
+      `AI feedback summary for application ${input.applicationId}.`,
     );
     summaryTextParts.push(`Total feedback entries: ${feedbacks.length}.`);
 
@@ -166,6 +206,19 @@ export class HeuristicAiInsightsProvider implements AiInsightsProvider {
       summary_text: summaryTextParts.join(' '),
       strengths_summary: strengthsSummary,
       concerns_summary: concernsSummary,
+      technical_summary:
+        technicalAvg !== null
+          ? `Average technical_score: ${technicalAvg.toFixed(2)}.`
+          : null,
+      communication_summary:
+        communicationAvg !== null
+          ? `Average communication_score: ${communicationAvg.toFixed(2)}.`
+          : null,
+      overall_score: avgOverall,
+      technical_score: technicalAvg,
+      communication_score: communicationAvg,
+      problem_solving_score: problemSolvingAvg,
+      culture_fit_score: cultureFitAvg,
       final_ai_recommendation: recommendation,
     };
   }

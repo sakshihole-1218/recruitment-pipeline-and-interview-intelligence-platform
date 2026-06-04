@@ -10,6 +10,7 @@ import { FindFeedbackAiSummaryByIdUseCase } from '../use-cases/find-feedback-ai-
 import { GenerateFeedbackAiSummaryUseCase } from '../use-cases/generate-feedback-ai-summary.usecase';
 import { ListFeedbackAiSummariesUseCase } from '../use-cases/list-feedback-ai-summaries.usecase';
 import { RegenerateFeedbackAiSummaryUseCase } from '../use-cases/regenerate-feedback-ai-summary.usecase';
+import { DeleteFeedbackAiSummaryUseCase } from '../use-cases/delete-feedback-ai-summary.usecase';
 
 @Injectable()
 export class FeedbackAiSummariesService {
@@ -19,6 +20,7 @@ export class FeedbackAiSummariesService {
     private readonly findByIdUseCase: FindFeedbackAiSummaryByIdUseCase,
     private readonly findByApplicationIdUseCase: FindFeedbackAiSummaryByApplicationIdUseCase,
     private readonly listUseCase: ListFeedbackAiSummariesUseCase,
+    private readonly deleteUseCase: DeleteFeedbackAiSummaryUseCase,
   ) {}
 
   generate(dto: GenerateFeedbackAiSummaryDto, actorUserId?: string): Promise<FeedbackAiSummaryEntity> {
@@ -39,5 +41,9 @@ export class FeedbackAiSummariesService {
 
   list(query: ListFeedbackAiSummariesQueryDto): Promise<FeedbackAiSummaryListResult> {
     return this.listUseCase.execute(query);
+  }
+
+  async delete(id: string, actorUserId?: string): Promise<void> {
+    await this.deleteUseCase.execute({ id, actorUserId });
   }
 }

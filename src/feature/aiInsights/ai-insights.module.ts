@@ -23,18 +23,24 @@ import { AiInsightsReferenceRepository } from './repositories/ai-insights-refere
 
 import { AI_INSIGHTS_PROVIDER } from './providers/ai-insights-provider';
 import { HeuristicAiInsightsProvider } from './providers/heuristic-ai-insights.provider';
+import { MockAiInsightsProvider } from './providers/mock-ai-insights.provider';
 
 import { CreateResumeAiAnalysisUseCase } from './application/use-cases/create-resume-ai-analysis.usecase';
 import { RegenerateResumeAiAnalysisUseCase } from './application/use-cases/regenerate-resume-ai-analysis.usecase';
 import { FindResumeAiAnalysisByIdUseCase } from './application/use-cases/find-resume-ai-analysis-by-id.usecase';
 import { FindResumeAiAnalysisByCandidateDocumentIdUseCase } from './application/use-cases/find-resume-ai-analysis-by-candidate-document-id.usecase';
 import { ListResumeAiAnalysesUseCase } from './application/use-cases/list-resume-ai-analyses.usecase';
+import { StartResumeAiAnalysisUseCase } from './application/use-cases/start-resume-ai-analysis.usecase';
+import { GetLatestResumeAiAnalysisByCandidateUseCase } from './application/use-cases/get-latest-resume-ai-analysis-by-candidate.usecase';
+import { UpdateResumeAiAnalysisUseCase } from './application/use-cases/update-resume-ai-analysis.usecase';
+import { DeleteResumeAiAnalysisUseCase } from './application/use-cases/delete-resume-ai-analysis.usecase';
 
 import { GenerateFeedbackAiSummaryUseCase } from './application/use-cases/generate-feedback-ai-summary.usecase';
 import { RegenerateFeedbackAiSummaryUseCase } from './application/use-cases/regenerate-feedback-ai-summary.usecase';
 import { FindFeedbackAiSummaryByIdUseCase } from './application/use-cases/find-feedback-ai-summary-by-id.usecase';
 import { FindFeedbackAiSummaryByApplicationIdUseCase } from './application/use-cases/find-feedback-ai-summary-by-application-id.usecase';
 import { ListFeedbackAiSummariesUseCase } from './application/use-cases/list-feedback-ai-summaries.usecase';
+import { DeleteFeedbackAiSummaryUseCase } from './application/use-cases/delete-feedback-ai-summary.usecase';
 
 import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
@@ -55,7 +61,7 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     // provider abstraction
     {
       provide: AI_INSIGHTS_PROVIDER,
-      useClass: HeuristicAiInsightsProvider,
+      useClass: MockAiInsightsProvider,
     },
 
     // repositories
@@ -68,10 +74,14 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
     // use-cases (resume)
     CreateResumeAiAnalysisUseCase,
+    StartResumeAiAnalysisUseCase,
     RegenerateResumeAiAnalysisUseCase,
     FindResumeAiAnalysisByIdUseCase,
     FindResumeAiAnalysisByCandidateDocumentIdUseCase,
+    GetLatestResumeAiAnalysisByCandidateUseCase,
     ListResumeAiAnalysesUseCase,
+    UpdateResumeAiAnalysisUseCase,
+    DeleteResumeAiAnalysisUseCase,
 
     // use-cases (feedback)
     GenerateFeedbackAiSummaryUseCase,
@@ -79,10 +89,15 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     FindFeedbackAiSummaryByIdUseCase,
     FindFeedbackAiSummaryByApplicationIdUseCase,
     ListFeedbackAiSummariesUseCase,
+    DeleteFeedbackAiSummaryUseCase,
 
     // services
     ResumeAiAnalysesService,
     FeedbackAiSummariesService,
+
+    // implementations
+    HeuristicAiInsightsProvider,
+    MockAiInsightsProvider,
   ],
   exports: [ResumeAiAnalysesService, FeedbackAiSummariesService],
 })

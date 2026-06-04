@@ -28,10 +28,19 @@ export class ResumeAiAnalysisEntity {
   id: string;
 
   @Column({ type: 'uuid' })
+  candidate_id: string;
+
+  @Column({ type: 'uuid' })
   candidate_document_id: string;
 
-  @Column({ type: 'text' })
-  extracted_text: string;
+  @Column({ type: 'uuid', nullable: true })
+  application_id: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  extracted_text: string | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  parsed_resume_json: unknown | null;
 
   @Column({ type: 'jsonb', default: () => "'[]'::jsonb" })
   skills_extracted: unknown;
@@ -42,11 +51,23 @@ export class ResumeAiAnalysisEntity {
   @Column({ type: 'text', nullable: true })
   education_summary: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  project_summary: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  certification_summary: string | null;
+
+  @Column({ type: 'numeric', precision: 10, scale: 2, nullable: true })
+  total_experience_years_detected: string | null;
+
   @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
   ai_fit_score: string | null;
 
   @Column({ type: 'varchar', length: 30 })
   analysis_status: ResumeAiAnalysisStatus;
+
+  @Column({ type: 'text', nullable: true })
+  failure_reason: string | null;
 
   @Column({ type: 'timestamptz', nullable: true })
   analyzed_at: Date | null;
