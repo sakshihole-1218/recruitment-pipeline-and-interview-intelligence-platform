@@ -9670,6 +9670,808 @@
           "AI Insights - Feedback Summaries"
         ]
       }
+    },
+    "/api/ai-interview-sessions": {
+      "post": {
+        "operationId": "AiInterviewSessionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAiInterviewSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview session created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create AI interview session for a scheduled interview",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      },
+      "get": {
+        "operationId": "AiInterviewSessionsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "started_at",
+                "ended_at",
+                "session_status",
+                "question_generation_status",
+                "feedback_generation_status"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and `sort_by` must be `created_at`.",
+            "schema": {
+              "example": "2026-01-15T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search by session_code / room / reason",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interview_id",
+            "required": false,
+            "in": "query",
+            "description": "Interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "required": false,
+            "in": "query",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resume_analysis_id",
+            "required": false,
+            "in": "query",
+            "description": "Resume analysis UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "READY",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "FAILED",
+                "CANCELLED"
+              ]
+            }
+          },
+          {
+            "name": "question_generation_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "PROCESSING",
+                "COMPLETED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "feedback_generation_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "PROCESSING",
+                "COMPLETED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "started_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter by started_at >= started_from",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "started_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter by started_at <= started_to",
+            "schema": {
+              "example": "2026-01-31T23:59:59.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview sessions fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-01-15T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List AI interview sessions (offset or cursor pagination)",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      }
+    },
+    "/api/ai-interview-sessions/{id}/start": {
+      "post": {
+        "operationId": "AiInterviewSessionsController_start",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview session started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Start AI interview session",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      }
+    },
+    "/api/ai-interview-sessions/{id}/end": {
+      "post": {
+        "operationId": "AiInterviewSessionsController_end",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview session ended successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "End AI interview session",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      }
+    },
+    "/api/ai-interview-sessions/{id}/cancel": {
+      "post": {
+        "operationId": "AiInterviewSessionsController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelAiInterviewSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview session cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Cancel AI interview session",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      }
+    },
+    "/api/ai-interview-sessions/{id}/mark-failed": {
+      "post": {
+        "operationId": "AiInterviewSessionsController_markFailed",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkAiInterviewSessionFailedDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview session marked as failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Mark AI interview session as failed",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      }
+    },
+    "/api/ai-interview-sessions/interview/{interviewId}": {
+      "get": {
+        "operationId": "AiInterviewSessionsController_getByInterviewId",
+        "parameters": [
+          {
+            "name": "interviewId",
+            "required": true,
+            "in": "path",
+            "description": "Interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview sessions fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get AI interview sessions by interview id",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      }
+    },
+    "/api/ai-interview-sessions/{id}": {
+      "get": {
+        "operationId": "AiInterviewSessionsController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview session fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get AI interview session by id",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      },
+      "patch": {
+        "operationId": "AiInterviewSessionsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiInterviewSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview session updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update AI interview session (controlled)",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      },
+      "delete": {
+        "operationId": "AiInterviewSessionsController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview session deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeleteAiInterviewSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete AI interview session",
+        "tags": [
+          "AI Interview Sessions"
+        ]
+      }
     }
   },
   "info": {
@@ -13812,6 +14614,216 @@
         },
         "required": [
           "application_id"
+        ]
+      },
+      "AiInterviewSessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "interview_id": {
+            "type": "string"
+          },
+          "application_id": {
+            "type": "string"
+          },
+          "candidate_id": {
+            "type": "string"
+          },
+          "resume_analysis_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "session_code": {
+            "type": "string"
+          },
+          "session_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "READY",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "livekit_room_name": {
+            "type": "object",
+            "nullable": true
+          },
+          "question_generation_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "feedback_generation_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "started_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "ended_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "duration_seconds": {
+            "type": "object",
+            "nullable": true
+          },
+          "failure_reason": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleted_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "updated_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "deleted_by_user_id": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "interview_id",
+          "application_id",
+          "candidate_id",
+          "resume_analysis_id",
+          "session_code",
+          "session_status",
+          "livekit_room_name",
+          "question_generation_status",
+          "feedback_generation_status",
+          "started_at",
+          "ended_at",
+          "duration_seconds",
+          "failure_reason",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "created_by_user_id",
+          "updated_by_user_id",
+          "deleted_by_user_id"
+        ]
+      },
+      "CreateAiInterviewSessionDto": {
+        "type": "object",
+        "properties": {
+          "interview_id": {
+            "type": "string",
+            "description": "Scheduled interview UUID"
+          },
+          "resume_analysis_id": {
+            "type": "string",
+            "description": "Resume analysis UUID (optional)"
+          }
+        },
+        "required": [
+          "interview_id"
+        ]
+      },
+      "CancelAiInterviewSessionDto": {
+        "type": "object",
+        "properties": {
+          "failure_reason": {
+            "type": "string",
+            "description": "Cancel reason"
+          }
+        }
+      },
+      "MarkAiInterviewSessionFailedDto": {
+        "type": "object",
+        "properties": {
+          "failure_reason": {
+            "type": "string",
+            "description": "Failure reason"
+          }
+        },
+        "required": [
+          "failure_reason"
+        ]
+      },
+      "UpdateAiInterviewSessionDto": {
+        "type": "object",
+        "properties": {
+          "session_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "READY",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "livekit_room_name": {
+            "type": "string",
+            "description": "Future LiveKit room name"
+          },
+          "question_generation_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "feedback_generation_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "failure_reason": {
+            "type": "string",
+            "description": "Failure/cancel reason"
+          }
+        }
+      },
+      "DeleteAiInterviewSessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Deleted session UUID"
+          }
+        },
+        "required": [
+          "id"
         ]
       }
     }
