@@ -102,6 +102,15 @@ export class InterviewRepository {
   async list(query: ListInterviewsQueryDto): Promise<InterviewListResult> {
     const qb = this.baseQuery('interviews');
 
+    qb.andWhere(
+      `NOT EXISTS (
+        SELECT 1
+        FROM interviews rescheduled_children
+        WHERE rescheduled_children.rescheduled_from_interview_id = interviews.id
+          AND rescheduled_children.deleted_at IS NULL
+      )`,
+    );
+
     if (query.application_id) {
       qb.andWhere('interviews.application_id = :applicationId', {
         applicationId: query.application_id,
@@ -115,9 +124,30 @@ export class InterviewRepository {
     }
 
     if (query.interview_status) {
-      qb.andWhere('interviews.interview_status = :status', {
-        status: query.interview_status,
-      });
+      if (query.interview_status === 'RESCHEDULED') {
+        qb.andWhere(
+          `(interviews.interview_status = :status OR (
+            interviews.interview_status = :scheduledStatus
+            AND interviews.rescheduled_from_interview_id IS NOT NULL
+          ))`,
+          {
+            status: query.interview_status,
+            scheduledStatus: 'SCHEDULED',
+          },
+        );
+      } else if (query.interview_status === 'SCHEDULED') {
+        qb.andWhere(
+          `interviews.interview_status = :status
+           AND interviews.rescheduled_from_interview_id IS NULL`,
+          {
+            status: query.interview_status,
+          },
+        );
+      } else {
+        qb.andWhere('interviews.interview_status = :status', {
+          status: query.interview_status,
+        });
+      }
     }
 
     if (query.interview_mode) {
