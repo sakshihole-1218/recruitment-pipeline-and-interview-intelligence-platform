@@ -11728,6 +11728,598 @@
           "AI Interview Transcripts"
         ]
       }
+    },
+    "/api/ai-interview-feedback/generate": {
+      "post": {
+        "operationId": "AiInterviewFeedbackController_generate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateAiInterviewFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview feedback generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewFeedbackResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Generate AI interview feedback from AI interview transcript",
+        "tags": [
+          "AI Interview Feedback"
+        ]
+      }
+    },
+    "/api/ai-interview-feedback/regenerate": {
+      "post": {
+        "operationId": "AiInterviewFeedbackController_regenerate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegenerateAiInterviewFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview feedback regenerated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewFeedbackResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Regenerate AI interview feedback for a session",
+        "tags": [
+          "AI Interview Feedback"
+        ]
+      }
+    },
+    "/api/ai-interview-feedback": {
+      "get": {
+        "operationId": "AiInterviewFeedbackController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "generated_at",
+                "overall_score",
+                "feedback_status",
+                "ai_recommendation"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and sort_by must be created_at.",
+            "schema": {
+              "example": "2026-06-06T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search across summaries, concerns and failure reason",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ai_interview_session_id",
+            "required": false,
+            "in": "query",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "required": false,
+            "in": "query",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resume_analysis_id",
+            "required": false,
+            "in": "query",
+            "description": "Resume analysis UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "feedback_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "PROCESSING",
+                "COMPLETED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "ai_recommendation",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STRONGLY_REJECT",
+                "REJECT",
+                "HOLD",
+                "SELECT",
+                "STRONGLY_SELECT"
+              ]
+            }
+          },
+          {
+            "name": "generated_from",
+            "required": false,
+            "in": "query",
+            "description": "Generated at start date (ISO8601)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "generated_to",
+            "required": false,
+            "in": "query",
+            "description": "Generated at end date (ISO8601)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview feedback fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/AiInterviewFeedbackResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/AiInterviewFeedbackResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-06-06T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List AI interview feedback with offset or cursor pagination",
+        "tags": [
+          "AI Interview Feedback"
+        ]
+      }
+    },
+    "/api/ai-interview-feedback/session/{sessionId}": {
+      "get": {
+        "operationId": "AiInterviewFeedbackController_getBySession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview feedback fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewFeedbackResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get AI interview feedback by AI interview session id",
+        "tags": [
+          "AI Interview Feedback"
+        ]
+      }
+    },
+    "/api/ai-interview-feedback/{id}": {
+      "get": {
+        "operationId": "AiInterviewFeedbackController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview feedback UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview feedback fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewFeedbackResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get AI interview feedback by id",
+        "tags": [
+          "AI Interview Feedback"
+        ]
+      },
+      "patch": {
+        "operationId": "AiInterviewFeedbackController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview feedback UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiInterviewFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview feedback updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewFeedbackResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update AI interview feedback",
+        "tags": [
+          "AI Interview Feedback"
+        ]
+      },
+      "delete": {
+        "operationId": "AiInterviewFeedbackController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview feedback UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview feedback deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeleteAiInterviewFeedbackResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete AI interview feedback",
+        "tags": [
+          "AI Interview Feedback"
+        ]
+      }
     }
   },
   "info": {
@@ -16563,6 +17155,295 @@
         }
       },
       "DeleteAiInterviewTranscriptResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "AiInterviewFeedbackResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ai_interview_session_id": {
+            "type": "string"
+          },
+          "application_id": {
+            "type": "string"
+          },
+          "candidate_id": {
+            "type": "string"
+          },
+          "resume_analysis_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "technical_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "communication_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "problem_solving_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "project_understanding_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "answer_relevance_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "confidence_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "overall_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "technical_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "communication_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "problem_solving_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "project_understanding_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "strengths": {
+            "type": "object",
+            "nullable": true
+          },
+          "concerns": {
+            "type": "object",
+            "nullable": true
+          },
+          "improvement_areas": {
+            "type": "object",
+            "nullable": true
+          },
+          "ai_recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ],
+            "nullable": true
+          },
+          "feedback_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "generated_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "failure_reason": {
+            "type": "object",
+            "nullable": true
+          },
+          "raw_ai_payload": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleted_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "updated_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "deleted_by_user_id": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "ai_interview_session_id",
+          "application_id",
+          "candidate_id",
+          "resume_analysis_id",
+          "technical_score",
+          "communication_score",
+          "problem_solving_score",
+          "project_understanding_score",
+          "answer_relevance_score",
+          "confidence_score",
+          "overall_score",
+          "technical_summary",
+          "communication_summary",
+          "problem_solving_summary",
+          "project_understanding_summary",
+          "strengths",
+          "concerns",
+          "improvement_areas",
+          "ai_recommendation",
+          "feedback_status",
+          "generated_at",
+          "failure_reason",
+          "raw_ai_payload",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "created_by_user_id",
+          "updated_by_user_id",
+          "deleted_by_user_id"
+        ]
+      },
+      "GenerateAiInterviewFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          }
+        },
+        "required": [
+          "ai_interview_session_id"
+        ]
+      },
+      "RegenerateAiInterviewFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          }
+        },
+        "required": [
+          "ai_interview_session_id"
+        ]
+      },
+      "UpdateAiInterviewFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "technical_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "communication_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "problem_solving_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "project_understanding_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "answer_relevance_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "confidence_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "overall_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "technical_summary": {
+            "type": "string"
+          },
+          "communication_summary": {
+            "type": "string"
+          },
+          "problem_solving_summary": {
+            "type": "string"
+          },
+          "project_understanding_summary": {
+            "type": "string"
+          },
+          "strengths": {
+            "type": "string"
+          },
+          "concerns": {
+            "type": "string"
+          },
+          "improvement_areas": {
+            "type": "string"
+          },
+          "ai_recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ]
+          },
+          "feedback_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "generated_at": {
+            "type": "string"
+          },
+          "failure_reason": {
+            "type": "string"
+          },
+          "raw_ai_payload": {
+            "type": "object"
+          }
+        }
+      },
+      "DeleteAiInterviewFeedbackResponseDto": {
         "type": "object",
         "properties": {
           "id": {
