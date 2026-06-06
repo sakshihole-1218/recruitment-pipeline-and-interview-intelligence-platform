@@ -19,6 +19,7 @@ import { OffersModule } from './feature/offers/offers.module';
 import { ActivityLogsModule } from './feature/activityLogs/activity-logs.module';
 import { AiInsightsModule } from './feature/aiInsights/ai-insights.module';
 import { AiInterviewSessionsModule } from './feature/aiInterviewSessions/ai-interview-sessions.module';
+import { AiInterviewQuestionsModule } from './feature/aiInterviewQuestions/ai-interview-questions.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AiInterviewSessionsModule } from './feature/aiInterviewSessions/ai-inte
     ActivityLogsModule,
     AiInsightsModule,
     AiInterviewSessionsModule,
+    AiInterviewQuestionsModule,
   ],
 })
 export class AppModule {}
