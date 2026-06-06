@@ -11174,6 +11174,560 @@
           "AI Interview Questions"
         ]
       }
+    },
+    "/api/ai-interview-transcripts": {
+      "post": {
+        "operationId": "AiInterviewTranscriptsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTranscriptEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview transcript entry created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewTranscriptResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a transcript entry for an AI interview session",
+        "tags": [
+          "AI Interview Transcripts"
+        ]
+      },
+      "get": {
+        "operationId": "AiInterviewTranscriptsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "sequence_number",
+                "spoken_at",
+                "speaker_type"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and sort_by must be created_at.",
+            "schema": {
+              "example": "2026-06-06T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "ai_interview_session_id",
+            "required": false,
+            "in": "query",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ai_interview_question_id",
+            "required": false,
+            "in": "query",
+            "description": "AI interview question UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "speaker_type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AI_INTERVIEWER",
+                "CANDIDATE",
+                "SYSTEM"
+              ]
+            }
+          },
+          {
+            "name": "spoken_from",
+            "required": false,
+            "in": "query",
+            "description": "Filter transcripts spoken from this ISO timestamp",
+            "schema": {
+              "example": "2026-06-06T10:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "spoken_to",
+            "required": false,
+            "in": "query",
+            "description": "Filter transcripts spoken until this ISO timestamp",
+            "schema": {
+              "example": "2026-06-06T11:00:00.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview transcript entries fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/AiInterviewTranscriptResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/AiInterviewTranscriptResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-06-06T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List AI interview transcript entries with offset or cursor pagination",
+        "tags": [
+          "AI Interview Transcripts"
+        ]
+      }
+    },
+    "/api/ai-interview-transcripts/bulk": {
+      "post": {
+        "operationId": "AiInterviewTranscriptsController_bulkCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateTranscriptEntriesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview transcript entries created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AiInterviewTranscriptResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Bulk create transcript entries for an AI interview session",
+        "tags": [
+          "AI Interview Transcripts"
+        ]
+      }
+    },
+    "/api/ai-interview-transcripts/session/{sessionId}": {
+      "get": {
+        "operationId": "AiInterviewTranscriptsController_getBySession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview transcript entries fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AiInterviewTranscriptResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get transcript entries by AI interview session id",
+        "tags": [
+          "AI Interview Transcripts"
+        ]
+      }
+    },
+    "/api/ai-interview-transcripts/{id}": {
+      "get": {
+        "operationId": "AiInterviewTranscriptsController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview transcript entry UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview transcript entry fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewTranscriptResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get AI interview transcript entry by id",
+        "tags": [
+          "AI Interview Transcripts"
+        ]
+      },
+      "patch": {
+        "operationId": "AiInterviewTranscriptsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview transcript entry UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTranscriptEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview transcript entry updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewTranscriptResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update AI interview transcript entry",
+        "tags": [
+          "AI Interview Transcripts"
+        ]
+      },
+      "delete": {
+        "operationId": "AiInterviewTranscriptsController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "AI interview transcript entry UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview transcript entry deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeleteAiInterviewTranscriptResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete AI interview transcript entry",
+        "tags": [
+          "AI Interview Transcripts"
+        ]
+      }
     }
   },
   "info": {
@@ -15773,6 +16327,242 @@
         }
       },
       "DeleteAiInterviewQuestionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "AiInterviewTranscriptResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ai_interview_session_id": {
+            "type": "string"
+          },
+          "ai_interview_question_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "speaker_type": {
+            "type": "string",
+            "enum": [
+              "AI_INTERVIEWER",
+              "CANDIDATE",
+              "SYSTEM"
+            ]
+          },
+          "message_text": {
+            "type": "string"
+          },
+          "sequence_number": {
+            "type": "number"
+          },
+          "spoken_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "speech_to_text_confidence": {
+            "type": "object",
+            "nullable": true,
+            "example": 0.9842
+          },
+          "raw_payload": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleted_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "updated_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "deleted_by_user_id": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "ai_interview_session_id",
+          "ai_interview_question_id",
+          "speaker_type",
+          "message_text",
+          "sequence_number",
+          "spoken_at",
+          "speech_to_text_confidence",
+          "raw_payload",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "created_by_user_id",
+          "updated_by_user_id",
+          "deleted_by_user_id"
+        ]
+      },
+      "CreateTranscriptEntryDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          },
+          "ai_interview_question_id": {
+            "type": "string",
+            "description": "Linked AI interview question UUID"
+          },
+          "speaker_type": {
+            "type": "string",
+            "enum": [
+              "AI_INTERVIEWER",
+              "CANDIDATE",
+              "SYSTEM"
+            ]
+          },
+          "message_text": {
+            "type": "string",
+            "description": "Transcript message text"
+          },
+          "sequence_number": {
+            "type": "number",
+            "description": "Sequence number within a session",
+            "example": 1
+          },
+          "spoken_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the message was spoken",
+            "example": "2026-06-06T10:30:00.000Z"
+          },
+          "speech_to_text_confidence": {
+            "type": "number",
+            "description": "Speech-to-text confidence score for future integrations",
+            "example": 0.9842
+          },
+          "raw_payload": {
+            "type": "object",
+            "description": "Raw provider payload for future LiveKit/STT ingestion",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "ai_interview_session_id",
+          "speaker_type",
+          "message_text"
+        ]
+      },
+      "BulkCreateTranscriptEntryItemDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_question_id": {
+            "type": "string",
+            "description": "Linked AI interview question UUID"
+          },
+          "speaker_type": {
+            "type": "string",
+            "enum": [
+              "AI_INTERVIEWER",
+              "CANDIDATE",
+              "SYSTEM"
+            ]
+          },
+          "message_text": {
+            "type": "string",
+            "description": "Transcript message text"
+          },
+          "sequence_number": {
+            "type": "number",
+            "description": "Sequence number within the session",
+            "example": 10
+          },
+          "spoken_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the message was spoken",
+            "example": "2026-06-06T10:30:00.000Z"
+          },
+          "speech_to_text_confidence": {
+            "type": "number",
+            "description": "Speech-to-text confidence score for future integrations",
+            "example": 0.9821
+          },
+          "raw_payload": {
+            "type": "object",
+            "description": "Raw provider payload for future LiveKit/STT ingestion",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "speaker_type",
+          "message_text"
+        ]
+      },
+      "BulkCreateTranscriptEntriesDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkCreateTranscriptEntryItemDto"
+            }
+          }
+        },
+        "required": [
+          "ai_interview_session_id",
+          "entries"
+        ]
+      },
+      "UpdateTranscriptEntryDto": {
+        "type": "object",
+        "properties": {
+          "message_text": {
+            "type": "string",
+            "description": "Transcript message text"
+          },
+          "spoken_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the message was spoken",
+            "example": "2026-06-06T10:30:00.000Z"
+          },
+          "speech_to_text_confidence": {
+            "type": "number",
+            "description": "Speech-to-text confidence score for future integrations",
+            "example": 0.9811
+          },
+          "raw_payload": {
+            "type": "object",
+            "description": "Raw provider payload for future LiveKit/STT ingestion",
+            "additionalProperties": true
+          }
+        }
+      },
+      "DeleteAiInterviewTranscriptResponseDto": {
         "type": "object",
         "properties": {
           "id": {
