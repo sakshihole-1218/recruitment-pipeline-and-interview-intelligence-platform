@@ -20,6 +20,7 @@ import { ActivityLogsModule } from './feature/activityLogs/activity-logs.module'
 import { AiInsightsModule } from './feature/aiInsights/ai-insights.module';
 import { AiInterviewSessionsModule } from './feature/aiInterviewSessions/ai-interview-sessions.module';
 import { AiInterviewQuestionsModule } from './feature/aiInterviewQuestions/ai-interview-questions.module';
+import { AiInterviewTranscriptsModule } from './feature/aiInterviewTranscripts/ai-interview-transcripts.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { AiInterviewQuestionsModule } from './feature/aiInterviewQuestions/ai-in
     AiInsightsModule,
     AiInterviewSessionsModule,
     AiInterviewQuestionsModule,
+    AiInterviewTranscriptsModule,
   ],
 })
 export class AppModule {}
