@@ -22,6 +22,7 @@ import { AiInterviewSessionsModule } from './feature/aiInterviewSessions/ai-inte
 import { AiInterviewQuestionsModule } from './feature/aiInterviewQuestions/ai-interview-questions.module';
 import { AiInterviewTranscriptsModule } from './feature/aiInterviewTranscripts/ai-interview-transcripts.module';
 import { AiInterviewFeedbackModule } from './feature/aiInterviewFeedback/ai-interview-feedback.module';
+import { AiInterviewProctoringEventsModule } from './feature/aiInterviewProctoringEvents/ai-interview-proctoring-events.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AiInterviewFeedbackModule } from './feature/aiInterviewFeedback/ai-inte
     AiInterviewQuestionsModule,
     AiInterviewTranscriptsModule,
     AiInterviewFeedbackModule,
+    AiInterviewProctoringEventsModule,
   ],
 })
 export class AppModule {}
