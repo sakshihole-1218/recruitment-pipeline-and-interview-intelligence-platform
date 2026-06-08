@@ -1,0 +1,7 @@
+export enum InterviewerRecommendation {
+  STRONGLY_REJECT = 'STRONGLY_REJECT',
+  REJECT = 'REJECT',
+  HOLD = 'HOLD',
+  SELECT = 'SELECT',
+  STRONGLY_SELECT = 'STRONGLY_SELECT',
+}
