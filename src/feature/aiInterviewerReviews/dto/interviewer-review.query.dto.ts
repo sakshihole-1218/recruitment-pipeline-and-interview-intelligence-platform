@@ -1,0 +1,98 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import {
+  IsEnum,
+  IsISO8601,
+  IsIn,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
+
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+
+import { InterviewerRecommendation } from '../enums/interviewer-recommendation.enum';
+import { InterviewerReviewStatus } from '../enums/interviewer-review-status.enum';
+
+const INTERVIEWER_REVIEW_SORT_FIELDS = [
+  'created_at',
+  'updated_at',
+  'reviewed_at',
+  'overall_score',
+  'review_status',
+  'interviewer_recommendation',
+] as const;
+
+export class InterviewerReviewQueryDto extends PaginationQueryDto {
+  @ApiPropertyOptional({
+    description:
+      'Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and sort_by must be created_at.',
+    example: '2026-06-06T10:30:00.000Z',
+  })
+  @IsOptional()
+  @IsISO8601()
+  cursor?: string;
+
+  @ApiPropertyOptional({ description: 'AI interview session UUID' })
+  @IsOptional()
+  @IsUUID()
+  ai_interview_session_id?: string;
+
+  @ApiPropertyOptional({ description: 'AI interview feedback UUID' })
+  @IsOptional()
+  @IsUUID()
+  ai_interview_feedback_id?: string;
+
+  @ApiPropertyOptional({ description: 'Application UUID' })
+  @IsOptional()
+  @IsUUID()
+  application_id?: string;
+
+  @ApiPropertyOptional({ description: 'Candidate UUID' })
+  @IsOptional()
+  @IsUUID()
+  candidate_id?: string;
+
+  @ApiPropertyOptional({ description: 'Reviewer user UUID' })
+  @IsOptional()
+  @IsUUID()
+  reviewer_user_id?: string;
+
+  @ApiPropertyOptional({ enum: InterviewerReviewStatus })
+  @IsOptional()
+  @IsEnum(InterviewerReviewStatus)
+  review_status?: InterviewerReviewStatus;
+
+  @ApiPropertyOptional({ enum: InterviewerRecommendation })
+  @IsOptional()
+  @IsEnum(InterviewerRecommendation)
+  interviewer_recommendation?: InterviewerRecommendation;
+
+  @ApiPropertyOptional({ description: 'Reviewed at start date (ISO8601)' })
+  @IsOptional()
+  @IsISO8601()
+  reviewed_from?: string;
+
+  @ApiPropertyOptional({ description: 'Reviewed at end date (ISO8601)' })
+  @IsOptional()
+  @IsISO8601()
+  reviewed_to?: string;
+
+  @ApiPropertyOptional({
+    example: 'created_at',
+    enum: INTERVIEWER_REVIEW_SORT_FIELDS,
+    default: 'created_at',
+  })
+  @IsOptional()
+  @IsIn(INTERVIEWER_REVIEW_SORT_FIELDS)
+  override sort_by?: (typeof INTERVIEWER_REVIEW_SORT_FIELDS)[number] = 'created_at';
+
+  @ApiPropertyOptional({
+    example: 'desc',
+    enum: ['asc', 'desc'],
+    default: 'desc',
+  })
+  @IsOptional()
+  @Transform(({ value }) => String(value).toLowerCase())
+  @IsIn(['asc', 'desc'])
+  override sort_order?: 'asc' | 'desc' = 'desc';
+}

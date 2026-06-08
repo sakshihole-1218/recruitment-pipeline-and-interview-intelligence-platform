@@ -12971,6 +12971,667 @@
           "Interview Proctoring Events"
         ]
       }
+    },
+    "/api/interviewer-reviews": {
+      "post": {
+        "operationId": "InterviewerReviewsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInterviewerReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interviewer review created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewerReviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create interviewer review draft for an AI interview session",
+        "tags": [
+          "Interviewer Reviews"
+        ]
+      },
+      "get": {
+        "operationId": "InterviewerReviewsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "reviewed_at",
+                "overall_score",
+                "review_status",
+                "interviewer_recommendation"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and sort_by must be created_at.",
+            "schema": {
+              "example": "2026-06-06T10:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "ai_interview_session_id",
+            "required": false,
+            "in": "query",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ai_interview_feedback_id",
+            "required": false,
+            "in": "query",
+            "description": "AI interview feedback UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "required": false,
+            "in": "query",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reviewer_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Reviewer user UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "review_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "SUBMITTED"
+              ]
+            }
+          },
+          {
+            "name": "interviewer_recommendation",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STRONGLY_REJECT",
+                "REJECT",
+                "HOLD",
+                "SELECT",
+                "STRONGLY_SELECT"
+              ]
+            }
+          },
+          {
+            "name": "reviewed_from",
+            "required": false,
+            "in": "query",
+            "description": "Reviewed at start date (ISO8601)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reviewed_to",
+            "required": false,
+            "in": "query",
+            "description": "Reviewed at end date (ISO8601)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interviewer reviews fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/InterviewerReviewResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/InterviewerReviewResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-06-06T10:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List interviewer reviews with offset or cursor pagination",
+        "tags": [
+          "Interviewer Reviews"
+        ]
+      }
+    },
+    "/api/interviewer-reviews/session/{sessionId}": {
+      "get": {
+        "operationId": "InterviewerReviewsController_getBySession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interviewer reviews fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/InterviewerReviewResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get interviewer reviews by AI interview session id",
+        "tags": [
+          "Interviewer Reviews"
+        ]
+      }
+    },
+    "/api/interviewer-reviews/application/{applicationId}": {
+      "get": {
+        "operationId": "InterviewerReviewsController_getByApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interviewer reviews fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/InterviewerReviewResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get interviewer reviews by application id",
+        "tags": [
+          "Interviewer Reviews"
+        ]
+      }
+    },
+    "/api/interviewer-reviews/{id}": {
+      "get": {
+        "operationId": "InterviewerReviewsController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interviewer review UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interviewer review fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewerReviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get interviewer review by id",
+        "tags": [
+          "Interviewer Reviews"
+        ]
+      },
+      "patch": {
+        "operationId": "InterviewerReviewsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interviewer review UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInterviewerReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interviewer review updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewerReviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update interviewer review draft",
+        "tags": [
+          "Interviewer Reviews"
+        ]
+      },
+      "delete": {
+        "operationId": "InterviewerReviewsController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interviewer review UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interviewer review deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeleteInterviewerReviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete interviewer review",
+        "tags": [
+          "Interviewer Reviews"
+        ]
+      }
+    },
+    "/api/interviewer-reviews/{id}/submit": {
+      "patch": {
+        "operationId": "InterviewerReviewsController_submit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Interviewer review UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitInterviewerReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interviewer review submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/InterviewerReviewResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Submit interviewer review",
+        "tags": [
+          "Interviewer Reviews"
+        ]
+      }
     }
   },
   "info": {
@@ -18409,6 +19070,327 @@
           "id": {
             "type": "string",
             "example": "3bd49007-cc4d-4068-9479-c6cda4ac32f1"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "InterviewerReviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ai_interview_session_id": {
+            "type": "string"
+          },
+          "ai_interview_feedback_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "application_id": {
+            "type": "string"
+          },
+          "candidate_id": {
+            "type": "string"
+          },
+          "reviewer_user_id": {
+            "type": "string"
+          },
+          "technical_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "communication_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "problem_solving_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "culture_fit_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "overall_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "strengths": {
+            "type": "object",
+            "nullable": true
+          },
+          "concerns": {
+            "type": "object",
+            "nullable": true
+          },
+          "detailed_review": {
+            "type": "object",
+            "nullable": true
+          },
+          "interviewer_recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ],
+            "nullable": true
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SUBMITTED"
+            ]
+          },
+          "reviewed_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleted_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "updated_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "deleted_by_user_id": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "ai_interview_session_id",
+          "ai_interview_feedback_id",
+          "application_id",
+          "candidate_id",
+          "reviewer_user_id",
+          "technical_score",
+          "communication_score",
+          "problem_solving_score",
+          "culture_fit_score",
+          "overall_score",
+          "strengths",
+          "concerns",
+          "detailed_review",
+          "interviewer_recommendation",
+          "review_status",
+          "reviewed_at",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "created_by_user_id",
+          "updated_by_user_id",
+          "deleted_by_user_id"
+        ]
+      },
+      "CreateInterviewerReviewDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          },
+          "ai_interview_feedback_id": {
+            "type": "string",
+            "description": "AI interview feedback UUID"
+          },
+          "reviewer_user_id": {
+            "type": "string",
+            "description": "Reviewer user UUID"
+          },
+          "technical_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 82.5
+          },
+          "communication_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 78
+          },
+          "problem_solving_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 80
+          },
+          "culture_fit_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 74
+          },
+          "strengths": {
+            "type": "string"
+          },
+          "concerns": {
+            "type": "string"
+          },
+          "detailed_review": {
+            "type": "string"
+          },
+          "interviewer_recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ]
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SUBMITTED"
+            ],
+            "default": "DRAFT"
+          }
+        },
+        "required": [
+          "ai_interview_session_id",
+          "reviewer_user_id"
+        ]
+      },
+      "UpdateInterviewerReviewDto": {
+        "type": "object",
+        "properties": {
+          "technical_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 82.5
+          },
+          "communication_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 78
+          },
+          "problem_solving_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 80
+          },
+          "culture_fit_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 74
+          },
+          "strengths": {
+            "type": "string"
+          },
+          "concerns": {
+            "type": "string"
+          },
+          "detailed_review": {
+            "type": "string"
+          },
+          "interviewer_recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ]
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SUBMITTED"
+            ]
+          }
+        }
+      },
+      "SubmitInterviewerReviewDto": {
+        "type": "object",
+        "properties": {
+          "technical_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 82.5
+          },
+          "communication_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 78
+          },
+          "problem_solving_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 80
+          },
+          "culture_fit_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 74
+          },
+          "strengths": {
+            "type": "string"
+          },
+          "concerns": {
+            "type": "string"
+          },
+          "detailed_review": {
+            "type": "string"
+          },
+          "interviewer_recommendation": {
+            "type": "string",
+            "enum": [
+              "STRONGLY_REJECT",
+              "REJECT",
+              "HOLD",
+              "SELECT",
+              "STRONGLY_SELECT"
+            ]
+          }
+        },
+        "required": [
+          "technical_score",
+          "communication_score",
+          "problem_solving_score",
+          "culture_fit_score",
+          "detailed_review",
+          "interviewer_recommendation"
+        ]
+      },
+      "DeleteInterviewerReviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           }
         },
         "required": [
