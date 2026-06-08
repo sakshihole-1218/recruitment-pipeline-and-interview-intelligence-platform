@@ -7,6 +7,15 @@ import {
 import { DataSource } from 'typeorm';
 
 import { UserRepository } from '../../../accessControl/repositories/user.repository';
+import { AiInterviewFeedbackEntity } from '../../../aiInterviewFeedback/entities/ai-interview-feedback.entity';
+import { AiInterviewFeedbackStatus } from '../../../aiInterviewFeedback/enums/ai-interview-feedback-status.enum';
+import { AiInterviewFeedbackRepository } from '../../../aiInterviewFeedback/repositories/ai-interview-feedback.repository';
+import { AiInterviewSessionEntity } from '../../../aiInterviewSessions/entities/ai-interview-session.entity';
+import { AiInterviewSessionStatus } from '../../../aiInterviewSessions/enums/ai-interview-session-status.enum';
+import { AiInterviewSessionRepository } from '../../../aiInterviewSessions/repositories/ai-interview-session.repository';
+import { InterviewerReviewStatus } from '../../../aiInterviewerReviews/enums/interviewer-review-status.enum';
+import { InterviewerReviewRepository } from '../../../aiInterviewerReviews/repositories/interviewer-review.repository';
+import { InterviewProctoringEventsRepository } from '../../../aiInterviewProctoringEvents/repositories/interview-proctoring-events.repository';
 import { ApplicationEntity } from '../../../applications/entities/application.entity';
 import { ApplicationCurrentStage } from '../../../applications/enums/application-current-stage.enum';
 import { ApplicationStatus } from '../../../applications/enums/application-status.enum';
@@ -15,6 +24,10 @@ import { ApplicationStageHistoryRepository } from '../../../applications/reposit
 import { OfferRepository } from '../../../offers/repositories/offer.repository';
 import { UpdateApplicationDecisionDto } from '../../dto/update-application-decision.dto';
 import { ApplicationDecisionEntity } from '../../entities/application-decision.entity';
+import { DecisionSource } from '../../enums/decision-source.enum';
+import { DecisionScoreHelper } from '../../helpers/decision-score.helper';
+import { DecisionSnapshotHelper } from '../../helpers/decision-snapshot.helper';
+import { DecisionTransitionValidator } from '../../helpers/decision-transition.validator';
 import { ApplicationDecisionRepository } from '../../repositories/application-decision.repository';
 import { DecisionsValidationHelper } from '../../helpers/decisions-validation.helper';
 import { DecisionsApplicationStageHelper } from '../../helpers/decisions-application-stage.helper';
@@ -36,7 +49,14 @@ export class UpdateApplicationDecisionUseCase {
     private readonly stageHistoryRepository: ApplicationStageHistoryRepository,
     private readonly offerRepository: OfferRepository,
     private readonly userRepository: UserRepository,
+    private readonly aiInterviewSessionRepository: AiInterviewSessionRepository,
+    private readonly aiInterviewFeedbackRepository: AiInterviewFeedbackRepository,
+    private readonly interviewerReviewRepository: InterviewerReviewRepository,
+    private readonly interviewProctoringEventsRepository: InterviewProctoringEventsRepository,
     private readonly validationHelper: DecisionsValidationHelper,
+    private readonly transitionValidator: DecisionTransitionValidator,
+    private readonly decisionSnapshotHelper: DecisionSnapshotHelper,
+    private readonly decisionScoreHelper: DecisionScoreHelper,
     private readonly workflowValidationHelper: DecisionsWorkflowValidationHelper,
     private readonly validateMandatoryInterviewsHelper: ValidateMandatoryInterviewsHelper,
     private readonly validateInterviewFeedbackHelper: ValidateInterviewFeedbackHelper,
@@ -77,12 +97,18 @@ export class UpdateApplicationDecisionUseCase {
         dto.decision_reason !== undefined
           ? this.validationHelper.normalizeReason(dto.decision_reason)
           : decision.decision_reason;
+      const nextNotes =
+        dto.decision_notes !== undefined
+          ? this.validationHelper.normalizeNotes(dto.decision_notes)
+          : decision.decision_notes;
 
       const isStatusChange =
         dto.decision_status !== undefined &&
         dto.decision_status !== decision.decision_status;
 
       const isReasonUpdate = dto.decision_reason !== undefined;
+      const isNotesUpdate = dto.decision_notes !== undefined;
+      const isSourceUpdate = dto.decision_source !== undefined;
 
       this.validationHelper.ensureReasonRules({
         decision_status: nextStatus,
@@ -90,7 +116,7 @@ export class UpdateApplicationDecisionUseCase {
       });
 
       if (isStatusChange) {
-        this.workflowValidationHelper.ensureDecisionTransitionAllowed({
+        this.transitionValidator.ensureAllowed({
           from: decision.decision_status,
           to: nextStatus,
         });
@@ -115,24 +141,105 @@ export class UpdateApplicationDecisionUseCase {
         application,
       );
 
-      const isApplicationHired =
-        application.current_stage === ApplicationCurrentStage.HIRED ||
-        application.application_status === ApplicationStatus.HIRED;
+      let aiSession: AiInterviewSessionEntity | null = null;
+      let aiFeedback: AiInterviewFeedbackEntity | null = null;
 
-      if (isApplicationHired) {
-        const attemptingNonHiredUpdate =
-          nextStatus !== DecisionStatus.HIRED || isReasonUpdate;
+      if (decision.ai_interview_session_id) {
+        aiSession = await this.aiInterviewSessionRepository.findById(
+          decision.ai_interview_session_id,
+          { manager },
+        );
 
-        if (attemptingNonHiredUpdate) {
+        if (!aiSession) {
           throw new ConflictException({
-            message:
-              'Decision cannot be updated after application is marked HIRED (except aligning decision to HIRED)',
-            code: 'DECISION_UPDATE_NOT_ALLOWED_HIRED',
+            message: 'AI interview session not found for decision',
+            code: 'DECISION_AI_SESSION_NOT_FOUND',
           });
+        }
+
+        this.ensureAiSessionBelongsToApplication(aiSession, application.id);
+        this.ensureAiSessionCompleted(aiSession);
+      }
+
+      if (decision.ai_interview_feedback_id) {
+        aiFeedback = await this.aiInterviewFeedbackRepository.findById(
+          decision.ai_interview_feedback_id,
+          { manager },
+        );
+
+        if (!aiFeedback) {
+          throw new ConflictException({
+            message: 'AI interview feedback not found for decision',
+            code: 'DECISION_AI_FEEDBACK_NOT_FOUND',
+          });
+        }
+
+        this.ensureAiFeedbackBelongsToApplication(aiFeedback, application.id);
+        this.ensureAiFeedbackCompleted(aiFeedback);
+      }
+
+      if (!aiFeedback && aiSession) {
+        const sessionFeedback =
+          await this.aiInterviewFeedbackRepository.findBySessionId(aiSession.id, {
+            manager,
+          });
+
+        if (
+          sessionFeedback &&
+          sessionFeedback.feedback_status === AiInterviewFeedbackStatus.COMPLETED
+        ) {
+          this.ensureAiFeedbackBelongsToApplication(
+            sessionFeedback,
+            application.id,
+          );
+          aiFeedback = sessionFeedback;
         }
       }
 
-      if (isStatusChange) {
+      if (!aiSession && aiFeedback) {
+        aiSession = await this.aiInterviewSessionRepository.findById(
+          aiFeedback.ai_interview_session_id,
+          { manager },
+        );
+
+        if (!aiSession) {
+          throw new ConflictException({
+            message: 'AI interview session not found for feedback',
+            code: 'DECISION_AI_SESSION_FOR_FEEDBACK_NOT_FOUND',
+          });
+        }
+
+        this.ensureAiSessionBelongsToApplication(aiSession, application.id);
+        this.ensureAiSessionCompleted(aiSession);
+      }
+
+      if (
+        aiSession &&
+        aiFeedback &&
+        aiFeedback.ai_interview_session_id !== aiSession.id
+      ) {
+        throw new ConflictException({
+          message:
+            'Stored AI interview feedback does not belong to the stored AI interview session',
+          code: 'DECISION_AI_EVIDENCE_MISMATCH',
+        });
+      }
+
+      const hasHumanInterviewFeedback =
+        await this.validateInterviewFeedbackHelper.hasAnyInterviewFeedbackForApplication(
+          {
+            applicationId: application.id,
+            manager,
+          },
+        );
+
+      const nextDecisionSource = this.validationHelper.resolveDecisionSource({
+        requestedSource: dto.decision_source ?? decision.decision_source,
+        hasHumanInterviewFeedback,
+        hasAiInterviewFeedback: Boolean(aiFeedback),
+      });
+
+      if (nextDecisionSource === DecisionSource.HUMAN_INTERVIEW) {
         await this.validateMandatoryInterviewsHelper.ensureAllMandatoryRoundsCompleted(
           {
             applicationId: application.id,
@@ -150,11 +257,50 @@ export class UpdateApplicationDecisionUseCase {
         await this.validateInterviewFeedbackHelper.ensureFeedbackExistsForMandatoryRounds(
           {
             applicationId: application.id,
-            mandatoryRoundIds: mandatoryRounds.map((r) => r.id),
+            mandatoryRoundIds: mandatoryRounds.map((round) => round.id),
             manager,
           },
         );
+      }
 
+      const interviewerReviews = aiSession
+        ? await this.interviewerReviewRepository.findBySessionId(aiSession.id, {
+            manager,
+          })
+        : [];
+
+      const submittedAiReviews = interviewerReviews.filter(
+        (review) => review.review_status === InterviewerReviewStatus.SUBMITTED,
+      );
+
+      this.validationHelper.ensureDecisionSourceRules({
+        decisionSource: nextDecisionSource,
+        hasHumanInterviewFeedback,
+        hasAiInterviewFeedback: Boolean(aiFeedback),
+        hasSubmittedAiReview: submittedAiReviews.length > 0,
+      });
+
+      const isApplicationHired =
+        application.current_stage === ApplicationCurrentStage.HIRED ||
+        application.application_status === ApplicationStatus.HIRED;
+
+      if (isApplicationHired) {
+        const attemptingNonHiredUpdate =
+          nextStatus !== DecisionStatus.HIRED ||
+          isReasonUpdate ||
+          isNotesUpdate ||
+          isSourceUpdate;
+
+        if (attemptingNonHiredUpdate) {
+          throw new ConflictException({
+            message:
+              'Decision cannot be updated after application is marked HIRED (except aligning decision to HIRED)',
+            code: 'DECISION_UPDATE_NOT_ALLOWED_HIRED',
+          });
+        }
+      }
+
+      if (isStatusChange) {
         if (nextStatus === DecisionStatus.HIRED) {
           await this.workflowValidationHelper.ensureHiredDecisionConsistency({
             applicationId: application.id,
@@ -173,11 +319,11 @@ export class UpdateApplicationDecisionUseCase {
         }
       }
 
-      if (!isStatusChange && isReasonUpdate) {
+      if (!isStatusChange && (isReasonUpdate || isNotesUpdate || isSourceUpdate)) {
         if (nextStatus === DecisionStatus.HIRED) {
           throw new ConflictException({
-            message: 'Decision reason cannot be updated for HIRED decisions',
-            code: 'DECISION_REASON_UPDATE_NOT_ALLOWED_HIRED',
+            message: 'Decision details cannot be updated for HIRED decisions',
+            code: 'DECISION_UPDATE_NOT_ALLOWED_HIRED',
           });
         }
 
@@ -192,6 +338,12 @@ export class UpdateApplicationDecisionUseCase {
       const stageChangeEvents: Array<{ fromStage: string; toStage: string }> =
         [];
       const now = new Date();
+      const proctoringEvents = aiSession
+        ? await this.interviewProctoringEventsRepository.getEventsForRiskSummary(
+            aiSession.id,
+            { manager },
+          )
+        : [];
 
       if (
         isStatusChange &&
@@ -220,6 +372,23 @@ export class UpdateApplicationDecisionUseCase {
 
       decision.decision_status = nextStatus;
       decision.decision_reason = nextReason;
+      decision.decision_notes = nextNotes;
+      decision.ai_interview_session_id = aiSession?.id ?? null;
+      decision.ai_interview_feedback_id = aiFeedback?.id ?? null;
+      decision.decision_source = nextDecisionSource;
+      decision.final_score = this.decisionScoreHelper.calculateFinalScore({
+        aiFeedback,
+        interviewerReviews,
+      });
+      decision.ai_recommendation_snapshot =
+        this.decisionSnapshotHelper.buildAiRecommendationSnapshot(aiFeedback);
+      decision.interviewer_recommendation_snapshot =
+        this.decisionSnapshotHelper.buildInterviewerRecommendationSnapshot(
+          interviewerReviews,
+        );
+      decision.proctoring_risk_snapshot =
+        this.decisionSnapshotHelper.buildProctoringRiskSnapshot(proctoringEvents);
+      decision.decision_at = now;
       decision.updated_by_user_id = actor.id;
 
       await this.decisionRepository.save(decision, { manager });
@@ -288,6 +457,8 @@ export class UpdateApplicationDecisionUseCase {
       const changedFields = [] as string[];
       if (dto.decision_status !== undefined) changedFields.push('decision_status');
       if (dto.decision_reason !== undefined) changedFields.push('decision_reason');
+      if (dto.decision_notes !== undefined) changedFields.push('decision_notes');
+      if (dto.decision_source !== undefined) changedFields.push('decision_source');
 
       await this.activityWriter.log(
         ActivityLogBuilder.build({
@@ -306,5 +477,51 @@ export class UpdateApplicationDecisionUseCase {
 
       return loaded;
     });
+  }
+
+  private ensureAiSessionBelongsToApplication(
+    session: AiInterviewSessionEntity,
+    applicationId: string,
+  ): void {
+    if (session.application_id !== applicationId) {
+      throw new BadRequestException({
+        message:
+          'AI interview session does not belong to the same application',
+        code: 'AI_INTERVIEW_SESSION_APPLICATION_MISMATCH',
+      });
+    }
+  }
+
+  private ensureAiSessionCompleted(session: AiInterviewSessionEntity): void {
+    if (session.session_status !== AiInterviewSessionStatus.COMPLETED) {
+      throw new ConflictException({
+        message: 'AI interview session must be COMPLETED',
+        code: 'AI_INTERVIEW_SESSION_NOT_COMPLETED',
+        meta: { session_status: session.session_status },
+      });
+    }
+  }
+
+  private ensureAiFeedbackBelongsToApplication(
+    feedback: AiInterviewFeedbackEntity,
+    applicationId: string,
+  ): void {
+    if (feedback.application_id !== applicationId) {
+      throw new BadRequestException({
+        message:
+          'AI interview feedback does not belong to the same application',
+        code: 'AI_INTERVIEW_FEEDBACK_APPLICATION_MISMATCH',
+      });
+    }
+  }
+
+  private ensureAiFeedbackCompleted(feedback: AiInterviewFeedbackEntity): void {
+    if (feedback.feedback_status !== AiInterviewFeedbackStatus.COMPLETED) {
+      throw new ConflictException({
+        message: 'AI interview feedback must be COMPLETED',
+        code: 'AI_INTERVIEW_FEEDBACK_NOT_COMPLETED',
+        meta: { feedback_status: feedback.feedback_status },
+      });
+    }
   }
 }

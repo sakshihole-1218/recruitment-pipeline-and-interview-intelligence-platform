@@ -6944,6 +6944,20 @@
             }
           },
           {
+            "name": "decision_source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MANUAL",
+                "HUMAN_INTERVIEW",
+                "AI_INTERVIEW",
+                "HYBRID"
+              ]
+            }
+          },
+          {
             "name": "decision_from",
             "required": false,
             "in": "query",
@@ -17082,9 +17096,51 @@
             "type": "object",
             "nullable": true
           },
+          "decision_notes": {
+            "type": "object",
+            "nullable": true
+          },
           "decided_by_user_id": {
             "type": "string",
             "description": "Actor user UUID"
+          },
+          "ai_interview_session_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "ai_interview_feedback_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "decision_source": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "HUMAN_INTERVIEW",
+              "AI_INTERVIEW",
+              "HYBRID"
+            ],
+            "nullable": true
+          },
+          "final_score": {
+            "type": "object",
+            "nullable": true,
+            "example": "84.50"
+          },
+          "ai_recommendation_snapshot": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          },
+          "interviewer_recommendation_snapshot": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          },
+          "proctoring_risk_snapshot": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
           },
           "decision_at": {
             "format": "date-time",
@@ -17134,6 +17190,32 @@
             "type": "string",
             "description": "Reason for the decision. Required when decision_status is REJECTED or HOLD.",
             "maxLength": 2000
+          },
+          "decision_notes": {
+            "type": "string",
+            "description": "Additional decision notes for audit/review context",
+            "maxLength": 5000
+          },
+          "decided_by_user_id": {
+            "type": "string",
+            "description": "Deciding user UUID. Defaults to the current authenticated user when omitted for backward compatibility."
+          },
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          },
+          "ai_interview_feedback_id": {
+            "type": "string",
+            "description": "AI interview feedback UUID"
+          },
+          "decision_source": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "HUMAN_INTERVIEW",
+              "AI_INTERVIEW",
+              "HYBRID"
+            ]
           }
         },
         "required": [
@@ -17159,6 +17241,20 @@
             "type": "string",
             "description": "Reason for the decision. Required when decision_status is REJECTED or HOLD.",
             "maxLength": 2000
+          },
+          "decision_notes": {
+            "type": "string",
+            "description": "Additional decision notes for audit/review context",
+            "maxLength": 5000
+          },
+          "decision_source": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "HUMAN_INTERVIEW",
+              "AI_INTERVIEW",
+              "HYBRID"
+            ]
           }
         }
       },
