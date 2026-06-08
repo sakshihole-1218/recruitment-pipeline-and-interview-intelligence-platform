@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 
+import { InterviewFeedbackEntity } from '../../interviews/entities/interview-feedback.entity';
 import { InterviewEntity } from '../../interviews/entities/interview.entity';
 import { InterviewStatus } from '../../interviews/enums/interview-status.enum';
 
@@ -49,5 +50,26 @@ export class ValidateInterviewFeedbackHelper {
       code: 'DECISION_FEEDBACK_REQUIRED',
       meta: { missing_round_ids: missingRoundIds },
     });
+  }
+
+  async hasAnyInterviewFeedbackForApplication(options: {
+    applicationId: string;
+    manager: EntityManager;
+  }): Promise<boolean> {
+    const count = await options.manager
+      .getRepository(InterviewFeedbackEntity)
+      .createQueryBuilder('feedback')
+      .innerJoin(
+        InterviewEntity,
+        'interviews',
+        'interviews.id = feedback.interview_id AND interviews.deleted_at IS NULL',
+      )
+      .where('feedback.deleted_at IS NULL')
+      .andWhere('interviews.application_id = :applicationId', {
+        applicationId: options.applicationId,
+      })
+      .getCount();
+
+    return count > 0;
   }
 }

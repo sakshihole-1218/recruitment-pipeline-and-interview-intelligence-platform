@@ -1,0 +1,6 @@
+export enum DecisionSource {
+  MANUAL = 'MANUAL',
+  HUMAN_INTERVIEW = 'HUMAN_INTERVIEW',
+  AI_INTERVIEW = 'AI_INTERVIEW',
+  HYBRID = 'HYBRID',
+}

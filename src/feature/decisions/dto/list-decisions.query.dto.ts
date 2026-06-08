@@ -3,6 +3,7 @@ import { Transform } from 'class-transformer';
 import { IsEnum, IsIn, IsISO8601, IsOptional, IsUUID } from 'class-validator';
 
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { DecisionSource } from '../enums/decision-source.enum';
 import { DecisionStatus } from '../enums/decision-status.enum';
 
 const DECISION_SORT_FIELDS = [
@@ -37,6 +38,12 @@ export class ListDecisionsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsUUID()
   decided_by_user_id?: string;
+
+  @ApiPropertyOptional({ enum: DecisionSource })
+  @IsOptional()
+  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @IsEnum(DecisionSource)
+  decision_source?: DecisionSource;
 
   @ApiPropertyOptional({
     description: 'Filter decisions where decision_at >= decision_from',

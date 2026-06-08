@@ -99,6 +99,12 @@ export class ApplicationDecisionRepository {
       });
     }
 
+    if (query.decision_source) {
+      qb.andWhere('application_decisions.decision_source = :decisionSource', {
+        decisionSource: query.decision_source,
+      });
+    }
+
     if (query.decision_from) {
       const from = new Date(query.decision_from);
       if (Number.isNaN(from.getTime())) {

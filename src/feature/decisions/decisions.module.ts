@@ -3,6 +3,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UserEntity } from '../accessControl/entities/user.entity';
 import { UserRepository } from '../accessControl/repositories/user.repository';
+import { AiInterviewFeedbackEntity } from '../aiInterviewFeedback/entities/ai-interview-feedback.entity';
+import { AiInterviewFeedbackRepository } from '../aiInterviewFeedback/repositories/ai-interview-feedback.repository';
+import { AiInterviewSessionEntity } from '../aiInterviewSessions/entities/ai-interview-session.entity';
+import { AiInterviewSessionRepository } from '../aiInterviewSessions/repositories/ai-interview-session.repository';
+import { InterviewerReviewEntity } from '../aiInterviewerReviews/entities/interviewer-review.entity';
+import { InterviewerReviewRepository } from '../aiInterviewerReviews/repositories/interviewer-review.repository';
+import { InterviewProctoringEventEntity } from '../aiInterviewProctoringEvents/entities/interview-proctoring-event.entity';
+import { InterviewProctoringEventsRepository } from '../aiInterviewProctoringEvents/repositories/interview-proctoring-events.repository';
 import { ApplicationEntity } from '../applications/entities/application.entity';
 import { ApplicationStageHistoryEntity } from '../applications/entities/application-stage-history.entity';
 import { ApplicationRepository } from '../applications/repositories/application.repository';
@@ -13,6 +21,9 @@ import { DecisionsController } from './controllers/decisions.controller';
 import { DecisionsService } from './application/services/decisions.service';
 import { ApplicationDecisionEntity } from './entities/application-decision.entity';
 import { ApplicationDecisionRepository } from './repositories/application-decision.repository';
+import { DecisionScoreHelper } from './helpers/decision-score.helper';
+import { DecisionSnapshotHelper } from './helpers/decision-snapshot.helper';
+import { DecisionTransitionValidator } from './helpers/decision-transition.validator';
 import { DecisionsPaginationHelper } from './helpers/decisions-pagination.helper';
 import { DecisionsValidationHelper } from './helpers/decisions-validation.helper';
 import { ValidateMandatoryInterviewsHelper } from './helpers/validate-mandatory-interviews.helper';
@@ -34,6 +45,10 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
       ApplicationStageHistoryEntity,
       OfferEntity,
       UserEntity,
+      AiInterviewSessionEntity,
+      AiInterviewFeedbackEntity,
+      InterviewerReviewEntity,
+      InterviewProctoringEventEntity,
     ]),
     ActivityLogsModule,
   ],
@@ -45,9 +60,16 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     ApplicationStageHistoryRepository,
     UserRepository,
     OfferRepository,
+    AiInterviewSessionRepository,
+    AiInterviewFeedbackRepository,
+    InterviewerReviewRepository,
+    InterviewProctoringEventsRepository,
     // helpers
     DecisionsPaginationHelper,
     DecisionsValidationHelper,
+    DecisionTransitionValidator,
+    DecisionScoreHelper,
+    DecisionSnapshotHelper,
     ValidateMandatoryInterviewsHelper,
     ValidateInterviewFeedbackHelper,
     DecisionsWorkflowValidationHelper,
