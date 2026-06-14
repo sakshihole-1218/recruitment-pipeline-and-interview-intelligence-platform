@@ -24,6 +24,7 @@ import { AiInterviewTranscriptsModule } from './feature/aiInterviewTranscripts/a
 import { AiInterviewFeedbackModule } from './feature/aiInterviewFeedback/ai-interview-feedback.module';
 import { AiInterviewProctoringEventsModule } from './feature/aiInterviewProctoringEvents/ai-interview-proctoring-events.module';
 import { AiInterviewReviewsModule } from './feature/aiInterviewerReviews/ai-interview-reviews.module';
+import { LivekitIntegrationModule } from './feature/livekit-integration/livekit-integration.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { AiInterviewReviewsModule } from './feature/aiInterviewerReviews/ai-inte
     AiInterviewFeedbackModule,
     AiInterviewProctoringEventsModule,
     AiInterviewReviewsModule,
+    LivekitIntegrationModule,
   ],
 })
 export class AppModule {}
