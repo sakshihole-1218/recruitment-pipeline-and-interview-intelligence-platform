@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { GeminiClient } from '../../common/ai/gemini/gemini.client';
 
 import { ApplicationEntity } from '../applications/entities/application.entity';
 import { CandidateDocumentEntity } from '../candidates/entities/candidate-document.entity';
@@ -8,6 +10,7 @@ import { InterviewFeedbackEntity } from '../interviews/entities/interview-feedba
 
 import { FeedbackAiSummariesController } from './controllers/feedback-ai-summaries.controller';
 import { ResumeAiAnalysesController } from './controllers/resume-ai-analyses.controller';
+import { AiInsightsGeminiController } from './controllers/ai-insights-gemini.controller';
 
 import { FeedbackAiSummariesService } from './application/services/feedback-ai-summaries.service';
 import { ResumeAiAnalysesService } from './application/services/resume-ai-analyses.service';
@@ -22,6 +25,7 @@ import { ResumeAiAnalysisRepository } from './repositories/resume-ai-analysis.re
 import { AiInsightsReferenceRepository } from './repositories/ai-insights-reference.repository';
 
 import { AI_INSIGHTS_PROVIDER } from './providers/ai-insights-provider';
+import { GeminiAiInsightsProvider } from './providers/gemini-ai-insights.provider';
 import { HeuristicAiInsightsProvider } from './providers/heuristic-ai-insights.provider';
 import { MockAiInsightsProvider } from './providers/mock-ai-insights.provider';
 
@@ -41,8 +45,10 @@ import { FindFeedbackAiSummaryByIdUseCase } from './application/use-cases/find-f
 import { FindFeedbackAiSummaryByApplicationIdUseCase } from './application/use-cases/find-feedback-ai-summary-by-application-id.usecase';
 import { ListFeedbackAiSummariesUseCase } from './application/use-cases/list-feedback-ai-summaries.usecase';
 import { DeleteFeedbackAiSummaryUseCase } from './application/use-cases/delete-feedback-ai-summary.usecase';
+import { TestGeminiConnectionUseCase } from './application/use-cases/test-gemini-connection.usecase';
 
 import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
+import { AiInsightsGeminiService } from './application/services/ai-insights-gemini.service';
 
 @Module({
   imports: [
@@ -56,13 +62,27 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     ]),
     ActivityLogsModule,
   ],
-  controllers: [ResumeAiAnalysesController, FeedbackAiSummariesController],
+  controllers: [
+    ResumeAiAnalysesController,
+    FeedbackAiSummariesController,
+    AiInsightsGeminiController,
+  ],
   providers: [
     // provider abstraction
     {
       provide: AI_INSIGHTS_PROVIDER,
-      useClass: MockAiInsightsProvider,
+      inject: [ConfigService, MockAiInsightsProvider, GeminiAiInsightsProvider],
+      useFactory: (
+        configService: ConfigService,
+        mockProvider: MockAiInsightsProvider,
+        geminiProvider: GeminiAiInsightsProvider,
+      ) => {
+        return configService.get<string>('AI_PROVIDER', 'mock') === 'gemini'
+          ? geminiProvider
+          : mockProvider;
+      },
     },
+    GeminiClient,
 
     // repositories
     ResumeAiAnalysisRepository,
@@ -90,14 +110,17 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     FindFeedbackAiSummaryByApplicationIdUseCase,
     ListFeedbackAiSummariesUseCase,
     DeleteFeedbackAiSummaryUseCase,
+    TestGeminiConnectionUseCase,
 
     // services
     ResumeAiAnalysesService,
     FeedbackAiSummariesService,
+    AiInsightsGeminiService,
 
     // implementations
     HeuristicAiInsightsProvider,
     MockAiInsightsProvider,
+    GeminiAiInsightsProvider,
   ],
   exports: [ResumeAiAnalysesService, FeedbackAiSummariesService],
 })

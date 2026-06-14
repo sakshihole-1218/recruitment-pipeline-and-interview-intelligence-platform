@@ -10,9 +10,21 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
     ports:
-      - '5433:5432'
+      - '5434:5432'
     volumes:
       - recruitment_postgres_data:/var/lib/postgresql/data
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: recruitment_livekit
+    restart: unless-stopped
+    command: --config /livekit.yaml
+    ports:
+      - '7880:7880'
+      - '7881:7881'
+      - '51000-51100:51000-51100/udp'
+    volumes:
+      - ./livekit/livekit.local.yaml:/livekit.yaml
 
 volumes:
   recruitment_postgres_data:

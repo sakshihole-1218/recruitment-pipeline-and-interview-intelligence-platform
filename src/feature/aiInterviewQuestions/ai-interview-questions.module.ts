@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { GeminiClient } from '../../common/ai/gemini/gemini.client';
 
 import { ApplicationEntity } from '../applications/entities/application.entity';
 import { CandidateEntity } from '../candidates/entities/candidate.entity';
@@ -24,6 +26,7 @@ import { MarkQuestionAnsweredUseCase } from './application/use-cases/mark-questi
 import { MarkQuestionAskedUseCase } from './application/use-cases/mark-question-asked.usecase';
 import { UpdateInterviewQuestionUseCase } from './application/use-cases/update-interview-question.usecase';
 import { AI_INTERVIEW_QUESTION_PROVIDER } from './providers/ai-interview-question-provider';
+import { GeminiAiInterviewQuestionProvider } from './providers/gemini-ai-interview-question.provider';
 import { MockAiInterviewQuestionProvider } from './providers/mock-ai-interview-question.provider';
 
 @Module({
@@ -46,9 +49,24 @@ import { MockAiInterviewQuestionProvider } from './providers/mock-ai-interview-q
     AiInterviewQuestionsValidationHelper,
     {
       provide: AI_INTERVIEW_QUESTION_PROVIDER,
-      useClass: MockAiInterviewQuestionProvider,
+      inject: [
+        ConfigService,
+        MockAiInterviewQuestionProvider,
+        GeminiAiInterviewQuestionProvider,
+      ],
+      useFactory: (
+        configService: ConfigService,
+        mockProvider: MockAiInterviewQuestionProvider,
+        geminiProvider: GeminiAiInterviewQuestionProvider,
+      ) => {
+        return configService.get<string>('AI_PROVIDER', 'mock') === 'gemini'
+          ? geminiProvider
+          : mockProvider;
+      },
     },
+    GeminiClient,
     MockAiInterviewQuestionProvider,
+    GeminiAiInterviewQuestionProvider,
     GenerateInterviewPlanUseCase,
     CreateInterviewQuestionUseCase,
     UpdateInterviewQuestionUseCase,

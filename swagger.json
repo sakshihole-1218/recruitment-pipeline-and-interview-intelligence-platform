@@ -9685,6 +9685,53 @@
         ]
       }
     },
+    "/api/ai-insights/gemini/test": {
+      "get": {
+        "operationId": "AiInsightsGeminiController_testConnection",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Gemini test completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/GeminiTestResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Test Gemini API connectivity",
+        "tags": [
+          "AI Insights - Gemini"
+        ]
+      }
+    },
     "/api/ai-interview-sessions": {
       "post": {
         "operationId": "AiInterviewSessionsController_create",
@@ -13644,6 +13691,539 @@
         "summary": "Submit interviewer review",
         "tags": [
           "Interviewer Reviews"
+        ]
+      }
+    },
+    "/api/livekit/rooms": {
+      "post": {
+        "operationId": "LivekitIntegrationController_createRoom",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLiveKitRoomDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "LiveKit room created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LivekitRoomSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create or fetch a LiveKit room for an AI interview session",
+        "tags": [
+          "LiveKit Integration"
+        ]
+      },
+      "get": {
+        "operationId": "LivekitIntegrationController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "room_started_at",
+                "room_ended_at",
+                "last_webhook_event_at",
+                "room_status"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "example": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor-based pagination. ISO timestamp for created_at. When provided, cursor pagination is used and sort_by must be created_at.",
+            "schema": {
+              "example": "2026-06-09T12:30:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "ai_interview_session_id",
+            "required": false,
+            "in": "query",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interview_id",
+            "required": false,
+            "in": "query",
+            "description": "Interview UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_id",
+            "required": false,
+            "in": "query",
+            "description": "Application UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidate_id",
+            "required": false,
+            "in": "query",
+            "description": "Candidate UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "room_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CREATED",
+                "ACTIVE",
+                "ENDED",
+                "FAILED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "LiveKit room sessions fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/PaginatedResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/LivekitRoomSessionResponseDto"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BaseResponseDto"
+                        },
+                        {
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "$ref": "#/components/schemas/LivekitRoomSessionResponseDto"
+                                  }
+                                },
+                                "limit": {
+                                  "type": "number",
+                                  "example": 10
+                                },
+                                "next_cursor": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "example": "2026-06-09T12:30:00.000Z"
+                                },
+                                "has_more": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List LiveKit room sessions",
+        "tags": [
+          "LiveKit Integration"
+        ]
+      }
+    },
+    "/api/livekit/token": {
+      "post": {
+        "operationId": "LivekitIntegrationController_generateToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateLiveKitTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "LiveKit token generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LivekitAccessTokenResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Generate LiveKit participant token",
+        "tags": [
+          "LiveKit Integration"
+        ]
+      }
+    },
+    "/api/livekit/rooms/end": {
+      "post": {
+        "operationId": "LivekitIntegrationController_endRoom",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndLiveKitRoomDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "LiveKit room ended successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LivekitRoomSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "End a LiveKit room for an AI interview session",
+        "tags": [
+          "LiveKit Integration"
+        ]
+      }
+    },
+    "/api/livekit/rooms/session/{sessionId}": {
+      "get": {
+        "operationId": "LivekitIntegrationController_getBySession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "LiveKit room session fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LivekitRoomSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get LiveKit room session by AI interview session id",
+        "tags": [
+          "LiveKit Integration"
+        ]
+      }
+    },
+    "/api/livekit/rooms/{id}": {
+      "get": {
+        "operationId": "LivekitIntegrationController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "LiveKit room session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "LiveKit room session fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LivekitRoomSessionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get LiveKit room session by id",
+        "tags": [
+          "LiveKit Integration"
+        ]
+      }
+    },
+    "/api/livekit/webhooks": {
+      "post": {
+        "operationId": "LivekitIntegrationController_handleWebhook",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "LiveKit webhook processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LivekitWebhookResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Handle LiveKit webhook events",
+        "tags": [
+          "LiveKit Integration"
         ]
       }
     }
@@ -17872,6 +18452,23 @@
           "application_id"
         ]
       },
+      "GeminiTestResponseDto": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "example": "gemini"
+          },
+          "response_text": {
+            "type": "string",
+            "example": "Hello from Gemini!"
+          }
+        },
+        "required": [
+          "provider",
+          "response_text"
+        ]
+      },
       "AiInterviewSessionResponseDto": {
         "type": "object",
         "properties": {
@@ -19491,6 +20088,228 @@
         },
         "required": [
           "id"
+        ]
+      },
+      "LivekitRoomSessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ai_interview_session_id": {
+            "type": "string"
+          },
+          "interview_id": {
+            "type": "string"
+          },
+          "application_id": {
+            "type": "string"
+          },
+          "candidate_id": {
+            "type": "string"
+          },
+          "room_name": {
+            "type": "string"
+          },
+          "room_status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "ACTIVE",
+              "ENDED",
+              "FAILED"
+            ]
+          },
+          "candidate_identity": {
+            "type": "object",
+            "nullable": true
+          },
+          "ai_agent_identity": {
+            "type": "object",
+            "nullable": true
+          },
+          "room_started_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "room_ended_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "last_webhook_event_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleted_at": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "updated_by_user_id": {
+            "type": "object",
+            "nullable": true
+          },
+          "deleted_by_user_id": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "ai_interview_session_id",
+          "interview_id",
+          "application_id",
+          "candidate_id",
+          "room_name",
+          "room_status",
+          "candidate_identity",
+          "ai_agent_identity",
+          "room_started_at",
+          "room_ended_at",
+          "last_webhook_event_at",
+          "metadata",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "created_by_user_id",
+          "updated_by_user_id",
+          "deleted_by_user_id"
+        ]
+      },
+      "CreateLiveKitRoomDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          }
+        },
+        "required": [
+          "ai_interview_session_id"
+        ]
+      },
+      "LivekitAccessTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "room_name": {
+            "type": "string"
+          },
+          "identity": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "participant_type": {
+            "type": "string",
+            "enum": [
+              "CANDIDATE",
+              "AI_AGENT",
+              "REVIEWER",
+              "ADMIN"
+            ]
+          },
+          "livekit_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "room_name",
+          "identity",
+          "display_name",
+          "participant_type",
+          "livekit_url"
+        ]
+      },
+      "GenerateLiveKitTokenDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          },
+          "participant_type": {
+            "type": "string",
+            "enum": [
+              "CANDIDATE",
+              "AI_AGENT",
+              "REVIEWER",
+              "ADMIN"
+            ]
+          },
+          "identity": {
+            "type": "string",
+            "description": "Optional custom identity for reviewer/admin flows"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Participant display name"
+          }
+        },
+        "required": [
+          "ai_interview_session_id",
+          "participant_type"
+        ]
+      },
+      "EndLiveKitRoomDto": {
+        "type": "object",
+        "properties": {
+          "ai_interview_session_id": {
+            "type": "string",
+            "description": "AI interview session UUID"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional reason for ending the room"
+          }
+        },
+        "required": [
+          "ai_interview_session_id"
+        ]
+      },
+      "LivekitWebhookResponseDto": {
+        "type": "object",
+        "properties": {
+          "processed": {
+            "type": "boolean"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "room_name": {
+            "type": "object",
+            "nullable": true
+          },
+          "room_status": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "processed",
+          "event_type",
+          "room_name",
+          "room_status"
         ]
       }
     }

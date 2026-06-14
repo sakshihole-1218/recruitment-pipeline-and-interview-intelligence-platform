@@ -24,7 +24,14 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  app.use(express.json({ limit: '10mb' }));
+  app.use(
+    express.json({
+      limit: '10mb',
+      verify: (req: express.Request & { rawBody?: string }, _res, buf) => {
+        req.rawBody = buf.toString('utf8');
+      },
+    }),
+  );
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
   app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });

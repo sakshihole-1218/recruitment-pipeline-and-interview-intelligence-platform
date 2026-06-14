@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { GeminiClient } from '../../common/ai/gemini/gemini.client';
 
 import { ApplicationEntity } from '../applications/entities/application.entity';
 import { CandidateEntity } from '../candidates/entities/candidate.entity';
@@ -20,6 +22,7 @@ import { AiInterviewFeedbackController } from './controllers/ai-interview-feedba
 import { AiInterviewFeedbackEntity } from './entities/ai-interview-feedback.entity';
 import { AiInterviewFeedbackValidationHelper } from './helpers/ai-interview-feedback-validation.helper';
 import { AI_INTERVIEW_FEEDBACK_PROVIDER } from './providers/ai-interview-feedback-provider';
+import { GeminiAiInterviewFeedbackProvider } from './providers/gemini-ai-interview-feedback.provider';
 import { MockAiInterviewFeedbackProvider } from './providers/mock-ai-interview-feedback.provider';
 import { AiInterviewFeedbackReferenceRepository } from './repositories/ai-interview-feedback-reference.repository';
 import { AiInterviewFeedbackRepository } from './repositories/ai-interview-feedback.repository';
@@ -44,9 +47,24 @@ import { AiInterviewFeedbackRepository } from './repositories/ai-interview-feedb
     AiInterviewFeedbackValidationHelper,
     {
       provide: AI_INTERVIEW_FEEDBACK_PROVIDER,
-      useClass: MockAiInterviewFeedbackProvider,
+      inject: [
+        ConfigService,
+        MockAiInterviewFeedbackProvider,
+        GeminiAiInterviewFeedbackProvider,
+      ],
+      useFactory: (
+        configService: ConfigService,
+        mockProvider: MockAiInterviewFeedbackProvider,
+        geminiProvider: GeminiAiInterviewFeedbackProvider,
+      ) => {
+        return configService.get<string>('AI_PROVIDER', 'mock') === 'gemini'
+          ? geminiProvider
+          : mockProvider;
+      },
     },
+    GeminiClient,
     MockAiInterviewFeedbackProvider,
+    GeminiAiInterviewFeedbackProvider,
     GenerateAiInterviewFeedbackUseCase,
     RegenerateAiInterviewFeedbackUseCase,
     GetAiInterviewFeedbackByIdUseCase,

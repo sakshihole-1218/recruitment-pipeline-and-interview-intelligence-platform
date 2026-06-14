@@ -25,4 +25,16 @@ export const envValidationSchema = Joi.object({
   JWT_ACCESS_EXPIRES_IN: Joi.string().required(),
   JWT_REFRESH_SECRET: Joi.string().required(),
   JWT_REFRESH_EXPIRES_IN: Joi.string().required(),
+
+  AI_PROVIDER: Joi.string().valid('mock', 'gemini').default('mock'),
+  GEMINI_API_KEY: Joi.when('AI_PROVIDER', {
+    is: 'gemini',
+    then: Joi.string().trim().required(),
+    otherwise: Joi.string().trim().optional().allow(''),
+  }),
+
+  LIVEKIT_API_KEY: Joi.string().required(),
+  LIVEKIT_API_SECRET: Joi.string().required(),
+  LIVEKIT_URL: Joi.string().required(),
+  LIVEKIT_WEBHOOK_SECRET: Joi.string().optional(),
 });
