@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+  GatewayTimeoutException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   AccessToken,
@@ -9,6 +14,8 @@ import {
 
 @Injectable()
 export class LivekitProvider {
+  private static readonly SERVICE_REQUEST_TIMEOUT_MS = 10000;
+
   constructor(private readonly configService: ConfigService) {}
 
   private get apiKey(): string {
@@ -62,6 +69,33 @@ export class LivekitProvider {
     return new RoomServiceClient(this.serviceUrl, this.apiKey, this.apiSecret);
   }
 
+  private async withTimeout<T>(operation: Promise<T>, action: string): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(
+          new GatewayTimeoutException({
+            message: `LiveKit ${action} timed out`,
+            code: `LIVEKIT_${action.toUpperCase().replace(/\s+/g, '_')}_TIMEOUT`,
+            meta: {
+              timeout_ms: LivekitProvider.SERVICE_REQUEST_TIMEOUT_MS,
+              service_url: this.serviceUrl,
+            },
+          }),
+        );
+      }, LivekitProvider.SERVICE_REQUEST_TIMEOUT_MS);
+    });
+
+    try {
+      return await Promise.race([operation, timeoutPromise]);
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    }
+  }
+
   async createRoom(input: {
     roomName: string;
     metadata?: Record<string, unknown>;
@@ -69,13 +103,16 @@ export class LivekitProvider {
     departureTimeout?: number;
     maxParticipants?: number;
   }): Promise<{ name: string; metadata: string | undefined }> {
-    const room = await this.createRoomClient().createRoom({
-      name: input.roomName,
-      metadata: input.metadata ? JSON.stringify(input.metadata) : undefined,
-      emptyTimeout: input.emptyTimeout,
-      departureTimeout: input.departureTimeout,
-      maxParticipants: input.maxParticipants,
-    });
+    const room = await this.withTimeout(
+      this.createRoomClient().createRoom({
+        name: input.roomName,
+        metadata: input.metadata ? JSON.stringify(input.metadata) : undefined,
+        emptyTimeout: input.emptyTimeout,
+        departureTimeout: input.departureTimeout,
+        maxParticipants: input.maxParticipants,
+      }),
+      'create room',
+    );
 
     return {
       name: room.name,
@@ -84,7 +121,10 @@ export class LivekitProvider {
   }
 
   deleteRoom(roomName: string): Promise<void> {
-    return this.createRoomClient().deleteRoom(roomName);
+    return this.withTimeout(
+      this.createRoomClient().deleteRoom(roomName),
+      'delete room',
+    );
   }
 
   async generateAccessToken(input: {
