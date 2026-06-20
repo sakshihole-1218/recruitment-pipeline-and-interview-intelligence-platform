@@ -36,7 +36,10 @@ export class ScheduleInterviewUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: ScheduleInterviewDto, actorUserId: string): Promise<InterviewEntity> {
+  async execute(
+    dto: ScheduleInterviewDto,
+    actorUserId: string,
+  ): Promise<InterviewEntity> {
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -258,7 +261,8 @@ export class ScheduleInterviewUseCase {
             interview_round_id: loaded.interview_round_id,
             interview_status: loaded.interview_status,
             interview_mode: loaded.interview_mode,
-            scheduled_start_at: loaded.scheduled_start_at?.toISOString?.() ?? null,
+            scheduled_start_at:
+              loaded.scheduled_start_at?.toISOString?.() ?? null,
             scheduled_end_at: loaded.scheduled_end_at?.toISOString?.() ?? null,
             panel_members_count: loaded.panel_members?.length ?? null,
           },

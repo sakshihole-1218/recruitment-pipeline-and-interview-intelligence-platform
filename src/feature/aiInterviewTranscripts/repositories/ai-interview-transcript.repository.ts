@@ -28,8 +28,12 @@ export class AiInterviewTranscriptRepository {
     private readonly repository: Repository<AiInterviewTranscriptEntity>,
   ) {}
 
-  private repo(manager?: EntityManager): Repository<AiInterviewTranscriptEntity> {
-    return manager ? manager.getRepository(AiInterviewTranscriptEntity) : this.repository;
+  private repo(
+    manager?: EntityManager,
+  ): Repository<AiInterviewTranscriptEntity> {
+    return manager
+      ? manager.getRepository(AiInterviewTranscriptEntity)
+      : this.repository;
   }
 
   private baseQuery(
@@ -65,10 +69,10 @@ export class AiInterviewTranscriptRepository {
     id: string,
     options?: { manager?: EntityManager; lockForUpdate?: boolean },
   ): Promise<AiInterviewTranscriptEntity | null> {
-    const qb = this.baseQuery('ai_interview_transcripts', options?.manager).andWhere(
-      'ai_interview_transcripts.id = :id',
-      { id },
-    );
+    const qb = this.baseQuery(
+      'ai_interview_transcripts',
+      options?.manager,
+    ).andWhere('ai_interview_transcripts.id = :id', { id });
 
     if (options?.lockForUpdate) {
       qb.setLock('pessimistic_write');
@@ -82,9 +86,12 @@ export class AiInterviewTranscriptRepository {
     options?: { manager?: EntityManager },
   ): Promise<AiInterviewTranscriptEntity[]> {
     return this.baseQuery('ai_interview_transcripts', options?.manager)
-      .andWhere('ai_interview_transcripts.ai_interview_session_id = :sessionId', {
-        sessionId,
-      })
+      .andWhere(
+        'ai_interview_transcripts.ai_interview_session_id = :sessionId',
+        {
+          sessionId,
+        },
+      )
       .orderBy('ai_interview_transcripts.sequence_number', 'ASC')
       .addOrderBy('ai_interview_transcripts.created_at', 'ASC')
       .getMany();
@@ -100,11 +107,20 @@ export class AiInterviewTranscriptRepository {
     sessionId: string,
     options?: { manager?: EntityManager },
   ): Promise<number> {
-    const raw = await this.baseQuery('ai_interview_transcripts', options?.manager)
-      .select('COALESCE(MAX(ai_interview_transcripts.sequence_number), 0)', 'max_sequence')
-      .andWhere('ai_interview_transcripts.ai_interview_session_id = :sessionId', {
-        sessionId,
-      })
+    const raw = await this.baseQuery(
+      'ai_interview_transcripts',
+      options?.manager,
+    )
+      .select(
+        'COALESCE(MAX(ai_interview_transcripts.sequence_number), 0)',
+        'max_sequence',
+      )
+      .andWhere(
+        'ai_interview_transcripts.ai_interview_session_id = :sessionId',
+        {
+          sessionId,
+        },
+      )
       .getRawOne<{ max_sequence: string }>();
 
     return Number(raw?.max_sequence || 0) + 1;
@@ -142,10 +158,16 @@ export class AiInterviewTranscriptRepository {
     sequenceNumber: number,
     options?: { manager?: EntityManager },
   ): Promise<boolean> {
-    const count = await this.baseQuery('ai_interview_transcripts', options?.manager)
-      .andWhere('ai_interview_transcripts.ai_interview_session_id = :sessionId', {
-        sessionId,
-      })
+    const count = await this.baseQuery(
+      'ai_interview_transcripts',
+      options?.manager,
+    )
+      .andWhere(
+        'ai_interview_transcripts.ai_interview_session_id = :sessionId',
+        {
+          sessionId,
+        },
+      )
       .andWhere('ai_interview_transcripts.sequence_number = :sequenceNumber', {
         sequenceNumber,
       })
@@ -154,7 +176,9 @@ export class AiInterviewTranscriptRepository {
     return count > 0;
   }
 
-  async list(query: TranscriptQueryDto): Promise<AiInterviewTranscriptListResult> {
+  async list(
+    query: TranscriptQueryDto,
+  ): Promise<AiInterviewTranscriptListResult> {
     const qb = this.baseQuery('ai_interview_transcripts');
 
     if (query.ai_interview_session_id) {
@@ -189,7 +213,8 @@ export class AiInterviewTranscriptRepository {
       });
     }
 
-    const orderDirection = (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
+    const orderDirection =
+      (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
     const sortBy = query.sort_by || 'created_at';
 
     const allowedSort = [
@@ -200,7 +225,7 @@ export class AiInterviewTranscriptRepository {
       'speaker_type',
     ] as const;
 
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
@@ -208,7 +233,11 @@ export class AiInterviewTranscriptRepository {
     }
 
     if (sortBy === 'spoken_at') {
-      qb.orderBy(`ai_interview_transcripts.${sortBy}`, orderDirection, 'NULLS LAST');
+      qb.orderBy(
+        `ai_interview_transcripts.${sortBy}`,
+        orderDirection,
+        'NULLS LAST',
+      );
     } else {
       qb.orderBy(`ai_interview_transcripts.${sortBy}`, orderDirection);
     }
@@ -219,7 +248,8 @@ export class AiInterviewTranscriptRepository {
     if (query.cursor) {
       if ((query.sort_by || 'created_at') !== 'created_at') {
         throw new BadRequestException({
-          message: 'Cursor pagination is only supported with sort_by=created_at',
+          message:
+            'Cursor pagination is only supported with sort_by=created_at',
           code: 'CURSOR_SORT_BY_REQUIRED',
         });
       }
@@ -242,10 +272,15 @@ export class AiInterviewTranscriptRepository {
         });
       }
 
-      const rows = await qb.clone().take(limit + 1).getMany();
+      const rows = await qb
+        .clone()
+        .take(limit + 1)
+        .getMany();
       const hasMore = rows.length > limit;
       const data = hasMore ? rows.slice(0, limit) : rows;
-      const nextCursor = hasMore ? data[data.length - 1]?.created_at?.toISOString() ?? null : null;
+      const nextCursor = hasMore
+        ? (data[data.length - 1]?.created_at?.toISOString() ?? null)
+        : null;
 
       return {
         mode: 'cursor',

@@ -38,10 +38,13 @@ export class EndLiveKitRoomUseCase {
         });
       }
 
-      const room = await this.roomRepository.findByAiInterviewSessionId(session.id, {
-        manager,
-        lockForUpdate: true,
-      });
+      const room = await this.roomRepository.findByAiInterviewSessionId(
+        session.id,
+        {
+          manager,
+          lockForUpdate: true,
+        },
+      );
 
       if (!room) {
         throw new NotFoundException({

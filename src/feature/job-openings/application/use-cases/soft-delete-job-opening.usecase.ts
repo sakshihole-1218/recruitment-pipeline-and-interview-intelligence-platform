@@ -37,7 +37,9 @@ export class SoftDeleteJobOpeningUseCase {
       opening.updated_by_user_id = actorUserId ?? opening.updated_by_user_id;
 
       await this.jobOpeningRepository.save(opening, { manager });
-      await this.jobOpeningSkillRepository.softDeleteByJobOpeningId(id, { manager });
+      await this.jobOpeningSkillRepository.softDeleteByJobOpeningId(id, {
+        manager,
+      });
 
       const loaded = await this.jobOpeningRepository.findById(id, { manager });
       if (loaded) {

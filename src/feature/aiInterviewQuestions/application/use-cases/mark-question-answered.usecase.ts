@@ -11,7 +11,10 @@ export class MarkQuestionAnsweredUseCase {
     private readonly validation: AiInterviewQuestionsValidationHelper,
   ) {}
 
-  async execute(id: string, actorUserId?: string): Promise<AiInterviewQuestionEntity> {
+  async execute(
+    id: string,
+    actorUserId?: string,
+  ): Promise<AiInterviewQuestionEntity> {
     this.validation.ensureActorUserRequired(actorUserId);
 
     const question = await this.repository.findById(id);
@@ -28,7 +31,10 @@ export class MarkQuestionAnsweredUseCase {
     question.is_answered = true;
     question.updated_by_user_id = actorUserId;
 
-    this.validation.ensureAnsweredAfterAsked(question.asked_at, question.answered_at);
+    this.validation.ensureAnsweredAfterAsked(
+      question.asked_at,
+      question.answered_at,
+    );
 
     return this.repository.updateQuestion(question);
   }

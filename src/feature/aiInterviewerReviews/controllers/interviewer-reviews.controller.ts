@@ -55,7 +55,9 @@ export class InterviewerReviewsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create interviewer review draft for an AI interview session' })
+  @ApiOperation({
+    summary: 'Create interviewer review draft for an AI interview session',
+  })
   @ApiBody({ type: CreateInterviewerReviewDto })
   @ApiStandardResponse(
     InterviewerReviewResponseDto,
@@ -74,7 +76,9 @@ export class InterviewerReviewsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List interviewer reviews with offset or cursor pagination' })
+  @ApiOperation({
+    summary: 'List interviewer reviews with offset or cursor pagination',
+  })
   @ApiInterviewerReviewsPaginatedResponse(
     InterviewerReviewResponseDto,
     'Interviewer reviews fetched successfully',
@@ -102,7 +106,9 @@ export class InterviewerReviewsController {
 
   @Get('session/:sessionId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get interviewer reviews by AI interview session id' })
+  @ApiOperation({
+    summary: 'Get interviewer reviews by AI interview session id',
+  })
   @ApiParam({ name: 'sessionId', description: 'AI interview session UUID' })
   @ApiInterviewerReviewsArrayResponse(
     InterviewerReviewResponseDto,
@@ -204,6 +210,8 @@ export class InterviewerReviewsController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     await this.service.softDelete(id, actor?.sub);
-    return ResponseUtil.success('Interviewer review deleted successfully', { id });
+    return ResponseUtil.success('Interviewer review deleted successfully', {
+      id,
+    });
   }
 }

@@ -57,9 +57,14 @@ export class LivekitIntegrationController {
   @ApiBearerAuth('JWT-auth')
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create or fetch a LiveKit room for an AI interview session' })
+  @ApiOperation({
+    summary: 'Create or fetch a LiveKit room for an AI interview session',
+  })
   @ApiBody({ type: CreateLiveKitRoomDto })
-  @ApiStandardResponse(LivekitRoomSessionResponseDto, 'LiveKit room created successfully')
+  @ApiStandardResponse(
+    LivekitRoomSessionResponseDto,
+    'LiveKit room created successfully',
+  )
   async createRoom(
     @Body() dto: CreateLiveKitRoomDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -84,7 +89,10 @@ export class LivekitIntegrationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Generate LiveKit participant token' })
   @ApiBody({ type: GenerateLiveKitTokenDto })
-  @ApiStandardResponse(LivekitAccessTokenResponseDto, 'LiveKit token generated successfully')
+  @ApiStandardResponse(
+    LivekitAccessTokenResponseDto,
+    'LiveKit token generated successfully',
+  )
   async generateToken(
     @Body() dto: GenerateLiveKitTokenDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -106,7 +114,10 @@ export class LivekitIntegrationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'End a LiveKit room for an AI interview session' })
   @ApiBody({ type: EndLiveKitRoomDto })
-  @ApiStandardResponse(LivekitRoomSessionResponseDto, 'LiveKit room ended successfully')
+  @ApiStandardResponse(
+    LivekitRoomSessionResponseDto,
+    'LiveKit room ended successfully',
+  )
   async endRoom(
     @Body() dto: EndLiveKitRoomDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -138,12 +149,15 @@ export class LivekitIntegrationController {
     const result = await this.service.list(query);
 
     if (result.mode === 'cursor') {
-      return ResponseUtil.success('LiveKit room sessions fetched successfully', {
-        data: result.data.map(LivekitRoomSessionsMapper.toResponse),
-        limit: result.limit,
-        next_cursor: result.next_cursor,
-        has_more: result.has_more,
-      });
+      return ResponseUtil.success(
+        'LiveKit room sessions fetched successfully',
+        {
+          data: result.data.map(LivekitRoomSessionsMapper.toResponse),
+          limit: result.limit,
+          next_cursor: result.next_cursor,
+          has_more: result.has_more,
+        },
+      );
     }
 
     return ResponseUtil.paginated(
@@ -166,7 +180,9 @@ export class LivekitIntegrationController {
   @ApiBearerAuth('JWT-auth')
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get LiveKit room session by AI interview session id' })
+  @ApiOperation({
+    summary: 'Get LiveKit room session by AI interview session id',
+  })
   @ApiParam({ name: 'sessionId', description: 'AI interview session UUID' })
   @ApiStandardResponse(
     LivekitRoomSessionResponseDto,
@@ -208,7 +224,10 @@ export class LivekitIntegrationController {
   @Post('webhooks')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Handle LiveKit webhook events' })
-  @ApiStandardResponse(LivekitWebhookResponseDto, 'LiveKit webhook processed successfully')
+  @ApiStandardResponse(
+    LivekitWebhookResponseDto,
+    'LiveKit webhook processed successfully',
+  )
   async handleWebhook(
     @Req() req: Request & { rawBody?: string },
     @Body() body: Record<string, unknown>,
@@ -219,6 +238,9 @@ export class LivekitIntegrationController {
       authorizationHeader,
     });
 
-    return ResponseUtil.success('LiveKit webhook processed successfully', result);
+    return ResponseUtil.success(
+      'LiveKit webhook processed successfully',
+      result,
+    );
   }
 }

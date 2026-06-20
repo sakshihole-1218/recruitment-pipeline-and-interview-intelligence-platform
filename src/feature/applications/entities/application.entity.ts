@@ -12,7 +12,6 @@ import { ApplicationCurrentStage } from '../enums/application-current-stage.enum
 import { ApplicationStatus } from '../enums/application-status.enum';
 import { ApplicationStageHistoryEntity } from './application-stage-history.entity';
 
-
 @Entity({ name: 'applications' })
 export class ApplicationEntity {
   @PrimaryGeneratedColumn('uuid')

@@ -55,9 +55,12 @@ export class BulkAssignPanelMembersUseCase {
       try {
         await this.dataSource.transaction(async (manager) => {
           const now = new Date();
-          const interview = await this.interviewRepository.findById(interviewId, {
-            manager,
-          });
+          const interview = await this.interviewRepository.findById(
+            interviewId,
+            {
+              manager,
+            },
+          );
 
           if (!interview) {
             throw new NotFoundException({
@@ -66,10 +69,10 @@ export class BulkAssignPanelMembersUseCase {
             });
           }
 
-          const oldActiveMembers = await this.panelMemberRepository.listByInterviewId(
-            interviewId,
-            { manager },
-          );
+          const oldActiveMembers =
+            await this.panelMemberRepository.listByInterviewId(interviewId, {
+              manager,
+            });
 
           const oldActiveUserIds = oldActiveMembers
             .filter((m) => !m.deleted_at)
@@ -79,11 +82,12 @@ export class BulkAssignPanelMembersUseCase {
           let changed = false;
 
           for (const userId of uniqueUserIds) {
-            const existing = await this.panelMemberRepository.findByInterviewAndUser(
-              interviewId,
-              userId,
-              { includeDeleted: true, manager },
-            );
+            const existing =
+              await this.panelMemberRepository.findByInterviewAndUser(
+                interviewId,
+                userId,
+                { includeDeleted: true, manager },
+              );
 
             if (existing) {
               if (existing.deleted_at) {
@@ -117,9 +121,12 @@ export class BulkAssignPanelMembersUseCase {
             return;
           }
 
-          const updated = await this.panelMemberRepository.listByInterviewId(interviewId, {
-            manager,
-          });
+          const updated = await this.panelMemberRepository.listByInterviewId(
+            interviewId,
+            {
+              manager,
+            },
+          );
 
           const newActiveUserIds = updated
             .filter((m) => !m.deleted_at)

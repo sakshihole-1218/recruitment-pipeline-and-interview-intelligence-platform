@@ -25,7 +25,11 @@ export class ListActivityLogsQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: ActivityEntityType })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(ActivityEntityType)
   entity_type?: ActivityEntityType;
 
@@ -36,7 +40,11 @@ export class ListActivityLogsQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: ActivityActionType })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(ActivityActionType)
   action_type?: ActivityActionType;
 
@@ -45,12 +53,18 @@ export class ListActivityLogsQueryDto extends PaginationQueryDto {
   @IsUUID()
   action_by_user_id?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by action_at from (inclusive)', example: '2026-01-01T00:00:00.000Z' })
+  @ApiPropertyOptional({
+    description: 'Filter by action_at from (inclusive)',
+    example: '2026-01-01T00:00:00.000Z',
+  })
   @IsOptional()
   @IsISO8601()
   action_from?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by action_at to (inclusive)', example: '2026-01-31T23:59:59.000Z' })
+  @ApiPropertyOptional({
+    description: 'Filter by action_at to (inclusive)',
+    example: '2026-01-31T23:59:59.000Z',
+  })
   @IsOptional()
   @IsISO8601()
   action_to?: string;

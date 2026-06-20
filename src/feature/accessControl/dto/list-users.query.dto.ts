@@ -51,7 +51,10 @@ export class ListUsersQueryDto extends PaginationQueryDto {
   @IsBoolean()
   is_active?: boolean;
 
-  @ApiPropertyOptional({ enum: SystemRoleCode, example: SystemRoleCode.RECRUITER })
+  @ApiPropertyOptional({
+    enum: SystemRoleCode,
+    example: SystemRoleCode.RECRUITER,
+  })
   @IsOptional()
   @IsEnum(SystemRoleCode)
   role_code?: SystemRoleCode;

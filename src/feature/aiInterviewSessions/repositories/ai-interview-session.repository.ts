@@ -56,8 +56,10 @@ export class AiInterviewSessionRepository {
     id: string,
     options?: { manager?: EntityManager; lockForUpdate?: boolean },
   ): Promise<AiInterviewSessionEntity | null> {
-    const qb = this.baseQuery('ai_interview_sessions', options?.manager)
-      .andWhere('ai_interview_sessions.id = :id', { id });
+    const qb = this.baseQuery(
+      'ai_interview_sessions',
+      options?.manager,
+    ).andWhere('ai_interview_sessions.id = :id', { id });
 
     if (options?.lockForUpdate) {
       qb.setLock('pessimistic_write');
@@ -118,7 +120,10 @@ export class AiInterviewSessionRepository {
     code: string,
     options?: { manager?: EntityManager },
   ): Promise<boolean> {
-    const existing = await this.baseQuery('ai_interview_sessions', options?.manager)
+    const existing = await this.baseQuery(
+      'ai_interview_sessions',
+      options?.manager,
+    )
       .andWhere('ai_interview_sessions.session_code = :code', { code })
       .getOne();
     return Boolean(existing);
@@ -156,7 +161,9 @@ export class AiInterviewSessionRepository {
     return this.list(query);
   }
 
-  async list(query: AiInterviewSessionQueryDto): Promise<AiInterviewSessionListResult> {
+  async list(
+    query: AiInterviewSessionQueryDto,
+  ): Promise<AiInterviewSessionListResult> {
     const qb = this.baseQuery('ai_interview_sessions');
 
     if (query.interview_id) {
@@ -178,9 +185,12 @@ export class AiInterviewSessionRepository {
     }
 
     if (query.resume_analysis_id) {
-      qb.andWhere('ai_interview_sessions.resume_analysis_id = :resumeAnalysisId', {
-        resumeAnalysisId: query.resume_analysis_id,
-      });
+      qb.andWhere(
+        'ai_interview_sessions.resume_analysis_id = :resumeAnalysisId',
+        {
+          resumeAnalysisId: query.resume_analysis_id,
+        },
+      );
     }
 
     if (query.session_status) {
@@ -251,7 +261,7 @@ export class AiInterviewSessionRepository {
       'feedback_generation_status',
     ] as const;
 
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
@@ -266,7 +276,8 @@ export class AiInterviewSessionRepository {
     if (query.cursor) {
       if ((query.sort_by || 'created_at') !== 'created_at') {
         throw new BadRequestException({
-          message: 'Cursor pagination is only supported with sort_by=created_at',
+          message:
+            'Cursor pagination is only supported with sort_by=created_at',
           code: 'CURSOR_SORT_BY_REQUIRED',
         });
       }
@@ -316,7 +327,7 @@ export class AiInterviewSessionRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

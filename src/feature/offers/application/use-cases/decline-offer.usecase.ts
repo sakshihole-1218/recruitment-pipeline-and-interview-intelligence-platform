@@ -32,7 +32,11 @@ export class DeclineOfferUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(id: string, dto: DeclineOfferDto, actorUserId?: string): Promise<OfferEntity> {
+  async execute(
+    id: string,
+    dto: DeclineOfferDto,
+    actorUserId?: string,
+  ): Promise<OfferEntity> {
     this.offersValidationHelper.ensureActorUserRequired(actorUserId);
 
     return this.dataSource.transaction(async (manager) => {
@@ -63,9 +67,12 @@ export class DeclineOfferUseCase {
 
       await this.offerRepository.save(offer, { manager });
 
-      const app = await this.applicationRepository.findById(offer.application_id, {
-        manager,
-      });
+      const app = await this.applicationRepository.findById(
+        offer.application_id,
+        {
+          manager,
+        },
+      );
       if (!app) {
         throw new ConflictException({
           message: 'Offer is linked to an invalid application',
@@ -73,7 +80,9 @@ export class DeclineOfferUseCase {
         });
       }
 
-      this.applicationsValidationHelper.ensureNotTerminalStage(app.current_stage);
+      this.applicationsValidationHelper.ensureNotTerminalStage(
+        app.current_stage,
+      );
 
       const targetStage = ApplicationCurrentStage.REJECTED;
       const fromStage = app.current_stage;
@@ -89,7 +98,7 @@ export class DeclineOfferUseCase {
             application_id: app.id,
             from_stage: fromStage,
             to_stage: targetStage,
-            changed_by_user_id: actorUserId!,
+            changed_by_user_id: actorUserId,
             change_reason: dto.decline_reason,
             changed_at: now,
           },
@@ -106,7 +115,7 @@ export class DeclineOfferUseCase {
             fromStage,
             toStage: targetStage,
             reason: dto.decline_reason,
-            actorUserId: actorUserId!,
+            actorUserId: actorUserId,
             actionAt: now,
             ipAddress: null,
             userAgent: null,
@@ -134,7 +143,7 @@ export class DeclineOfferUseCase {
           entityType: ActivityEntityType.OFFER,
           entityId: loaded.id,
           actionType: ActivityActionType.DECLINE,
-          actorUserId: actorUserId!,
+          actorUserId: actorUserId,
           oldValues: oldOfferValues,
           newValues: {
             offer_status: loaded.offer_status,

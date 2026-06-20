@@ -11,7 +11,9 @@ export class InterviewPanelMemberRepository {
     private readonly repository: Repository<InterviewPanelMemberEntity>,
   ) {}
 
-  private repo(manager?: EntityManager): Repository<InterviewPanelMemberEntity> {
+  private repo(
+    manager?: EntityManager,
+  ): Repository<InterviewPanelMemberEntity> {
     return manager
       ? manager.getRepository(InterviewPanelMemberEntity)
       : this.repository;

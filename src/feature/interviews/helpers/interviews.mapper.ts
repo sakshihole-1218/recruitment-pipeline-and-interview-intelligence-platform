@@ -8,7 +8,9 @@ import { InterviewEntity } from '../entities/interview.entity';
 import { InterviewRoundEntity } from '../entities/interview-round.entity';
 
 export class InterviewsMapper {
-  static toInterviewRoundResponse(entity: InterviewRoundEntity): InterviewRoundResponseDto {
+  static toInterviewRoundResponse(
+    entity: InterviewRoundEntity,
+  ): InterviewRoundResponseDto {
     return {
       id: entity.id,
       job_opening_id: entity.job_opening_id,
@@ -23,7 +25,9 @@ export class InterviewsMapper {
     };
   }
 
-  static toPanelMemberResponse(entity: InterviewPanelMemberEntity): InterviewPanelMemberResponseDto {
+  static toPanelMemberResponse(
+    entity: InterviewPanelMemberEntity,
+  ): InterviewPanelMemberResponseDto {
     return {
       id: entity.id,
       interview_id: entity.interview_id,
@@ -60,7 +64,9 @@ export class InterviewsMapper {
     };
   }
 
-  static toFeedbackResponse(entity: InterviewFeedbackEntity): InterviewFeedbackResponseDto {
+  static toFeedbackResponse(
+    entity: InterviewFeedbackEntity,
+  ): InterviewFeedbackResponseDto {
     return {
       id: entity.id,
       interview_id: entity.interview_id,

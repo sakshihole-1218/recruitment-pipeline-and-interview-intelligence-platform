@@ -64,7 +64,11 @@ import { UploadCandidateDocumentDto } from '../dto/upload-candidate-document.dto
 
 @ApiTags('Candidates')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('candidates')
@@ -130,7 +134,9 @@ export class CandidatesController {
   @Post('bulk/update-status')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bulk update candidate active status (partial success)' })
+  @ApiOperation({
+    summary: 'Bulk update candidate active status (partial success)',
+  })
   @ApiBody({ type: BulkUpdateCandidateStatusDto })
   @ApiStandardResponse(
     BulkUpdateCandidateStatusResponseDto,
@@ -140,7 +146,10 @@ export class CandidatesController {
     @Body() dto: BulkUpdateCandidateStatusDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const result = await this.candidatesService.bulkUpdateStatus(dto, actor?.sub);
+    const result = await this.candidatesService.bulkUpdateStatus(
+      dto,
+      actor?.sub,
+    );
 
     return ResponseUtil.success('Bulk status update processed', {
       updated: result.updated,
@@ -215,7 +224,10 @@ export class CandidatesController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List candidates (offset or cursor pagination)' })
-  @ApiCandidatesPaginatedResponse(CandidateResponseDto, 'Candidates fetched successfully')
+  @ApiCandidatesPaginatedResponse(
+    CandidateResponseDto,
+    'Candidates fetched successfully',
+  )
   async list(@Query() query: ListCandidatesQueryDto) {
     const result = await this.candidatesService.list(query);
 
@@ -242,7 +254,10 @@ export class CandidatesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete candidate' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
-  @ApiStandardResponse(SoftDeleteCandidateResponseDto, 'Candidate deleted successfully')
+  @ApiStandardResponse(
+    SoftDeleteCandidateResponseDto,
+    'Candidate deleted successfully',
+  )
   async softDelete(
     @Param('id') id: string,
     @CurrentUser() actor: AuthJwtPayload,
@@ -279,7 +294,11 @@ export class CandidatesController {
     @Body() dto: UpsertCandidateSkillsDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const skills = await this.candidatesService.upsertSkills(id, dto, actor?.sub);
+    const skills = await this.candidatesService.upsertSkills(
+      id,
+      dto,
+      actor?.sub,
+    );
     return ResponseUtil.success(
       'Candidate skills updated successfully',
       skills.map(CandidatesMapper.toSkillResponse),
@@ -340,7 +359,9 @@ export class CandidatesController {
   @Post(':id/documents/upload')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Upload candidate document (stores file + metadata)' })
+  @ApiOperation({
+    summary: 'Upload candidate document (stores file + metadata)',
+  })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
@@ -352,7 +373,12 @@ export class CandidatesController {
           cb: (error: Error | null, destination: string) => void,
         ) => {
           const candidateId = String((req as any)?.params?.id ?? 'unknown');
-          const dest = join(process.cwd(), 'uploads', 'candidates', candidateId);
+          const dest = join(
+            process.cwd(),
+            'uploads',
+            'candidates',
+            candidateId,
+          );
           fs.mkdirSync(dest, { recursive: true });
           cb(null, dest);
         },
@@ -376,7 +402,14 @@ export class CandidatesController {
       properties: {
         document_type: {
           type: 'string',
-          enum: ['RESUME', 'COVER_LETTER', 'PORTFOLIO', 'CERTIFICATION', 'ID_PROOF', 'OTHER'],
+          enum: [
+            'RESUME',
+            'COVER_LETTER',
+            'PORTFOLIO',
+            'CERTIFICATION',
+            'ID_PROOF',
+            'OTHER',
+          ],
           example: 'RESUME',
         },
         is_latest: {
@@ -453,13 +486,20 @@ export class CandidatesController {
   @ApiOperation({ summary: 'Mark candidate resume as latest' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
   @ApiParam({ name: 'documentId', description: 'Candidate document UUID' })
-  @ApiStandardResponse(CandidateDocumentResponseDto, 'Candidate resume marked as latest successfully')
+  @ApiStandardResponse(
+    CandidateDocumentResponseDto,
+    'Candidate resume marked as latest successfully',
+  )
   async markLatestResume(
     @Param('id') id: string,
     @Param('documentId') documentId: string,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const doc = await this.candidatesService.markLatestResume(id, documentId, actor?.sub);
+    const doc = await this.candidatesService.markLatestResume(
+      id,
+      documentId,
+      actor?.sub,
+    );
     return ResponseUtil.success(
       'Candidate resume marked as latest successfully',
       CandidatesMapper.toDocumentResponse(doc),

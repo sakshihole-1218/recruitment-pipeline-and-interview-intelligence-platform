@@ -16,10 +16,7 @@ import {
 export class HeuristicAiInsightsProvider implements AiInsightsProvider {
   async analyzeResume(input: AnalyzeResumeInput): Promise<AnalyzeResumeOutput> {
     const extractedText = String(input.extractedText ?? '').trim();
-    const normalized = extractedText
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase();
+    const normalized = extractedText.replace(/\s+/g, ' ').trim().toLowerCase();
 
     const knownSkills = [
       'typescript',
@@ -72,10 +69,12 @@ export class HeuristicAiInsightsProvider implements AiInsightsProvider {
       .filter((n) => Number.isFinite(n) && n >= 0)
       .sort((a, b) => b - a)[0];
 
-    const hasBachelors =
-      /\b(bachelor|b\.tech|btech|b\.e|be|b\.sc|bsc)\b/i.test(extractedText);
-    const hasMasters =
-      /\b(master|m\.tech|mtech|m\.e|me|m\.sc|msc|mba)\b/i.test(extractedText);
+    const hasBachelors = /\b(bachelor|b\.tech|btech|b\.e|be|b\.sc|bsc)\b/i.test(
+      extractedText,
+    );
+    const hasMasters = /\b(master|m\.tech|mtech|m\.e|me|m\.sc|msc|mba)\b/i.test(
+      extractedText,
+    );
     const hasPhd = /\b(phd|doctorate)\b/i.test(extractedText);
 
     const educationLevels: string[] = [];
@@ -97,7 +96,13 @@ export class HeuristicAiInsightsProvider implements AiInsightsProvider {
 
     const skillsScore = Math.min(40, matchedSkills.length * 4);
     const yearsScore = Number.isFinite(years) ? Math.min(30, years * 3) : 0;
-    const educationScore = hasPhd ? 20 : hasMasters ? 15 : hasBachelors ? 10 : 0;
+    const educationScore = hasPhd
+      ? 20
+      : hasMasters
+        ? 15
+        : hasBachelors
+          ? 10
+          : 0;
     const baseScore = 30;
 
     const aiFitScore = Math.max(
@@ -121,7 +126,9 @@ export class HeuristicAiInsightsProvider implements AiInsightsProvider {
       },
       experience_summary: experienceSummary,
       education_summary: educationSummary,
-      project_summary: normalized.length ? 'Projects extracted from resume text.' : null,
+      project_summary: normalized.length
+        ? 'Projects extracted from resume text.'
+        : null,
       certification_summary: normalized.length
         ? 'Certifications extracted from resume text.'
         : null,
@@ -242,7 +249,9 @@ export class HeuristicAiInsightsProvider implements AiInsightsProvider {
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
 
-    const max = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0];
+    const max = Array.from(counts.entries()).sort(
+      (a, b) => b[1] - a[1],
+    )[0]?.[0];
     const mapped = (max || '').toUpperCase();
 
     switch (mapped) {

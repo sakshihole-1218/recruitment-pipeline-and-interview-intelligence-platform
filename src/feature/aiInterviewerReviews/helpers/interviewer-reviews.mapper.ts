@@ -1,7 +1,9 @@
 import { InterviewerReviewResponseDto } from '../dto/interviewer-review.response.dto';
 import { InterviewerReviewEntity } from '../entities/interviewer-review.entity';
 
-function toNullableNumber(value: string | number | null | undefined): number | null {
+function toNullableNumber(
+  value: string | number | null | undefined,
+): number | null {
   if (value === null || value === undefined) {
     return null;
   }
@@ -11,7 +13,9 @@ function toNullableNumber(value: string | number | null | undefined): number | n
 }
 
 export class InterviewerReviewsMapper {
-  static toResponse(entity: InterviewerReviewEntity): InterviewerReviewResponseDto {
+  static toResponse(
+    entity: InterviewerReviewEntity,
+  ): InterviewerReviewResponseDto {
     return {
       id: entity.id,
       ai_interview_session_id: entity.ai_interview_session_id,

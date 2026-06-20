@@ -46,9 +46,8 @@ export class ReplaceJobOpeningSkillsUseCase {
         });
       }
 
-      const normalizedSkills = this.validationHelper.dedupeAndValidateSkills(
-        skillsInput,
-      );
+      const normalizedSkills =
+        this.validationHelper.dedupeAndValidateSkills(skillsInput);
       const skillIds = normalizedSkills.map((s) => s.skill_id);
       const skills = await this.referenceRepository.findSkillsByIds(
         skillIds,

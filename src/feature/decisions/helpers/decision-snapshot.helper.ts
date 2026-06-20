@@ -44,14 +44,13 @@ export class DecisionSnapshotHelper {
       return null;
     }
 
-    const recommendationCounts = submittedReviews.reduce<Record<string, number>>(
-      (accumulator, review) => {
-        const key = review.interviewer_recommendation ?? 'UNSPECIFIED';
-        accumulator[key] = (accumulator[key] ?? 0) + 1;
-        return accumulator;
-      },
-      {},
-    );
+    const recommendationCounts = submittedReviews.reduce<
+      Record<string, number>
+    >((accumulator, review) => {
+      const key = review.interviewer_recommendation ?? 'UNSPECIFIED';
+      accumulator[key] = (accumulator[key] ?? 0) + 1;
+      return accumulator;
+    }, {});
 
     const reviewScores = submittedReviews
       .map((review) => this.toNumber(review.overall_score))
@@ -77,7 +76,7 @@ export class DecisionSnapshotHelper {
               submittedReviews
                 .map((review) => review.reviewed_at?.getTime() ?? null)
                 .filter((value): value is number => value !== null)
-                .sort((left, right) => right - left)[0]!,
+                .sort((left, right) => right - left)[0],
             ).toISOString()
           : null,
       submitted_reviews: submittedReviews.map((review) => ({
@@ -111,7 +110,9 @@ export class DecisionSnapshotHelper {
     );
 
     const highestSeverity = this.resolveHighestSeverity(events);
-    const unresolvedEvents = events.filter((event) => !event.is_resolved).length;
+    const unresolvedEvents = events.filter(
+      (event) => !event.is_resolved,
+    ).length;
 
     return {
       total_events: events.length,
@@ -142,7 +143,9 @@ export class DecisionSnapshotHelper {
   private resolveHighestSeverity(
     events: InterviewProctoringEventEntity[],
   ): ProctoringSeverity {
-    if (events.some((event) => event.severity === ProctoringSeverity.CRITICAL)) {
+    if (
+      events.some((event) => event.severity === ProctoringSeverity.CRITICAL)
+    ) {
       return ProctoringSeverity.CRITICAL;
     }
 

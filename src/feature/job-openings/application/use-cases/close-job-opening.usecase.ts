@@ -54,7 +54,9 @@ export class CloseJobOpeningUseCase {
 
       await this.jobOpeningRepository.save(opening, { manager });
 
-      const updated = await this.jobOpeningRepository.findById(opening.id, { manager });
+      const updated = await this.jobOpeningRepository.findById(opening.id, {
+        manager,
+      });
       if (!updated) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',
@@ -72,7 +74,9 @@ export class CloseJobOpeningUseCase {
             oldValues,
             newValues: {
               status: updated.status,
-              closed_at: updated.closed_at ? updated.closed_at.toISOString() : null,
+              closed_at: updated.closed_at
+                ? updated.closed_at.toISOString()
+                : null,
             },
             actionAt: now,
             ipAddress: null,

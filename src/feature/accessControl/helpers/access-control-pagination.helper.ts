@@ -11,7 +11,8 @@ export class AccessControlPaginationHelper {
 
     if (options.sort_by && options.sort_by !== 'created_at') {
       throw new BadRequestException({
-        message: 'Cursor pagination is only available when sorting by creation date',
+        message:
+          'Cursor pagination is only available when sorting by creation date',
         code: 'CURSOR_PAGINATION_UNSUPPORTED_SORT',
       });
     }

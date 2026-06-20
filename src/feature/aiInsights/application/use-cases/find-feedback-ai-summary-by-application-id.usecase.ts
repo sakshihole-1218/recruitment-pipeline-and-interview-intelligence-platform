@@ -10,9 +10,10 @@ export class FindFeedbackAiSummaryByApplicationIdUseCase {
   ) {}
 
   async execute(applicationId: string): Promise<FeedbackAiSummaryEntity> {
-    const row = await this.feedbackAiSummaryRepository.findActiveByApplicationId(
-      applicationId,
-    );
+    const row =
+      await this.feedbackAiSummaryRepository.findActiveByApplicationId(
+        applicationId,
+      );
 
     if (!row) {
       throw new NotFoundException({

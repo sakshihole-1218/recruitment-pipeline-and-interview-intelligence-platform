@@ -15,10 +15,14 @@ import { InterviewRecommendation } from '../enums/interview-recommendation.enum'
 import { InterviewEntity } from './interview.entity';
 
 @Entity({ name: 'interview_feedback' })
-@Index('uq_interview_feedback_interview_interviewer', ['interview_id', 'interviewer_user_id'], {
-  unique: true,
-  where: '"deleted_at" IS NULL',
-})
+@Index(
+  'uq_interview_feedback_interview_interviewer',
+  ['interview_id', 'interviewer_user_id'],
+  {
+    unique: true,
+    where: '"deleted_at" IS NULL',
+  },
+)
 export class InterviewFeedbackEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

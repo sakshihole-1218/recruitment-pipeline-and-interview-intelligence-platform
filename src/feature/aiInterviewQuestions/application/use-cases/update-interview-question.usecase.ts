@@ -54,7 +54,10 @@ export class UpdateInterviewQuestionUseCase {
       question.expected_answer_keywords = dto.expected_answer_keywords;
     }
 
-    this.validation.ensureAnsweredAfterAsked(question.asked_at, question.answered_at);
+    this.validation.ensureAnsweredAfterAsked(
+      question.asked_at,
+      question.answered_at,
+    );
 
     question.updated_by_user_id = actorUserId;
     return this.repository.updateQuestion(question);

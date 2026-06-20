@@ -45,7 +45,7 @@ export class BulkCreateProctoringEventsUseCase {
       const activeSession = session as NonNullable<typeof session>;
 
       this.validation.ensureSessionAllowsProctoringEvent(
-        activeSession.session_status as AiInterviewSessionStatus,
+        activeSession.session_status,
       );
 
       const payloads = dto.events.map((event) => ({

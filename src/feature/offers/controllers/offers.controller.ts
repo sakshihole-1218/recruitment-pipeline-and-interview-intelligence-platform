@@ -44,7 +44,11 @@ import { OffersMapper } from '../helpers/offers.mapper';
 
 @ApiTags('Offers')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('offers')
@@ -57,9 +61,15 @@ export class OffersController {
   @ApiOperation({ summary: 'Create offer (DRAFT)' })
   @ApiBody({ type: CreateOfferDto })
   @ApiStandardResponse(OfferResponseDto, 'Offer created successfully')
-  async create(@Body() dto: CreateOfferDto, @CurrentUser() actor: AuthJwtPayload) {
+  async create(
+    @Body() dto: CreateOfferDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
     const offer = await this.offersService.create(dto, actor?.sub);
-    return ResponseUtil.success('Offer created successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer created successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Patch(':id')
@@ -75,7 +85,10 @@ export class OffersController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     const offer = await this.offersService.update(id, dto, actor?.sub);
-    return ResponseUtil.success('Offer updated successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer updated successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Get(':id')
@@ -85,7 +98,10 @@ export class OffersController {
   @ApiStandardResponse(OfferResponseDto, 'Offer fetched successfully')
   async findById(@Param('id') id: string) {
     const offer = await this.offersService.findById(id);
-    return ResponseUtil.success('Offer fetched successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer fetched successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Get('by-application/:applicationId')
@@ -95,7 +111,10 @@ export class OffersController {
   @ApiStandardResponse(OfferResponseDto, 'Offer fetched successfully')
   async findByApplicationId(@Param('applicationId') applicationId: string) {
     const offer = await this.offersService.findByApplicationId(applicationId);
-    return ResponseUtil.success('Offer fetched successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer fetched successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Get()
@@ -126,13 +145,18 @@ export class OffersController {
   @Post('bulk/send')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bulk send offers (DRAFT -> SENT) (partial success)' })
+  @ApiOperation({
+    summary: 'Bulk send offers (DRAFT -> SENT) (partial success)',
+  })
   @ApiBody({ type: BulkOfferIdsDto })
   @ApiStandardResponse(
     BulkOfferOperationResultResponseDto,
     'Bulk send processed (partial success)',
   )
-  async bulkSend(@Body() dto: BulkOfferIdsDto, @CurrentUser() actor: AuthJwtPayload) {
+  async bulkSend(
+    @Body() dto: BulkOfferIdsDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
     const result = await this.offersService.bulkSend(dto.offer_ids, actor?.sub);
     return ResponseUtil.success('Bulk send processed', result);
   }
@@ -140,21 +164,31 @@ export class OffersController {
   @Post('bulk/expire')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bulk expire offers (SENT -> EXPIRED) (partial success)' })
+  @ApiOperation({
+    summary: 'Bulk expire offers (SENT -> EXPIRED) (partial success)',
+  })
   @ApiBody({ type: BulkOfferIdsDto })
   @ApiStandardResponse(
     BulkOfferOperationResultResponseDto,
     'Bulk expire processed (partial success)',
   )
-  async bulkExpire(@Body() dto: BulkOfferIdsDto, @CurrentUser() actor: AuthJwtPayload) {
-    const result = await this.offersService.bulkExpire(dto.offer_ids, actor?.sub);
+  async bulkExpire(
+    @Body() dto: BulkOfferIdsDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.offersService.bulkExpire(
+      dto.offer_ids,
+      actor?.sub,
+    );
     return ResponseUtil.success('Bulk expire processed', result);
   }
 
   @Post('bulk/cancel')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bulk cancel offers (DRAFT/SENT -> CANCELLED) (partial success)' })
+  @ApiOperation({
+    summary: 'Bulk cancel offers (DRAFT/SENT -> CANCELLED) (partial success)',
+  })
   @ApiBody({ type: BulkCancelOffersDto })
   @ApiStandardResponse(
     BulkOfferOperationResultResponseDto,
@@ -180,7 +214,10 @@ export class OffersController {
   @ApiStandardResponse(OfferResponseDto, 'Offer sent successfully')
   async send(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     const offer = await this.offersService.send(id, actor?.sub);
-    return ResponseUtil.success('Offer sent successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer sent successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Post(':id/accept')
@@ -191,7 +228,10 @@ export class OffersController {
   @ApiStandardResponse(OfferResponseDto, 'Offer accepted successfully')
   async accept(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     const offer = await this.offersService.accept(id, actor?.sub);
-    return ResponseUtil.success('Offer accepted successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer accepted successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Post(':id/decline')
@@ -207,7 +247,10 @@ export class OffersController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     const offer = await this.offersService.decline(id, dto, actor?.sub);
-    return ResponseUtil.success('Offer declined successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer declined successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Post(':id/cancel')
@@ -218,7 +261,10 @@ export class OffersController {
   @ApiStandardResponse(OfferResponseDto, 'Offer cancelled successfully')
   async cancel(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     const offer = await this.offersService.cancel(id, actor?.sub);
-    return ResponseUtil.success('Offer cancelled successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer cancelled successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Post(':id/expire')
@@ -229,7 +275,10 @@ export class OffersController {
   @ApiStandardResponse(OfferResponseDto, 'Offer expired successfully')
   async expire(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     const offer = await this.offersService.expire(id, actor?.sub);
-    return ResponseUtil.success('Offer expired successfully', OffersMapper.toOfferResponse(offer));
+    return ResponseUtil.success(
+      'Offer expired successfully',
+      OffersMapper.toOfferResponse(offer),
+    );
   }
 
   @Delete(':id')
@@ -238,7 +287,10 @@ export class OffersController {
   @ApiOperation({ summary: 'Soft delete offer' })
   @ApiParam({ name: 'id', description: 'Offer UUID' })
   @ApiStandardResponse(SoftDeleteOfferResponseDto, 'Offer deleted successfully')
-  async softDelete(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
+  async softDelete(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
     await this.offersService.softDelete(id, actor?.sub);
     return ResponseUtil.success('Offer deleted successfully', { id });
   }

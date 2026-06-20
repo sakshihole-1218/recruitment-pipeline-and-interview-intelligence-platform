@@ -18,20 +18,20 @@ import { DecisionSource } from '../enums/decision-source.enum';
 import { DecisionStatus } from '../enums/decision-status.enum';
 
 @Entity({ name: 'application_decisions' })
-@Index(
-  'uq_application_decisions_application_id_active',
-  ['application_id'],
-  {
-    unique: true,
-    where: '"deleted_at" IS NULL',
-  },
-)
+@Index('uq_application_decisions_application_id_active', ['application_id'], {
+  unique: true,
+  where: '"deleted_at" IS NULL',
+})
 @Index('idx_application_decisions_decision_status', ['decision_status'])
 @Index('idx_application_decisions_decided_by_user_id', ['decided_by_user_id'])
 @Index('idx_application_decisions_decision_at', ['decision_at'])
 @Index('idx_application_decisions_decision_source', ['decision_source'])
-@Index('idx_application_decisions_ai_interview_session_id', ['ai_interview_session_id'])
-@Index('idx_application_decisions_ai_interview_feedback_id', ['ai_interview_feedback_id'])
+@Index('idx_application_decisions_ai_interview_session_id', [
+  'ai_interview_session_id',
+])
+@Index('idx_application_decisions_ai_interview_feedback_id', [
+  'ai_interview_feedback_id',
+])
 export class ApplicationDecisionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

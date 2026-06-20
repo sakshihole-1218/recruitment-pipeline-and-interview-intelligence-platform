@@ -33,7 +33,9 @@ export class AiInterviewFeedbackQueryDto extends PaginationQueryDto {
   @IsISO8601()
   cursor?: string;
 
-  @ApiPropertyOptional({ description: 'Search across summaries, concerns and failure reason' })
+  @ApiPropertyOptional({
+    description: 'Search across summaries, concerns and failure reason',
+  })
   @IsOptional()
   @IsString()
   search?: string;
@@ -85,7 +87,8 @@ export class AiInterviewFeedbackQueryDto extends PaginationQueryDto {
   })
   @IsOptional()
   @IsIn(AI_INTERVIEW_FEEDBACK_SORT_FIELDS)
-  override sort_by?: (typeof AI_INTERVIEW_FEEDBACK_SORT_FIELDS)[number] = 'created_at';
+  override sort_by?: (typeof AI_INTERVIEW_FEEDBACK_SORT_FIELDS)[number] =
+    'created_at';
 
   @ApiPropertyOptional({
     example: 'desc',

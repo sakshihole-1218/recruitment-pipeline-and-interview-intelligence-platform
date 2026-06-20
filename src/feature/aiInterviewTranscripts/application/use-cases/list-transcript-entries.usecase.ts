@@ -14,7 +14,9 @@ export class ListTranscriptEntriesUseCase {
     private readonly validation: AiInterviewTranscriptsValidationHelper,
   ) {}
 
-  async execute(query: TranscriptQueryDto): Promise<AiInterviewTranscriptListResult> {
+  async execute(
+    query: TranscriptQueryDto,
+  ): Promise<AiInterviewTranscriptListResult> {
     this.validation.ensureSpokenRangeValid(query.spoken_from, query.spoken_to);
     return this.repository.findAllWithFilters(query);
   }

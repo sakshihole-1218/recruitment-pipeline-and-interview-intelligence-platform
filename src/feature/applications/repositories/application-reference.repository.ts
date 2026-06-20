@@ -8,7 +8,10 @@ import { UserEntity } from '../../accessControl/entities/user.entity';
 
 @Injectable()
 export class ApplicationReferenceRepository {
-  async candidateExists(candidateId: string, manager: EntityManager): Promise<boolean> {
+  async candidateExists(
+    candidateId: string,
+    manager: EntityManager,
+  ): Promise<boolean> {
     const repo = manager.getRepository(CandidateEntity);
     const candidate = await repo
       .createQueryBuilder('candidates')
@@ -20,7 +23,10 @@ export class ApplicationReferenceRepository {
     return Boolean(candidate);
   }
 
-  async jobOpeningExists(jobOpeningId: string, manager: EntityManager): Promise<boolean> {
+  async jobOpeningExists(
+    jobOpeningId: string,
+    manager: EntityManager,
+  ): Promise<boolean> {
     const repo = manager.getRepository(JobOpeningEntity);
     const opening = await repo
       .createQueryBuilder('job_openings')
@@ -32,14 +38,19 @@ export class ApplicationReferenceRepository {
     return Boolean(opening);
   }
 
-  async jobOpeningIsOpen(jobOpeningId: string, manager: EntityManager): Promise<boolean> {
+  async jobOpeningIsOpen(
+    jobOpeningId: string,
+    manager: EntityManager,
+  ): Promise<boolean> {
     const repo = manager.getRepository(JobOpeningEntity);
     const opening = await repo
       .createQueryBuilder('job_openings')
       .select(['job_openings.id'])
       .where('job_openings.id = :id', { id: jobOpeningId })
       .andWhere('job_openings.deleted_at IS NULL')
-      .andWhere('job_openings.status = :status', { status: JobOpeningStatus.OPEN })
+      .andWhere('job_openings.status = :status', {
+        status: JobOpeningStatus.OPEN,
+      })
       .getOne();
 
     return Boolean(opening);

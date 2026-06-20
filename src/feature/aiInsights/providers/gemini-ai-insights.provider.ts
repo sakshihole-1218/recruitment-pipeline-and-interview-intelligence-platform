@@ -53,12 +53,15 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
     const extractedText = String(input.extractedText || '').trim();
 
     if (!extractedText) {
-      throw new Error('Resume extracted text is required for Gemini resume analysis');
+      throw new Error(
+        'Resume extracted text is required for Gemini resume analysis',
+      );
     }
 
     try {
       const responseText = await this.geminiClient.generateText({
-        prompt: GeminiAiInsightsPromptHelper.buildResumeAnalysisPrompt(extractedText),
+        prompt:
+          GeminiAiInsightsPromptHelper.buildResumeAnalysisPrompt(extractedText),
         responseMimeType: 'application/json',
       });
 
@@ -133,12 +136,20 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
         strengths_summary: this.toNullableText(parsed.strengths_summary),
         concerns_summary: this.toNullableText(parsed.concerns_summary),
         technical_summary: this.toNullableText(parsed.technical_summary),
-        communication_summary: this.toNullableText(parsed.communication_summary),
+        communication_summary: this.toNullableText(
+          parsed.communication_summary,
+        ),
         overall_score: this.toNullableTenPointScore(parsed.overall_score),
         technical_score: this.toNullableTenPointScore(parsed.technical_score),
-        communication_score: this.toNullableTenPointScore(parsed.communication_score),
-        problem_solving_score: this.toNullableTenPointScore(parsed.problem_solving_score),
-        culture_fit_score: this.toNullableTenPointScore(parsed.culture_fit_score),
+        communication_score: this.toNullableTenPointScore(
+          parsed.communication_score,
+        ),
+        problem_solving_score: this.toNullableTenPointScore(
+          parsed.problem_solving_score,
+        ),
+        culture_fit_score: this.toNullableTenPointScore(
+          parsed.culture_fit_score,
+        ),
         final_ai_recommendation: this.toFinalRecommendation(
           parsed.final_ai_recommendation,
           parsed.overall_score,
@@ -156,11 +167,7 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
     }
 
     return Array.from(
-      new Set(
-        value
-          .map((entry) => String(entry || '').trim())
-          .filter(Boolean),
-      ),
+      new Set(value.map((entry) => String(entry || '').trim()).filter(Boolean)),
     );
   }
 
@@ -170,7 +177,9 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
     }
 
     return value.filter((entry): entry is Record<string, unknown> => {
-      return Boolean(entry && typeof entry === 'object' && !Array.isArray(entry));
+      return Boolean(
+        entry && typeof entry === 'object' && !Array.isArray(entry),
+      );
     });
   }
 
@@ -178,7 +187,9 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
     return Array.isArray(value) ? value : [];
   }
 
-  private toNullableNumber(value: number | string | null | undefined): number | null {
+  private toNullableNumber(
+    value: number | string | null | undefined,
+  ): number | null {
     if (value === null || value === undefined || value === '') {
       return null;
     }
@@ -191,7 +202,10 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
     return Number(numeric.toFixed(2));
   }
 
-  private toScore(value: number | string | null | undefined, fieldName: string): number {
+  private toScore(
+    value: number | string | null | undefined,
+    fieldName: string,
+  ): number {
     const numeric = this.toNullableNumber(value);
 
     if (numeric === null || numeric < 0 || numeric > 100) {
@@ -230,16 +244,23 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
     value: string | null | undefined,
     overallScore: number | string | null | undefined,
   ): FinalAiRecommendation {
-    const normalized = String(value || '').trim().toUpperCase();
+    const normalized = String(value || '')
+      .trim()
+      .toUpperCase();
 
-    if (Object.values(FinalAiRecommendation).includes(normalized as FinalAiRecommendation)) {
+    if (
+      Object.values(FinalAiRecommendation).includes(
+        normalized as FinalAiRecommendation,
+      )
+    ) {
       return normalized as FinalAiRecommendation;
     }
 
     const score = this.toNullableTenPointScore(overallScore);
     const normalizedHundredPoint = score === null ? 55 : score * 10;
 
-    if (normalizedHundredPoint <= 39) return FinalAiRecommendation.STRONGLY_REJECT;
+    if (normalizedHundredPoint <= 39)
+      return FinalAiRecommendation.STRONGLY_REJECT;
     if (normalizedHundredPoint <= 54) return FinalAiRecommendation.REJECT;
     if (normalizedHundredPoint <= 69) return FinalAiRecommendation.HOLD;
     if (normalizedHundredPoint <= 84) return FinalAiRecommendation.SELECT;

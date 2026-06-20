@@ -80,7 +80,8 @@ export class UpdateInterviewerReviewUseCase {
       }
 
       if (dto.interviewer_recommendation !== undefined) {
-        review.interviewer_recommendation = dto.interviewer_recommendation ?? null;
+        review.interviewer_recommendation =
+          dto.interviewer_recommendation ?? null;
       }
 
       if (dto.review_status !== undefined) {

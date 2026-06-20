@@ -9,7 +9,11 @@ export class UploadCandidateDocumentDto {
     enum: CandidateDocumentType,
     example: CandidateDocumentType.RESUME,
   })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(CandidateDocumentType)
   document_type: CandidateDocumentType;
 

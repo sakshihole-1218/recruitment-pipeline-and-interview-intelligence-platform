@@ -4,7 +4,9 @@ import { FeedbackAiSummaryResponseDto } from '../dto/feedback-ai-summary.respons
 import { ResumeAiAnalysisResponseDto } from '../dto/resume-ai-analysis.response.dto';
 
 export class AiInsightsMapper {
-  static toResumeAnalysisResponse(entity: ResumeAiAnalysisEntity): ResumeAiAnalysisResponseDto {
+  static toResumeAnalysisResponse(
+    entity: ResumeAiAnalysisEntity,
+  ): ResumeAiAnalysisResponseDto {
     return {
       id: entity.id,
       candidate_id: entity.candidate_id,
@@ -17,7 +19,8 @@ export class AiInsightsMapper {
       education_summary: entity.education_summary,
       project_summary: entity.project_summary ?? null,
       certification_summary: entity.certification_summary ?? null,
-      total_experience_years_detected: entity.total_experience_years_detected ?? null,
+      total_experience_years_detected:
+        entity.total_experience_years_detected ?? null,
       ai_fit_score: entity.ai_fit_score,
       analysis_status: entity.analysis_status,
       analyzed_at: entity.analyzed_at,
@@ -27,7 +30,9 @@ export class AiInsightsMapper {
     };
   }
 
-  static toFeedbackSummaryResponse(entity: FeedbackAiSummaryEntity): FeedbackAiSummaryResponseDto {
+  static toFeedbackSummaryResponse(
+    entity: FeedbackAiSummaryEntity,
+  ): FeedbackAiSummaryResponseDto {
     return {
       id: entity.id,
       application_id: entity.application_id,

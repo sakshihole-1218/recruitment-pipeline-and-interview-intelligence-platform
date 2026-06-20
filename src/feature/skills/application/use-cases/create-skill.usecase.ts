@@ -1,7 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { CreateSkillDto } from '../../dto/create-skill.dto';
@@ -22,7 +19,10 @@ export class CreateSkillUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: CreateSkillDto, actorUserId?: string): Promise<SkillEntity> {
+  async execute(
+    dto: CreateSkillDto,
+    actorUserId?: string,
+  ): Promise<SkillEntity> {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
       const code = this.validationHelper.normalizeCode(dto.code);
@@ -33,7 +33,6 @@ export class CreateSkillUseCase {
         manager,
       });
 
-      
       if (existingByCode) {
         if (!existingByCode.deleted_at) {
           throw new ConflictException({
@@ -54,7 +53,9 @@ export class CreateSkillUseCase {
           description: existingByCode.description,
           category: existingByCode.category,
           is_active: existingByCode.is_active,
-          deleted_at: existingByCode.deleted_at ? existingByCode.deleted_at.toISOString() : null,
+          deleted_at: existingByCode.deleted_at
+            ? existingByCode.deleted_at.toISOString()
+            : null,
         };
 
         existingByCode.name = name;
@@ -63,13 +64,17 @@ export class CreateSkillUseCase {
         existingByCode.is_active = dto.is_active ?? true;
         existingByCode.deleted_at = null;
         existingByCode.deleted_by_user_id = null;
-        existingByCode.updated_by_user_id = actorUserId ?? existingByCode.updated_by_user_id;
+        existingByCode.updated_by_user_id =
+          actorUserId ?? existingByCode.updated_by_user_id;
 
         await this.skillRepository.save(existingByCode, { manager });
 
-        const restored = await this.skillRepository.findById(existingByCode.id, {
-          manager,
-        });
+        const restored = await this.skillRepository.findById(
+          existingByCode.id,
+          {
+            manager,
+          },
+        );
         if (!restored) {
           throw new ConflictException({
             message: 'We could not complete the request. Please try again',
@@ -121,7 +126,9 @@ export class CreateSkillUseCase {
         { manager },
       );
 
-      const loaded = await this.skillRepository.findById(created.id, { manager });
+      const loaded = await this.skillRepository.findById(created.id, {
+        manager,
+      });
 
       if (!loaded) {
         throw new ConflictException({

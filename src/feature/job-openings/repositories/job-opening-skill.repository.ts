@@ -18,7 +18,10 @@ export class JobOpeningSkillRepository {
       : this.repository;
   }
 
-  async softDeleteByJobOpeningId(jobOpeningId: string, options: { manager: EntityManager }): Promise<void> {
+  async softDeleteByJobOpeningId(
+    jobOpeningId: string,
+    options: { manager: EntityManager },
+  ): Promise<void> {
     await this.repo(options.manager)
       .createQueryBuilder()
       .update(JobOpeningSkillEntity)

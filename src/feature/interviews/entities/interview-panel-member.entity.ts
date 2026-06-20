@@ -15,10 +15,14 @@ import { InterviewPanelRole } from '../enums/interview-panel-role.enum';
 import { InterviewEntity } from './interview.entity';
 
 @Entity({ name: 'interview_panel_members' })
-@Index('uq_interview_panel_members_interview_user', ['interview_id', 'user_id'], {
-  unique: true,
-  where: '"deleted_at" IS NULL',
-})
+@Index(
+  'uq_interview_panel_members_interview_user',
+  ['interview_id', 'user_id'],
+  {
+    unique: true,
+    where: '"deleted_at" IS NULL',
+  },
+)
 export class InterviewPanelMemberEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

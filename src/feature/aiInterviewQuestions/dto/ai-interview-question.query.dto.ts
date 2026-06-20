@@ -100,7 +100,8 @@ export class AiInterviewQuestionQueryDto extends PaginationQueryDto {
   })
   @IsOptional()
   @IsIn(AI_INTERVIEW_QUESTION_SORT_FIELDS)
-  override sort_by?: (typeof AI_INTERVIEW_QUESTION_SORT_FIELDS)[number] = 'created_at';
+  override sort_by?: (typeof AI_INTERVIEW_QUESTION_SORT_FIELDS)[number] =
+    'created_at';
 
   @ApiPropertyOptional({
     example: 'desc',

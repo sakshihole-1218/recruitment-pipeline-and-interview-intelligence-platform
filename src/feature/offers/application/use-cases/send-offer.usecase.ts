@@ -66,9 +66,12 @@ export class SendOfferUseCase {
 
       await this.offerRepository.save(offer, { manager });
 
-      const app = await this.applicationRepository.findById(offer.application_id, {
-        manager,
-      });
+      const app = await this.applicationRepository.findById(
+        offer.application_id,
+        {
+          manager,
+        },
+      );
       if (!app) {
         throw new ConflictException({
           message: 'Offer is linked to an invalid application',
@@ -76,7 +79,9 @@ export class SendOfferUseCase {
         });
       }
 
-      this.applicationsValidationHelper.ensureNotTerminalStage(app.current_stage);
+      this.applicationsValidationHelper.ensureNotTerminalStage(
+        app.current_stage,
+      );
 
       if (app.current_stage !== ApplicationCurrentStage.OFFER) {
         this.applicationsValidationHelper.ensureStageTransitionAllowed({
@@ -110,7 +115,7 @@ export class SendOfferUseCase {
             fromStage,
             toStage: ApplicationCurrentStage.OFFER,
             reason: 'Offer sent',
-            actorUserId: actorUserId!,
+            actorUserId: actorUserId,
             actionAt: now,
             ipAddress: null,
             userAgent: null,
@@ -132,11 +137,13 @@ export class SendOfferUseCase {
           entityType: ActivityEntityType.OFFER,
           entityId: loaded.id,
           actionType: ActivityActionType.SEND,
-          actorUserId: actorUserId!,
+          actorUserId: actorUserId,
           oldValues: oldOfferValues,
           newValues: {
             offer_status: loaded.offer_status,
-            offered_at: loaded.offered_at ? loaded.offered_at.toISOString() : null,
+            offered_at: loaded.offered_at
+              ? loaded.offered_at.toISOString()
+              : null,
           },
           actionAt: now,
           ipAddress: null,

@@ -1,12 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsEnum,
-  IsISO8601,
-  IsIn,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsEnum, IsISO8601, IsIn, IsOptional, IsUUID } from 'class-validator';
 
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
@@ -37,13 +31,21 @@ export class FeedbackAiSummaryQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: FinalAiRecommendation })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(FinalAiRecommendation)
   final_ai_recommendation?: FinalAiRecommendation;
 
   @ApiPropertyOptional({ enum: AiFeedbackSummaryStatus })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(AiFeedbackSummaryStatus)
   generation_status?: AiFeedbackSummaryStatus;
 

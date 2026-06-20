@@ -2,7 +2,10 @@ import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { BulkAssignHiringManagerDto } from '../../dto/bulk-assign-hiring-manager.dto';
-import { BulkOperationFailureDto, BulkOperationResultResponseDto } from '../../dto/bulk-operation-result.response.dto';
+import {
+  BulkOperationFailureDto,
+  BulkOperationResultResponseDto,
+} from '../../dto/bulk-operation-result.response.dto';
 import { ApplicationRepository } from '../../repositories/application.repository';
 import { ApplicationReferenceRepository } from '../../repositories/application-reference.repository';
 import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
@@ -19,7 +22,10 @@ export class BulkAssignHiringManagerUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: BulkAssignHiringManagerDto, actorUserId?: string): Promise<BulkOperationResultResponseDto> {
+  async execute(
+    dto: BulkAssignHiringManagerDto,
+    actorUserId?: string,
+  ): Promise<BulkOperationResultResponseDto> {
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -44,7 +50,9 @@ export class BulkAssignHiringManagerUseCase {
     for (const applicationId of dto.application_ids) {
       try {
         await this.dataSource.transaction(async (manager) => {
-          const app = await this.applicationRepository.findById(applicationId, { manager });
+          const app = await this.applicationRepository.findById(applicationId, {
+            manager,
+          });
           if (!app) {
             throw new BadRequestException({
               message: 'Application not found',
@@ -67,7 +75,9 @@ export class BulkAssignHiringManagerUseCase {
               actionType: ActivityActionType.UPDATE,
               actorUserId,
               oldValues: { assigned_hiring_manager_user_id: oldHmId },
-              newValues: { assigned_hiring_manager_user_id: dto.hiring_manager_user_id },
+              newValues: {
+                assigned_hiring_manager_user_id: dto.hiring_manager_user_id,
+              },
               actionAt: now,
               ipAddress: null,
               userAgent: null,

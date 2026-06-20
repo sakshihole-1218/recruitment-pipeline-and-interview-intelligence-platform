@@ -47,7 +47,9 @@ export class UpdateSkillStatusUseCase {
 
       await this.skillRepository.save(skill, { manager });
 
-      const updated = await this.skillRepository.findById(skill.id, { manager });
+      const updated = await this.skillRepository.findById(skill.id, {
+        manager,
+      });
       if (!updated) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

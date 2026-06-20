@@ -42,7 +42,10 @@ export class CreateInterviewRoundDto {
   @IsBoolean()
   is_mandatory?: boolean = true;
 
-  @ApiPropertyOptional({ example: 10, description: 'Maximum score for this round' })
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Maximum score for this round',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -50,7 +53,9 @@ export class CreateInterviewRoundDto {
   @Max(1000)
   max_score?: number;
 
-  @ApiPropertyOptional({ example: 'Focus on data structures and system design' })
+  @ApiPropertyOptional({
+    example: 'Focus on data structures and system design',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(2000)

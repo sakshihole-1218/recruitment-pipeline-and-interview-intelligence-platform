@@ -49,7 +49,10 @@ export class CandidateResponseDto {
   @ApiPropertyOptional({ example: 'INR', nullable: true })
   currency_code: string | null;
 
-  @ApiPropertyOptional({ example: 'https://www.linkedin.com/in/sakshi', nullable: true })
+  @ApiPropertyOptional({
+    example: 'https://www.linkedin.com/in/sakshi',
+    nullable: true,
+  })
   linkedin_url: string | null;
 
   @ApiPropertyOptional({ example: 'https://github.com/sakshi', nullable: true })
@@ -58,7 +61,10 @@ export class CandidateResponseDto {
   @ApiPropertyOptional({ example: 'https://sakshi.dev', nullable: true })
   portfolio_url: string | null;
 
-  @ApiPropertyOptional({ example: 'Backend engineer with 5+ years', nullable: true })
+  @ApiPropertyOptional({
+    example: 'Backend engineer with 5+ years',
+    nullable: true,
+  })
   resume_headline: string | null;
 
   @ApiPropertyOptional({ enum: CandidateSourceType, nullable: true })

@@ -23,7 +23,11 @@ export class UpdateSkillDto {
 
   @ApiPropertyOptional({ example: 'TYPESCRIPT' })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsString()
   @MinLength(2)
   @MaxLength(50)
@@ -41,7 +45,11 @@ export class UpdateSkillDto {
 
   @ApiPropertyOptional({ enum: SkillCategory, example: SkillCategory.LANGUAGE })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(SkillCategory)
   category?: SkillCategory;
 

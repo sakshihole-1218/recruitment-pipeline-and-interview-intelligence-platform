@@ -2,7 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DepartmentsPaginationHelper {
-  ensureCursorCompatibleSort(options: { cursor?: string; sort_by?: string }): void {
+  ensureCursorCompatibleSort(options: {
+    cursor?: string;
+    sort_by?: string;
+  }): void {
     if (!options.cursor) {
       return;
     }

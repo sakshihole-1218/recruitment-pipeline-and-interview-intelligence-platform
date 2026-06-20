@@ -26,7 +26,8 @@ export class AiInterviewFeedbackValidationHelper {
   ensureSessionCompleted(status: AiInterviewSessionStatus): void {
     if (status !== AiInterviewSessionStatus.COMPLETED) {
       throw new ConflictException({
-        message: 'AI interview feedback can only be generated for a completed AI interview session',
+        message:
+          'AI interview feedback can only be generated for a completed AI interview session',
         code: 'AI_INTERVIEW_SESSION_NOT_COMPLETED',
         meta: { session_status: status },
       });
@@ -36,26 +37,32 @@ export class AiInterviewFeedbackValidationHelper {
   ensureTranscriptExists(entries: AiInterviewTranscriptEntity[]): void {
     if (!entries.length) {
       throw new BadRequestException({
-        message: 'AI interview transcript must exist before generating feedback',
+        message:
+          'AI interview transcript must exist before generating feedback',
         code: 'AI_INTERVIEW_TRANSCRIPT_REQUIRED',
       });
     }
   }
 
-  ensureCandidateTranscriptExists(entries: AiInterviewTranscriptEntity[]): void {
+  ensureCandidateTranscriptExists(
+    entries: AiInterviewTranscriptEntity[],
+  ): void {
     const exists = entries.some(
       (entry) => entry.speaker_type === TranscriptSpeakerType.CANDIDATE,
     );
 
     if (!exists) {
       throw new BadRequestException({
-        message: 'At least one candidate transcript entry is required before generating feedback',
+        message:
+          'At least one candidate transcript entry is required before generating feedback',
         code: 'CANDIDATE_TRANSCRIPT_REQUIRED',
       });
     }
   }
 
-  ensureNoDuplicateActiveFeedback(existing: AiInterviewFeedbackEntity | null): void {
+  ensureNoDuplicateActiveFeedback(
+    existing: AiInterviewFeedbackEntity | null,
+  ): void {
     if (existing) {
       throw new ConflictException({
         message: 'Active AI interview feedback already exists for this session',
@@ -64,7 +71,10 @@ export class AiInterviewFeedbackValidationHelper {
     }
   }
 
-  ensureScoreWithinRange(score: number | null | undefined, fieldName: string): void {
+  ensureScoreWithinRange(
+    score: number | null | undefined,
+    fieldName: string,
+  ): void {
     if (score === null || score === undefined) {
       return;
     }
@@ -82,7 +92,10 @@ export class AiInterviewFeedbackValidationHelper {
     status: AiInterviewFeedbackStatus,
     failureReason?: string | null,
   ): void {
-    if (status === AiInterviewFeedbackStatus.FAILED && !String(failureReason || '').trim()) {
+    if (
+      status === AiInterviewFeedbackStatus.FAILED &&
+      !String(failureReason || '').trim()
+    ) {
       throw new BadRequestException({
         message: 'failure_reason is required when feedback_status is FAILED',
         code: 'FAILURE_REASON_REQUIRED',
@@ -90,9 +103,12 @@ export class AiInterviewFeedbackValidationHelper {
     }
   }
 
-  calculateOverallScore(scores: Array<number | null | undefined>): number | null {
+  calculateOverallScore(
+    scores: Array<number | null | undefined>,
+  ): number | null {
     const validScores = scores.filter(
-      (score): score is number => score !== null && score !== undefined && Number.isFinite(score),
+      (score): score is number =>
+        score !== null && score !== undefined && Number.isFinite(score),
     );
 
     if (!validScores.length) {
@@ -103,7 +119,9 @@ export class AiInterviewFeedbackValidationHelper {
     return Number((total / validScores.length).toFixed(2));
   }
 
-  toRecommendation(score: number | null | undefined): AiInterviewRecommendation | null {
+  toRecommendation(
+    score: number | null | undefined,
+  ): AiInterviewRecommendation | null {
     if (score === null || score === undefined || !Number.isFinite(score)) {
       return null;
     }

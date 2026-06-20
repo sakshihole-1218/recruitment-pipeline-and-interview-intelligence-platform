@@ -55,5 +55,3 @@ export class CancelAiInterviewSessionUseCase {
     });
   }
 }
-
-

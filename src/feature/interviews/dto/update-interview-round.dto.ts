@@ -27,7 +27,10 @@ export class UpdateInterviewRoundDto {
   @IsEnum(InterviewRoundType)
   round_type?: InterviewRoundType;
 
-  @ApiPropertyOptional({ example: 1, description: '1-based order of this round' })
+  @ApiPropertyOptional({
+    example: 1,
+    description: '1-based order of this round',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

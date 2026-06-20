@@ -49,7 +49,10 @@ export class ResumeAiAnalysisResponseDto {
   @ApiProperty({ nullable: true })
   certification_summary: string | null;
 
-  @ApiProperty({ nullable: true, description: 'Detected total years (numeric)' })
+  @ApiProperty({
+    nullable: true,
+    description: 'Detected total years (numeric)',
+  })
   total_experience_years_detected: string | null;
 
   @ApiProperty({ nullable: true, description: '0-100 numeric fit score' })

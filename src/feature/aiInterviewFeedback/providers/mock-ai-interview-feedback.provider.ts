@@ -44,7 +44,9 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
       .join(' ')
       .toLowerCase();
 
-    const resumeSkillCount = this.extractResumeSkillCount(input.resume_analysis?.skills_extracted);
+    const resumeSkillCount = this.extractResumeSkillCount(
+      input.resume_analysis?.skills_extracted,
+    );
     const architectureMentions = this.keywordHits(transcriptText, [
       'architecture',
       'design',
@@ -73,22 +75,31 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
     ]);
 
     const technicalScore = this.clamp(
-      42 + questionCoverage * 22 + Math.min(architectureMentions * 4, 18) + Math.min(resumeSkillCount, 10),
+      42 +
+        questionCoverage * 22 +
+        Math.min(architectureMentions * 4, 18) +
+        Math.min(resumeSkillCount, 10),
     );
     const communicationScore = this.clamp(
-      40 + Math.min(avgWordsPerAnswer / 4, 25) + Math.min(communicationMentions * 3, 20),
+      40 +
+        Math.min(avgWordsPerAnswer / 4, 25) +
+        Math.min(communicationMentions * 3, 20),
     );
     const problemSolvingScore = this.clamp(
       38 + questionCoverage * 18 + Math.min(problemSolvingMentions * 5, 26),
     );
     const projectUnderstandingScore = this.clamp(
-      35 + Math.min(architectureMentions * 5, 25) + Math.min(avgWordsPerAnswer / 5, 20),
+      35 +
+        Math.min(architectureMentions * 5, 25) +
+        Math.min(avgWordsPerAnswer / 5, 20),
     );
     const answerRelevanceScore = this.clamp(
       45 + questionCoverage * 30 + Math.min(answeredQuestionIds.size * 2, 12),
     );
     const confidenceScore = this.clamp(
-      41 + Math.min(candidateEntries.length * 4, 20) + Math.min(avgWordsPerAnswer / 6, 18),
+      41 +
+        Math.min(candidateEntries.length * 4, 20) +
+        Math.min(avgWordsPerAnswer / 6, 18),
     );
 
     const overallScore = this.average([
@@ -114,9 +125,16 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
       communication_summary: `The candidate showed ${this.bandLabel(communicationScore)} communication clarity with reasonably structured explanations and supporting examples.`,
       problem_solving_summary: `The responses reflected ${this.bandLabel(problemSolvingScore)} problem-solving ability, particularly in discussing debugging, performance, and decision-making trade-offs.`,
       project_understanding_summary: `Project understanding appears ${this.bandLabel(projectUnderstandingScore)}, with the candidate describing system components, responsibilities, and implementation context in a coherent way.`,
-      strengths: this.buildStrengths(technicalScore, communicationScore, problemSolvingScore),
+      strengths: this.buildStrengths(
+        technicalScore,
+        communicationScore,
+        problemSolvingScore,
+      ),
       concerns: this.buildConcerns(answerRelevanceScore, confidenceScore),
-      improvement_areas: this.buildImprovementAreas(projectUnderstandingScore, answerRelevanceScore),
+      improvement_areas: this.buildImprovementAreas(
+        projectUnderstandingScore,
+        answerRelevanceScore,
+      ),
       ai_recommendation: recommendation,
       raw_ai_payload: {
         provider: 'mock-ai-interview-feedback',
@@ -200,34 +218,49 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
     const strengths: string[] = [];
 
     if (technicalScore >= 70) {
-      strengths.push('Shows solid technical grounding and practical engineering exposure');
+      strengths.push(
+        'Shows solid technical grounding and practical engineering exposure',
+      );
     }
     if (communicationScore >= 70) {
-      strengths.push('Communicates answers with reasonable clarity and structure');
+      strengths.push(
+        'Communicates answers with reasonable clarity and structure',
+      );
     }
     if (problemSolvingScore >= 70) {
-      strengths.push('Demonstrates useful debugging and problem-solving instincts');
+      strengths.push(
+        'Demonstrates useful debugging and problem-solving instincts',
+      );
     }
 
     if (!strengths.length) {
-      strengths.push('Provides some relevant context from prior work and project experience');
+      strengths.push(
+        'Provides some relevant context from prior work and project experience',
+      );
     }
 
     return strengths.join('. ');
   }
 
-  private buildConcerns(answerRelevanceScore: number, confidenceScore: number): string {
+  private buildConcerns(
+    answerRelevanceScore: number,
+    confidenceScore: number,
+  ): string {
     const concerns: string[] = [];
 
     if (answerRelevanceScore < 60) {
       concerns.push('Some answers do not fully address the question intent');
     }
     if (confidenceScore < 60) {
-      concerns.push('Response delivery lacks consistency and assertiveness in places');
+      concerns.push(
+        'Response delivery lacks consistency and assertiveness in places',
+      );
     }
 
     if (!concerns.length) {
-      concerns.push('No major risks were detected from the transcript alone, but human review remains necessary');
+      concerns.push(
+        'No major risks were detected from the transcript alone, but human review remains necessary',
+      );
     }
 
     return concerns.join('. ');
@@ -240,14 +273,20 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
     const areas: string[] = [];
 
     if (projectUnderstandingScore < 70) {
-      areas.push('Explain project architecture and ownership boundaries in more depth');
+      areas.push(
+        'Explain project architecture and ownership boundaries in more depth',
+      );
     }
     if (answerRelevanceScore < 70) {
-      areas.push('Give more direct, question-focused responses with stronger examples');
+      areas.push(
+        'Give more direct, question-focused responses with stronger examples',
+      );
     }
 
     if (!areas.length) {
-      areas.push('Continue strengthening quantified examples and decision rationale in technical answers');
+      areas.push(
+        'Continue strengthening quantified examples and decision rationale in technical answers',
+      );
     }
 
     return areas.join('. ');

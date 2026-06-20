@@ -64,7 +64,10 @@ export class AiInterviewQuestionsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a single AI interview question' })
   @ApiBody({ type: CreateInterviewQuestionDto })
-  @ApiStandardResponse(AiInterviewQuestionResponseDto, 'AI interview question created successfully')
+  @ApiStandardResponse(
+    AiInterviewQuestionResponseDto,
+    'AI interview question created successfully',
+  )
   async create(
     @Body() dto: CreateInterviewQuestionDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -77,9 +80,16 @@ export class AiInterviewQuestionsController {
   }
 
   @Post('generate-plan')
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Generate mocked interview plan questions for an AI interview session' })
+  @ApiOperation({
+    summary:
+      'Generate mocked interview plan questions for an AI interview session',
+  })
   @ApiBody({ type: GenerateInterviewPlanDto })
   @ApiAiInterviewQuestionsArrayResponse(
     AiInterviewQuestionResponseDto,
@@ -100,7 +110,10 @@ export class AiInterviewQuestionsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark interview question as asked' })
   @ApiParam({ name: 'id', description: 'AI interview question UUID' })
-  @ApiStandardResponse(AiInterviewQuestionResponseDto, 'AI interview question marked as asked')
+  @ApiStandardResponse(
+    AiInterviewQuestionResponseDto,
+    'AI interview question marked as asked',
+  )
   async markAsked(
     @Param('id') id: string,
     @CurrentUser() actor: AuthJwtPayload,
@@ -133,7 +146,9 @@ export class AiInterviewQuestionsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List AI interview questions with offset or cursor pagination' })
+  @ApiOperation({
+    summary: 'List AI interview questions with offset or cursor pagination',
+  })
   @ApiAiInterviewQuestionsPaginatedResponse(
     AiInterviewQuestionResponseDto,
     'AI interview questions fetched successfully',
@@ -142,12 +157,15 @@ export class AiInterviewQuestionsController {
     const result = await this.service.list(query);
 
     if (result.mode === 'cursor') {
-      return ResponseUtil.success('AI interview questions fetched successfully', {
-        data: result.data.map(AiInterviewQuestionsMapper.toResponse),
-        limit: result.limit,
-        next_cursor: result.next_cursor,
-        has_more: result.has_more,
-      });
+      return ResponseUtil.success(
+        'AI interview questions fetched successfully',
+        {
+          data: result.data.map(AiInterviewQuestionsMapper.toResponse),
+          limit: result.limit,
+          next_cursor: result.next_cursor,
+          has_more: result.has_more,
+        },
+      );
     }
 
     return ResponseUtil.paginated(
@@ -179,7 +197,10 @@ export class AiInterviewQuestionsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get AI interview question by id' })
   @ApiParam({ name: 'id', description: 'AI interview question UUID' })
-  @ApiStandardResponse(AiInterviewQuestionResponseDto, 'AI interview question fetched successfully')
+  @ApiStandardResponse(
+    AiInterviewQuestionResponseDto,
+    'AI interview question fetched successfully',
+  )
   async getById(@Param('id') id: string) {
     const question = await this.service.getById(id);
     return ResponseUtil.success(
@@ -193,7 +214,10 @@ export class AiInterviewQuestionsController {
   @ApiOperation({ summary: 'Update AI interview question' })
   @ApiParam({ name: 'id', description: 'AI interview question UUID' })
   @ApiBody({ type: UpdateInterviewQuestionDto })
-  @ApiStandardResponse(AiInterviewQuestionResponseDto, 'AI interview question updated successfully')
+  @ApiStandardResponse(
+    AiInterviewQuestionResponseDto,
+    'AI interview question updated successfully',
+  )
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateInterviewQuestionDto,
@@ -220,6 +244,8 @@ export class AiInterviewQuestionsController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     await this.service.softDelete(id, actor?.sub);
-    return ResponseUtil.success('AI interview question deleted successfully', { id });
+    return ResponseUtil.success('AI interview question deleted successfully', {
+      id,
+    });
   }
 }

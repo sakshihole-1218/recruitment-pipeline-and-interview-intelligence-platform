@@ -15,12 +15,15 @@ import { JobOpeningEntity } from '../../job-openings/entities/job-opening.entity
 import { InterviewRoundType } from '../enums/interview-round-type.enum';
 import { InterviewEntity } from './interview.entity';
 
-
 @Entity({ name: 'interview_rounds' })
-@Index('uq_interview_rounds_job_opening_sequence', ['job_opening_id', 'sequence_number'], {
-  unique: true,
-  where: '"deleted_at" IS NULL',
-})
+@Index(
+  'uq_interview_rounds_job_opening_sequence',
+  ['job_opening_id', 'sequence_number'],
+  {
+    unique: true,
+    where: '"deleted_at" IS NULL',
+  },
+)
 export class InterviewRoundEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

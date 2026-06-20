@@ -99,7 +99,10 @@ export class UpdateAiInterviewSessionUseCase {
       ) {
         session.ended_at = now;
         session.duration_seconds = session.started_at
-          ? Math.max(0, Math.floor((now.getTime() - session.started_at.getTime()) / 1000))
+          ? Math.max(
+              0,
+              Math.floor((now.getTime() - session.started_at.getTime()) / 1000),
+            )
           : session.duration_seconds;
       }
 

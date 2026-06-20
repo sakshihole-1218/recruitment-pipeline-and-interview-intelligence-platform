@@ -22,7 +22,7 @@ export class GeminiClient {
     const client = this.createClient();
 
     try {
-      const response = (await this.withTimeout(
+      const response = await this.withTimeout(
         client.models.generateContent({
           model: options.model || this.defaultModel,
           contents: options.prompt,
@@ -32,7 +32,7 @@ export class GeminiClient {
           },
         }),
         options.timeoutMs ?? this.defaultTimeoutMs,
-      )) as { text?: string };
+      );
 
       const text = String(response.text ?? '').trim();
 
@@ -52,16 +52,23 @@ export class GeminiClient {
   }
 
   private createClient(): GoogleGenAI {
-    const apiKey = String(this.configService.get<string>('GEMINI_API_KEY') || '').trim();
+    const apiKey = String(
+      this.configService.get<string>('GEMINI_API_KEY') || '',
+    ).trim();
 
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is required when using Gemini AI provider');
+      throw new Error(
+        'GEMINI_API_KEY is required when using Gemini AI provider',
+      );
     }
 
     return new GoogleGenAI({ apiKey });
   }
 
-  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+  ): Promise<T> {
     let timeoutHandle: NodeJS.Timeout | undefined;
 
     try {

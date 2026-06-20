@@ -18,10 +18,14 @@ import { CandidateEntity } from '../../candidates/entities/candidate.entity';
 import { LivekitRoomStatus } from '../enums/livekit-room-status.enum';
 
 @Entity({ name: 'livekit_room_sessions' })
-@Index('uq_livekit_room_sessions_ai_session_active', ['ai_interview_session_id'], {
-  unique: true,
-  where: '"deleted_at" IS NULL',
-})
+@Index(
+  'uq_livekit_room_sessions_ai_session_active',
+  ['ai_interview_session_id'],
+  {
+    unique: true,
+    where: '"deleted_at" IS NULL',
+  },
+)
 @Index('uq_livekit_room_sessions_room_name_active', ['room_name'], {
   unique: true,
   where: '"deleted_at" IS NULL',

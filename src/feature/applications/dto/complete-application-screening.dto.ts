@@ -29,7 +29,8 @@ export class CompleteApplicationScreeningDto {
 
   @ApiPropertyOptional({
     example: 'Good communication, strong system design fundamentals',
-    description: 'Optional screening remarks (stored as stage change reason and/or rejection reason based on result)',
+    description:
+      'Optional screening remarks (stored as stage change reason and/or rejection reason based on result)',
   })
   @IsOptional()
   @IsString()

@@ -14,7 +14,10 @@ export class EndAiInterviewSessionUseCase {
     private readonly validation: AiInterviewSessionsValidationHelper,
   ) {}
 
-  async execute(id: string, actorUserId?: string): Promise<AiInterviewSessionEntity> {
+  async execute(
+    id: string,
+    actorUserId?: string,
+  ): Promise<AiInterviewSessionEntity> {
     this.validation.ensureActorUserRequired(actorUserId);
 
     return this.dataSource.transaction(async (manager) => {
@@ -37,7 +40,10 @@ export class EndAiInterviewSessionUseCase {
       session.session_status = AiInterviewSessionStatus.COMPLETED;
       session.ended_at = now;
       session.duration_seconds = session.started_at
-        ? Math.max(0, Math.floor((now.getTime() - session.started_at.getTime()) / 1000))
+        ? Math.max(
+            0,
+            Math.floor((now.getTime() - session.started_at.getTime()) / 1000),
+          )
         : null;
       session.updated_by_user_id = actorUserId;
 

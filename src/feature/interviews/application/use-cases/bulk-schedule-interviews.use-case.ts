@@ -10,7 +10,9 @@ import { ScheduleInterviewUseCase } from './schedule-interview.usecase';
 
 @Injectable()
 export class BulkScheduleInterviewsUseCase {
-  constructor(private readonly scheduleInterviewUseCase: ScheduleInterviewUseCase) {}
+  constructor(
+    private readonly scheduleInterviewUseCase: ScheduleInterviewUseCase,
+  ) {}
 
   async execute(
     dto: BulkScheduleInterviewsDto,

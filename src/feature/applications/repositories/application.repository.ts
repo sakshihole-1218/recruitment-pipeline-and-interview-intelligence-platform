@@ -35,19 +35,28 @@ export class ApplicationRepository {
     return manager ? manager.getRepository(ApplicationEntity) : this.repository;
   }
 
-  private baseQuery(alias = 'applications', manager?: EntityManager): SelectQueryBuilder<ApplicationEntity> {
+  private baseQuery(
+    alias = 'applications',
+    manager?: EntityManager,
+  ): SelectQueryBuilder<ApplicationEntity> {
     return this.repo(manager)
       .createQueryBuilder(alias)
       .where(`${alias}.deleted_at IS NULL`);
   }
 
-  async findById(id: string, options?: { manager?: EntityManager }): Promise<ApplicationEntity | null> {
+  async findById(
+    id: string,
+    options?: { manager?: EntityManager },
+  ): Promise<ApplicationEntity | null> {
     return this.baseQuery('applications', options?.manager)
       .andWhere('applications.id = :id', { id })
       .getOne();
   }
 
-  async save(entity: ApplicationEntity, options?: { manager?: EntityManager }): Promise<ApplicationEntity> {
+  async save(
+    entity: ApplicationEntity,
+    options?: { manager?: EntityManager },
+  ): Promise<ApplicationEntity> {
     return this.repo(options?.manager).save(entity);
   }
 
@@ -66,15 +75,21 @@ export class ApplicationRepository {
     manager?: EntityManager;
   }): Promise<ApplicationEntity | null> {
     return this.baseQuery('applications', options.manager)
-      .andWhere('applications.candidate_id = :candidateId', { candidateId: options.candidateId })
-      .andWhere('applications.job_opening_id = :jobOpeningId', { jobOpeningId: options.jobOpeningId })
+      .andWhere('applications.candidate_id = :candidateId', {
+        candidateId: options.candidateId,
+      })
+      .andWhere('applications.job_opening_id = :jobOpeningId', {
+        jobOpeningId: options.jobOpeningId,
+      })
       .andWhere('applications.application_status IN (:...activeStatuses)', {
         activeStatuses: options.activeStatuses,
       })
       .getOne();
   }
 
-  async getNextApplicationNumberSequence(manager: EntityManager): Promise<number> {
+  async getNextApplicationNumberSequence(
+    manager: EntityManager,
+  ): Promise<number> {
     const rows = await manager.query(
       `SELECT nextval('application_number_seq')::bigint AS seq;`,
     );
@@ -200,7 +215,10 @@ export class ApplicationRepository {
 
       const idRows = await qb
         .clone()
-        .select(['applications.id AS id', 'applications.created_at AS created_at'])
+        .select([
+          'applications.id AS id',
+          'applications.created_at AS created_at',
+        ])
         .distinct(true)
         .take(limit + 1)
         .getRawMany<{ id: string; created_at: Date }>();
@@ -222,7 +240,7 @@ export class ApplicationRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

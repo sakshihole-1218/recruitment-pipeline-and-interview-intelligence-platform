@@ -21,7 +21,8 @@ export class AiInterviewTranscriptsValidationHelper {
   ensureSessionAllowsCreate(status: AiInterviewSessionStatus): void {
     if (status !== AiInterviewSessionStatus.IN_PROGRESS) {
       throw new ConflictException({
-        message: 'Transcript entries can only be created for IN_PROGRESS sessions',
+        message:
+          'Transcript entries can only be created for IN_PROGRESS sessions',
         code: 'AI_INTERVIEW_SESSION_NOT_IN_PROGRESS',
         meta: { session_status: status },
       });
@@ -36,7 +37,8 @@ export class AiInterviewTranscriptsValidationHelper {
 
     if (!allowed.has(status)) {
       throw new ConflictException({
-        message: 'Bulk transcript import is only allowed for IN_PROGRESS or COMPLETED sessions',
+        message:
+          'Bulk transcript import is only allowed for IN_PROGRESS or COMPLETED sessions',
         code: 'AI_INTERVIEW_SESSION_INVALID_FOR_BULK_TRANSCRIPTS',
         meta: { session_status: status },
       });
@@ -49,8 +51,33 @@ export class AiInterviewTranscriptsValidationHelper {
   ): void {
     if (question.ai_interview_session_id !== sessionId) {
       throw new BadRequestException({
-        message: 'AI interview question must belong to the same AI interview session',
+        message:
+          'AI interview question must belong to the same AI interview session',
         code: 'AI_INTERVIEW_QUESTION_SESSION_MISMATCH',
+      });
+    }
+  }
+
+  ensureAudioFileProvided(
+    file: Express.Multer.File | undefined,
+  ): asserts file is Express.Multer.File {
+    if (!file) {
+      throw new BadRequestException({
+        message: 'Audio file is required',
+        code: 'AI_INTERVIEW_AUDIO_FILE_REQUIRED',
+      });
+    }
+  }
+
+  ensureAudioFileType(file: Express.Multer.File): void {
+    const mimeType = String(file.mimetype ?? '').toLowerCase();
+
+    if (!mimeType.startsWith('audio/')) {
+      throw new BadRequestException({
+        message:
+          'Only audio uploads are supported for AI interview transcription',
+        code: 'AI_INTERVIEW_AUDIO_FILE_INVALID_TYPE',
+        meta: { mime_type: file.mimetype },
       });
     }
   }

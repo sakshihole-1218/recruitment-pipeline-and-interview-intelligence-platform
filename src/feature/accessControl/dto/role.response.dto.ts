@@ -10,7 +10,9 @@ export class RoleResponseDto {
   @ApiProperty({ example: 'RECRUITER' })
   code: string;
 
-  @ApiPropertyOptional({ example: 'Handles candidate pipeline and coordination' })
+  @ApiPropertyOptional({
+    example: 'Handles candidate pipeline and coordination',
+  })
   description: string | null;
 
   @ApiProperty({ example: '2026-01-01T10:00:00.000Z' })

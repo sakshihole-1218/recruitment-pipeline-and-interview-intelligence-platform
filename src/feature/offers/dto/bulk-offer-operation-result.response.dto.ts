@@ -15,7 +15,10 @@ export class BulkOfferOperationResultResponseDto {
   @ApiProperty({ example: 1 })
   failed_count: number;
 
-  @ApiProperty({ type: [String], description: 'Offer IDs processed successfully' })
+  @ApiProperty({
+    type: [String],
+    description: 'Offer IDs processed successfully',
+  })
   successful_ids: string[];
 
   @ApiProperty({ type: [BulkOfferOperationFailureDto] })

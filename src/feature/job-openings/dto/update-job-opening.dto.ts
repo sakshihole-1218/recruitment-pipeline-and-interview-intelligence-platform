@@ -29,7 +29,11 @@ export class UpdateJobOpeningDto {
 
   @ApiPropertyOptional({ example: 'BE-2026-001' })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsString()
   @MinLength(2)
   @MaxLength(50)
@@ -50,15 +54,26 @@ export class UpdateJobOpeningDto {
   @IsUUID()
   recruiter_user_id?: string;
 
-  @ApiPropertyOptional({ enum: EmploymentType, example: EmploymentType.FULL_TIME })
+  @ApiPropertyOptional({
+    enum: EmploymentType,
+    example: EmploymentType.FULL_TIME,
+  })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(EmploymentType)
   employment_type?: EmploymentType;
 
   @ApiPropertyOptional({ enum: WorkMode, example: WorkMode.HYBRID })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(WorkMode)
   work_mode?: WorkMode;
 
@@ -92,7 +107,11 @@ export class UpdateJobOpeningDto {
 
   @ApiPropertyOptional({ example: 'INR' })
   @IsOptional()
-  @Transform(({ value }) => (value === undefined || value === null ? value : String(value).trim().toUpperCase()))
+  @Transform(({ value }) =>
+    value === undefined || value === null
+      ? value
+      : String(value).trim().toUpperCase(),
+  )
   @IsString()
   @MinLength(3)
   @MaxLength(10)
@@ -127,9 +146,16 @@ export class UpdateJobOpeningDto {
   @MaxLength(255)
   location?: string | null;
 
-  @ApiPropertyOptional({ enum: JobOpeningStatus, example: JobOpeningStatus.OPEN })
+  @ApiPropertyOptional({
+    enum: JobOpeningStatus,
+    example: JobOpeningStatus.OPEN,
+  })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(JobOpeningStatus)
   status?: JobOpeningStatus;
 

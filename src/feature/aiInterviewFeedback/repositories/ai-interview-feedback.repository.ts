@@ -29,7 +29,9 @@ export class AiInterviewFeedbackRepository {
   ) {}
 
   private repo(manager?: EntityManager): Repository<AiInterviewFeedbackEntity> {
-    return manager ? manager.getRepository(AiInterviewFeedbackEntity) : this.repository;
+    return manager
+      ? manager.getRepository(AiInterviewFeedbackEntity)
+      : this.repository;
   }
 
   private baseQuery(
@@ -53,8 +55,10 @@ export class AiInterviewFeedbackRepository {
     id: string,
     options?: { manager?: EntityManager; lockForUpdate?: boolean },
   ): Promise<AiInterviewFeedbackEntity | null> {
-    const qb = this.baseQuery('ai_interview_feedback', options?.manager)
-      .andWhere('ai_interview_feedback.id = :id', { id });
+    const qb = this.baseQuery(
+      'ai_interview_feedback',
+      options?.manager,
+    ).andWhere('ai_interview_feedback.id = :id', { id });
 
     if (options?.lockForUpdate) {
       qb.setLock('pessimistic_write');
@@ -139,7 +143,9 @@ export class AiInterviewFeedbackRepository {
     return this.list(query);
   }
 
-  async list(query: AiInterviewFeedbackQueryDto): Promise<AiInterviewFeedbackListResult> {
+  async list(
+    query: AiInterviewFeedbackQueryDto,
+  ): Promise<AiInterviewFeedbackListResult> {
     const qb = this.baseQuery('ai_interview_feedback');
 
     if (query.ai_interview_session_id) {
@@ -162,9 +168,12 @@ export class AiInterviewFeedbackRepository {
     }
 
     if (query.resume_analysis_id) {
-      qb.andWhere('ai_interview_feedback.resume_analysis_id = :resumeAnalysisId', {
-        resumeAnalysisId: query.resume_analysis_id,
-      });
+      qb.andWhere(
+        'ai_interview_feedback.resume_analysis_id = :resumeAnalysisId',
+        {
+          resumeAnalysisId: query.resume_analysis_id,
+        },
+      );
     }
 
     if (query.feedback_status) {
@@ -174,9 +183,12 @@ export class AiInterviewFeedbackRepository {
     }
 
     if (query.ai_recommendation) {
-      qb.andWhere('ai_interview_feedback.ai_recommendation = :aiRecommendation', {
-        aiRecommendation: query.ai_recommendation,
-      });
+      qb.andWhere(
+        'ai_interview_feedback.ai_recommendation = :aiRecommendation',
+        {
+          aiRecommendation: query.ai_recommendation,
+        },
+      );
     }
 
     if (query.generated_from) {
@@ -218,7 +230,8 @@ export class AiInterviewFeedbackRepository {
       );
     }
 
-    const orderDirection = (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
+    const orderDirection =
+      (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
     const sortBy = query.sort_by || 'created_at';
     const allowedSort = [
       'created_at',
@@ -229,7 +242,7 @@ export class AiInterviewFeedbackRepository {
       'ai_recommendation',
     ] as const;
 
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
@@ -244,7 +257,8 @@ export class AiInterviewFeedbackRepository {
     if (query.cursor) {
       if ((query.sort_by || 'created_at') !== 'created_at') {
         throw new BadRequestException({
-          message: 'Cursor pagination is only supported with sort_by=created_at',
+          message:
+            'Cursor pagination is only supported with sort_by=created_at',
           code: 'CURSOR_SORT_BY_REQUIRED',
         });
       }
@@ -258,16 +272,23 @@ export class AiInterviewFeedbackRepository {
       }
 
       if (orderDirection === 'DESC') {
-        qb.andWhere('ai_interview_feedback.created_at < :cursorDate', { cursorDate });
+        qb.andWhere('ai_interview_feedback.created_at < :cursorDate', {
+          cursorDate,
+        });
       } else {
-        qb.andWhere('ai_interview_feedback.created_at > :cursorDate', { cursorDate });
+        qb.andWhere('ai_interview_feedback.created_at > :cursorDate', {
+          cursorDate,
+        });
       }
 
-      const rows = await qb.clone().take(limit + 1).getMany();
+      const rows = await qb
+        .clone()
+        .take(limit + 1)
+        .getMany();
       const hasMore = rows.length > limit;
       const data = hasMore ? rows.slice(0, limit) : rows;
       const nextCursor = hasMore
-        ? data[data.length - 1]?.created_at?.toISOString() ?? null
+        ? (data[data.length - 1]?.created_at?.toISOString() ?? null)
         : null;
 
       return {

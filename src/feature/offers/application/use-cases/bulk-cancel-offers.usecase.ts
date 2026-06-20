@@ -51,7 +51,9 @@ export class BulkCancelOffersUseCase {
         await this.dataSource.transaction(async (manager) => {
           const now = new Date();
 
-          const offer = await this.offerRepository.findById(offerId, { manager });
+          const offer = await this.offerRepository.findById(offerId, {
+            manager,
+          });
           if (!offer) {
             throw new NotFoundException({
               message: 'Offer not found',
@@ -74,7 +76,10 @@ export class BulkCancelOffersUseCase {
 
           await this.offerRepository.save(offer, { manager });
 
-          const app = await this.applicationRepository.findById(offer.application_id, { manager });
+          const app = await this.applicationRepository.findById(
+            offer.application_id,
+            { manager },
+          );
           if (!app) {
             throw new ConflictException({
               message: 'Offer is linked to an invalid application',
@@ -82,11 +87,15 @@ export class BulkCancelOffersUseCase {
             });
           }
 
-          this.applicationsValidationHelper.ensureNotTerminalStage(app.current_stage);
+          this.applicationsValidationHelper.ensureNotTerminalStage(
+            app.current_stage,
+          );
 
           const targetStage = ApplicationCurrentStage.OFFER;
           const fromStage = app.current_stage;
-          const reason = dto.cancel_reason ? `Offer cancelled: ${dto.cancel_reason}` : 'Offer cancelled';
+          const reason = dto.cancel_reason
+            ? `Offer cancelled: ${dto.cancel_reason}`
+            : 'Offer cancelled';
 
           if (fromStage !== targetStage) {
             this.applicationsValidationHelper.ensureStageTransitionAllowed({
@@ -99,7 +108,7 @@ export class BulkCancelOffersUseCase {
                 application_id: app.id,
                 from_stage: fromStage,
                 to_stage: targetStage,
-                changed_by_user_id: actorUserId!,
+                changed_by_user_id: actorUserId,
                 change_reason: reason,
                 changed_at: now,
               },
@@ -116,7 +125,7 @@ export class BulkCancelOffersUseCase {
                 fromStage,
                 toStage: targetStage,
                 reason,
-                actorUserId: actorUserId!,
+                actorUserId: actorUserId,
                 actionAt: now,
                 ipAddress: null,
                 userAgent: null,
@@ -129,7 +138,9 @@ export class BulkCancelOffersUseCase {
           app.updated_by_user_id = actorUserId ?? null;
           await this.applicationRepository.save(app, { manager });
 
-          const loaded = await this.offerRepository.findById(offer.id, { manager });
+          const loaded = await this.offerRepository.findById(offer.id, {
+            manager,
+          });
           if (!loaded) {
             throw new ConflictException({
               message: 'We could not complete the request. Please try again',
@@ -142,7 +153,7 @@ export class BulkCancelOffersUseCase {
               entityType: ActivityEntityType.OFFER,
               entityId: loaded.id,
               actionType: ActivityActionType.STATUS_CHANGE,
-              actorUserId: actorUserId!,
+              actorUserId: actorUserId,
               oldValues: oldOfferValues,
               newValues: {
                 offer_status: loaded.offer_status,

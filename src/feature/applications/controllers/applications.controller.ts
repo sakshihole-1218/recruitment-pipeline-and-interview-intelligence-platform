@@ -66,7 +66,10 @@ export class ApplicationsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create candidate application' })
   @ApiBody({ type: CreateApplicationDto })
-  @ApiStandardResponse(ApplicationResponseDto, 'Application created successfully')
+  @ApiStandardResponse(
+    ApplicationResponseDto,
+    'Application created successfully',
+  )
   async create(
     @Body() dto: CreateApplicationDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -82,7 +85,10 @@ export class ApplicationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get application by id' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
-  @ApiStandardResponse(ApplicationResponseDto, 'Application fetched successfully')
+  @ApiStandardResponse(
+    ApplicationResponseDto,
+    'Application fetched successfully',
+  )
   async findById(@Param('id') id: string) {
     const app = await this.applicationsService.findById(id);
     return ResponseUtil.success(
@@ -94,7 +100,10 @@ export class ApplicationsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List applications (offset or cursor pagination)' })
-  @ApiApplicationsPaginatedResponse(ApplicationResponseDto, 'Applications fetched successfully')
+  @ApiApplicationsPaginatedResponse(
+    ApplicationResponseDto,
+    'Applications fetched successfully',
+  )
   async list(@Query() query: ListApplicationsQueryDto) {
     const result = await this.applicationsService.list(query);
 
@@ -121,12 +130,18 @@ export class ApplicationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Bulk move application stage (partial success)' })
   @ApiBody({ type: BulkMoveApplicationStageDto })
-  @ApiStandardResponse(BulkOperationResultResponseDto, 'Bulk stage move processed')
+  @ApiStandardResponse(
+    BulkOperationResultResponseDto,
+    'Bulk stage move processed',
+  )
   async bulkMoveStage(
     @Body() dto: BulkMoveApplicationStageDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const result = await this.applicationsService.bulkMoveStage(dto, actor?.sub);
+    const result = await this.applicationsService.bulkMoveStage(
+      dto,
+      actor?.sub,
+    );
     return ResponseUtil.success('Bulk stage move processed', result);
   }
 
@@ -135,7 +150,10 @@ export class ApplicationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Bulk reject applications (partial success)' })
   @ApiBody({ type: BulkRejectApplicationsDto })
-  @ApiStandardResponse(BulkOperationResultResponseDto, 'Bulk rejection processed')
+  @ApiStandardResponse(
+    BulkOperationResultResponseDto,
+    'Bulk rejection processed',
+  )
   async bulkReject(
     @Body() dto: BulkRejectApplicationsDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -147,29 +165,48 @@ export class ApplicationsController {
   @Post('bulk/assign-recruiter')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bulk assign recruiter to applications (partial success)' })
+  @ApiOperation({
+    summary: 'Bulk assign recruiter to applications (partial success)',
+  })
   @ApiBody({ type: BulkAssignRecruiterDto })
-  @ApiStandardResponse(BulkOperationResultResponseDto, 'Bulk recruiter assignment processed')
+  @ApiStandardResponse(
+    BulkOperationResultResponseDto,
+    'Bulk recruiter assignment processed',
+  )
   async bulkAssignRecruiter(
     @Body() dto: BulkAssignRecruiterDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const result = await this.applicationsService.bulkAssignRecruiter(dto, actor?.sub);
+    const result = await this.applicationsService.bulkAssignRecruiter(
+      dto,
+      actor?.sub,
+    );
     return ResponseUtil.success('Bulk recruiter assignment processed', result);
   }
 
   @Post('bulk/assign-hiring-manager')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bulk assign hiring manager to applications (partial success)' })
+  @ApiOperation({
+    summary: 'Bulk assign hiring manager to applications (partial success)',
+  })
   @ApiBody({ type: BulkAssignHiringManagerDto })
-  @ApiStandardResponse(BulkOperationResultResponseDto, 'Bulk hiring manager assignment processed')
+  @ApiStandardResponse(
+    BulkOperationResultResponseDto,
+    'Bulk hiring manager assignment processed',
+  )
   async bulkAssignHiringManager(
     @Body() dto: BulkAssignHiringManagerDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const result = await this.applicationsService.bulkAssignHiringManager(dto, actor?.sub);
-    return ResponseUtil.success('Bulk hiring manager assignment processed', result);
+    const result = await this.applicationsService.bulkAssignHiringManager(
+      dto,
+      actor?.sub,
+    );
+    return ResponseUtil.success(
+      'Bulk hiring manager assignment processed',
+      result,
+    );
   }
 
   @Post(':id/reject')
@@ -178,7 +215,10 @@ export class ApplicationsController {
   @ApiOperation({ summary: 'Reject an application' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
   @ApiBody({ type: RejectApplicationDto })
-  @ApiStandardResponse(ApplicationResponseDto, 'Application rejected successfully')
+  @ApiStandardResponse(
+    ApplicationResponseDto,
+    'Application rejected successfully',
+  )
   async reject(
     @Param('id') id: string,
     @Body() dto: RejectApplicationDto,
@@ -197,7 +237,10 @@ export class ApplicationsController {
   @ApiOperation({ summary: 'Put an application on hold' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
   @ApiBody({ type: HoldApplicationDto })
-  @ApiStandardResponse(ApplicationResponseDto, 'Application put on hold successfully')
+  @ApiStandardResponse(
+    ApplicationResponseDto,
+    'Application put on hold successfully',
+  )
   async hold(
     @Param('id') id: string,
     @Body() dto: HoldApplicationDto,
@@ -216,7 +259,10 @@ export class ApplicationsController {
   @ApiOperation({ summary: 'Withdraw an application' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
   @ApiBody({ type: WithdrawApplicationDto })
-  @ApiStandardResponse(ApplicationResponseDto, 'Application withdrawn successfully')
+  @ApiStandardResponse(
+    ApplicationResponseDto,
+    'Application withdrawn successfully',
+  )
   async withdraw(
     @Param('id') id: string,
     @Body() dto: WithdrawApplicationDto,
@@ -243,7 +289,9 @@ export class ApplicationsController {
           properties: {
             data: {
               type: 'array',
-              items: { $ref: getSchemaPath(ApplicationStageHistoryResponseDto) },
+              items: {
+                $ref: getSchemaPath(ApplicationStageHistoryResponseDto),
+              },
             },
           },
         },
@@ -261,7 +309,9 @@ export class ApplicationsController {
   @Post(':id/start-screening')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Start application screening (APPLIED -> SCREENING)' })
+  @ApiOperation({
+    summary: 'Start application screening (APPLIED -> SCREENING)',
+  })
   @ApiParam({ name: 'id', description: 'Application UUID' })
   @ApiStandardResponse(ApplicationResponseDto, 'Screening started successfully')
   async startScreening(
@@ -278,16 +328,25 @@ export class ApplicationsController {
   @Post(':id/complete-screening')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Complete application screening (SCREENING -> result stage)' })
+  @ApiOperation({
+    summary: 'Complete application screening (SCREENING -> result stage)',
+  })
   @ApiParam({ name: 'id', description: 'Application UUID' })
   @ApiBody({ type: CompleteApplicationScreeningDto })
-  @ApiStandardResponse(ApplicationResponseDto, 'Screening completed successfully')
+  @ApiStandardResponse(
+    ApplicationResponseDto,
+    'Screening completed successfully',
+  )
   async completeScreening(
     @Param('id') id: string,
     @Body() dto: CompleteApplicationScreeningDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const app = await this.applicationsService.completeScreening(id, dto, actor?.sub);
+    const app = await this.applicationsService.completeScreening(
+      id,
+      dto,
+      actor?.sub,
+    );
     return ResponseUtil.success(
       'Screening completed successfully',
       ApplicationsMapper.toApplicationResponse(app),

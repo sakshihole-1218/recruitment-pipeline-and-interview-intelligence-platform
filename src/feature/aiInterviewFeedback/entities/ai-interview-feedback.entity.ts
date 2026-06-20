@@ -19,10 +19,14 @@ import { AiInterviewFeedbackStatus } from '../enums/ai-interview-feedback-status
 import { AiInterviewRecommendation } from '../enums/ai-interview-recommendation.enum';
 
 @Entity({ name: 'ai_interview_feedback' })
-@Index('uq_ai_interview_feedback_session_id_active', ['ai_interview_session_id'], {
-  unique: true,
-  where: '"deleted_at" IS NULL',
-})
+@Index(
+  'uq_ai_interview_feedback_session_id_active',
+  ['ai_interview_session_id'],
+  {
+    unique: true,
+    where: '"deleted_at" IS NULL',
+  },
+)
 @Index('idx_ai_interview_feedback_application_id_active', ['application_id'], {
   where: '"deleted_at" IS NULL',
 })
@@ -138,7 +142,10 @@ export class AiInterviewFeedbackEntity {
   @JoinColumn({ name: 'candidate_id' })
   candidate?: CandidateEntity;
 
-  @ManyToOne(() => ResumeAiAnalysisEntity, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => ResumeAiAnalysisEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'resume_analysis_id' })
   resume_analysis?: ResumeAiAnalysisEntity | null;
 }

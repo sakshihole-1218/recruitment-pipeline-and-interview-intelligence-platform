@@ -42,21 +42,27 @@ export class SubmitInterviewFeedbackDto {
   @Max(10)
   culture_fit_score: number;
 
-  @ApiPropertyOptional({ example: 'Strong problem solving and clear communication' })
+  @ApiPropertyOptional({
+    example: 'Strong problem solving and clear communication',
+  })
   @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(2000)
   strengths?: string;
 
-  @ApiPropertyOptional({ example: 'Needs improvement in system design fundamentals' })
+  @ApiPropertyOptional({
+    example: 'Needs improvement in system design fundamentals',
+  })
   @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(2000)
   concerns?: string;
 
-  @ApiPropertyOptional({ example: 'Detailed notes about coding exercise and discussion' })
+  @ApiPropertyOptional({
+    example: 'Detailed notes about coding exercise and discussion',
+  })
   @IsOptional()
   @IsString()
   @MinLength(2)

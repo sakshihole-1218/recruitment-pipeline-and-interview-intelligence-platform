@@ -9,10 +9,9 @@ import {
 
 import { BaseResponseDto } from '../../../common/dto/base-response.dto';
 
-export function ApiAiInterviewTranscriptsArrayResponse<TModel extends Type<unknown>>(
-  model: TModel,
-  description = 'Request processed successfully',
-) {
+export function ApiAiInterviewTranscriptsArrayResponse<
+  TModel extends Type<unknown>,
+>(model: TModel, description = 'Request processed successfully') {
   return applyDecorators(
     ApiExtraModels(BaseResponseDto, model),
     ApiOkResponse({

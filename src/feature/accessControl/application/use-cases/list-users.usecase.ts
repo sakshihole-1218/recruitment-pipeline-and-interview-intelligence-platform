@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { ListUsersQueryDto } from '../../dto/list-users.query.dto';
-import { UserRepository, UserListResult } from '../../repositories/user.repository';
+import {
+  UserRepository,
+  UserListResult,
+} from '../../repositories/user.repository';
 import { AccessControlPaginationHelper } from '../../helpers/access-control-pagination.helper';
 
 @Injectable()

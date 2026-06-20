@@ -25,7 +25,9 @@ export class ListApplicationNotesUseCase {
       sort_by: options.query.sort_by,
     });
 
-    await this.referenceRepository.ensureApplicationExists(options.applicationId);
+    await this.referenceRepository.ensureApplicationExists(
+      options.applicationId,
+    );
 
     const actorUserId = options.actor?.sub;
     const isAdmin = (options.actor?.roles ?? []).includes(SystemRoleCode.ADMIN);

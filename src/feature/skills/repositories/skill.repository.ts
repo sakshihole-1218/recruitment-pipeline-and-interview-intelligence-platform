@@ -55,7 +55,9 @@ export class SkillRepository {
     code: string,
     options?: { includeDeleted?: boolean; manager?: EntityManager },
   ): Promise<SkillEntity | null> {
-    const normalized = String(code ?? '').trim().toUpperCase();
+    const normalized = String(code ?? '')
+      .trim()
+      .toUpperCase();
     if (!normalized) return null;
 
     const repo = this.repo(options?.manager);
@@ -106,7 +108,9 @@ export class SkillRepository {
       qb.andWhere('skills.name ILIKE :name', { name: `%${nameFilter}%` });
     }
 
-    const codeFilter = String(query.code ?? '').trim().toUpperCase();
+    const codeFilter = String(query.code ?? '')
+      .trim()
+      .toUpperCase();
     if (codeFilter) {
       qb.andWhere('skills.code = :code', { code: codeFilter });
     }
@@ -116,7 +120,9 @@ export class SkillRepository {
     }
 
     if (typeof query.is_active === 'boolean') {
-      qb.andWhere('skills.is_active = :isActive', { isActive: query.is_active });
+      qb.andWhere('skills.is_active = :isActive', {
+        isActive: query.is_active,
+      });
     }
 
     const orderDirection =
@@ -167,7 +173,7 @@ export class SkillRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

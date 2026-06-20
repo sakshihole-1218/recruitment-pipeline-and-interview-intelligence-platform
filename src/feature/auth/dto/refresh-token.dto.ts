@@ -4,7 +4,8 @@ import { IsString, MinLength } from 'class-validator';
 
 export class RefreshTokenDto {
   @ApiProperty({
-    description: 'Refresh token previously issued by /auth/login or /auth/refresh',
+    description:
+      'Refresh token previously issued by /auth/login or /auth/refresh',
   })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()

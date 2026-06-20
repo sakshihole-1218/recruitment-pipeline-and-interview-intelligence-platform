@@ -106,7 +106,9 @@ export class CreateApplicationDecisionUseCase {
         });
       }
 
-      const actor = await this.userRepository.findById(actorUserId, { manager });
+      const actor = await this.userRepository.findById(actorUserId, {
+        manager,
+      });
       if (!actor) {
         throw new NotFoundException({
           message: 'User not found',
@@ -115,9 +117,12 @@ export class CreateApplicationDecisionUseCase {
       }
 
       const decidedByUserId = dto.decided_by_user_id ?? actor.id;
-      const decidedByUser = await this.userRepository.findById(decidedByUserId, {
-        manager,
-      });
+      const decidedByUser = await this.userRepository.findById(
+        decidedByUserId,
+        {
+          manager,
+        },
+      );
       if (!decidedByUser) {
         throw new NotFoundException({
           message: 'Decided-by user not found',
@@ -188,9 +193,12 @@ export class CreateApplicationDecisionUseCase {
 
       if (!aiFeedback && aiSession && dto.decision_source) {
         const sessionFeedback =
-          await this.aiInterviewFeedbackRepository.findBySessionId(aiSession.id, {
-            manager,
-          });
+          await this.aiInterviewFeedbackRepository.findBySessionId(
+            aiSession.id,
+            {
+              manager,
+            },
+          );
 
         if (sessionFeedback) {
           this.ensureAiFeedbackBelongsToApplication(
@@ -245,11 +253,13 @@ export class CreateApplicationDecisionUseCase {
 
       if (decisionSource === DecisionSource.HUMAN_INTERVIEW) {
         const { mandatoryRoundIds } =
-          await this.mandatoryInterviewsHelper.ensureAllMandatoryRoundsCompleted({
-            applicationId: application.id,
-            jobOpeningId: application.job_opening_id,
-            manager,
-          });
+          await this.mandatoryInterviewsHelper.ensureAllMandatoryRoundsCompleted(
+            {
+              applicationId: application.id,
+              jobOpeningId: application.job_opening_id,
+              manager,
+            },
+          );
 
         await this.feedbackHelper.ensureFeedbackExistsForMandatoryRounds({
           applicationId: application.id,
@@ -289,7 +299,9 @@ export class CreateApplicationDecisionUseCase {
           interviewerReviews,
         );
       const proctoringRiskSnapshot =
-        this.decisionSnapshotHelper.buildProctoringRiskSnapshot(proctoringEvents);
+        this.decisionSnapshotHelper.buildProctoringRiskSnapshot(
+          proctoringEvents,
+        );
       const finalScore = this.decisionScoreHelper.calculateFinalScore({
         aiFeedback,
         interviewerReviews,
@@ -303,7 +315,6 @@ export class CreateApplicationDecisionUseCase {
         reason: string | null;
       }> = [];
 
-      
       if (application.current_stage === ApplicationCurrentStage.INTERVIEW) {
         await this.stageHistoryRepository.createAndSave(
           {
@@ -365,12 +376,11 @@ export class CreateApplicationDecisionUseCase {
         throw error;
       }
 
-      const mapped = DecisionsApplicationStageHelper.mapDecisionToApplicationState(
-        {
+      const mapped =
+        DecisionsApplicationStageHelper.mapDecisionToApplicationState({
           decision_status: created.decision_status,
           decision_reason: created.decision_reason,
-        },
-      );
+        });
 
       const fromStage = application.current_stage;
       const toStage = mapped.current_stage;
@@ -443,8 +453,8 @@ export class CreateApplicationDecisionUseCase {
           newValues: {
             application_id: loaded.application_id,
             decision_status: loaded.decision_status,
-              decision_source: loaded.decision_source,
-              final_score: loaded.final_score,
+            decision_source: loaded.decision_source,
+            final_score: loaded.final_score,
           },
           actionAt: now,
           ipAddress: null,
@@ -463,8 +473,7 @@ export class CreateApplicationDecisionUseCase {
   ): void {
     if (session.application_id !== applicationId) {
       throw new BadRequestException({
-        message:
-          'AI interview session does not belong to the same application',
+        message: 'AI interview session does not belong to the same application',
         code: 'AI_INTERVIEW_SESSION_APPLICATION_MISMATCH',
       });
     }

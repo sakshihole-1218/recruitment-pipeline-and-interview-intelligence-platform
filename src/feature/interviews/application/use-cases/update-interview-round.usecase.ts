@@ -28,7 +28,9 @@ export class UpdateInterviewRoundUseCase {
   ): Promise<InterviewRoundEntity> {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
-      const round = await this.interviewRoundRepository.findById(id, { manager });
+      const round = await this.interviewRoundRepository.findById(id, {
+        manager,
+      });
 
       if (!round) {
         throw new NotFoundException({
@@ -43,22 +45,25 @@ export class UpdateInterviewRoundUseCase {
         typeof dto.sequence_number === 'number' &&
         dto.sequence_number !== round.sequence_number
       ) {
-        const existing = await this.interviewRoundRepository.findByJobOpeningAndSequence(
-          round.job_opening_id,
-          dto.sequence_number,
-          { includeDeleted: true, manager },
-        );
+        const existing =
+          await this.interviewRoundRepository.findByJobOpeningAndSequence(
+            round.job_opening_id,
+            dto.sequence_number,
+            { includeDeleted: true, manager },
+          );
 
         if (existing && existing.id !== round.id && !existing.deleted_at) {
           throw new ConflictException({
-            message: 'An interview round with this sequence number already exists for this job opening',
+            message:
+              'An interview round with this sequence number already exists for this job opening',
             code: 'INTERVIEW_ROUND_SEQUENCE_ALREADY_EXISTS',
           });
         }
 
         if (existing && existing.id !== round.id && existing.deleted_at) {
           throw new ConflictException({
-            message: 'A deleted round already exists with this sequence number. Restore it instead of creating another',
+            message:
+              'A deleted round already exists with this sequence number. Restore it instead of creating another',
             code: 'INTERVIEW_ROUND_SEQUENCE_CONFLICT_DELETED',
           });
         }
@@ -88,7 +93,9 @@ export class UpdateInterviewRoundUseCase {
       }
 
       if (dto.description !== undefined) {
-        round.description = dto.description ? String(dto.description).trim() : null;
+        round.description = dto.description
+          ? String(dto.description).trim()
+          : null;
         changedFields.push('description');
       }
 
@@ -96,7 +103,9 @@ export class UpdateInterviewRoundUseCase {
 
       await this.interviewRoundRepository.save(round, { manager });
 
-      const loaded = await this.interviewRoundRepository.findById(round.id, { manager });
+      const loaded = await this.interviewRoundRepository.findById(round.id, {
+        manager,
+      });
       if (!loaded) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

@@ -27,7 +27,10 @@ export class StartApplicationScreeningUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(applicationId: string, actorUserId?: string): Promise<ApplicationEntity> {
+  async execute(
+    applicationId: string,
+    actorUserId?: string,
+  ): Promise<ApplicationEntity> {
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -76,7 +79,9 @@ export class StartApplicationScreeningUseCase {
         { manager },
       );
 
-      const loaded = await this.applicationRepository.findById(app.id, { manager });
+      const loaded = await this.applicationRepository.findById(app.id, {
+        manager,
+      });
       if (!loaded) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

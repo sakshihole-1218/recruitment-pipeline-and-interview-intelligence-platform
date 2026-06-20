@@ -47,10 +47,16 @@ export class BulkAddSkillsUseCase {
     );
   }
 
-  private static toFailure(error: unknown, candidateId?: string): BulkAddSkillsFailure {
+  private static toFailure(
+    error: unknown,
+    candidateId?: string,
+  ): BulkAddSkillsFailure {
     if (error instanceof HttpException) {
       const res = error.getResponse();
-      const obj = typeof res === 'object' && res !== null ? (res as Record<string, unknown>) : {};
+      const obj =
+        typeof res === 'object' && res !== null
+          ? (res as Record<string, unknown>)
+          : {};
       return {
         candidate_id: candidateId,
         message:
@@ -113,7 +119,9 @@ export class BulkAddSkillsUseCase {
       }
     }
 
-    const validSkillIds = dedupedSkillIds.filter((id) => existingSkillIds.has(id));
+    const validSkillIds = dedupedSkillIds.filter((id) =>
+      existingSkillIds.has(id),
+    );
 
     const seenCandidates = new Set<string>();
     for (const raw of rawCandidateIds) {
@@ -149,92 +157,110 @@ export class BulkAddSkillsUseCase {
       }
 
       try {
-        const perCandidate = await this.dataSource.transaction(async (manager) => {
-          const candidate = await this.candidateRepository.findByIdIncludingDeleted(candidateId, {
-            manager,
-          });
-          if (!candidate) {
-            return { kind: 'fail' as const, failure: { message: 'Candidate not found', code: 'CANDIDATE_NOT_FOUND' } };
-          }
-          if (candidate.deleted_at) {
-            return {
-              kind: 'fail' as const,
-              failure: { message: 'Candidate is deleted and was skipped', code: 'CANDIDATE_DELETED_SKIPPED' },
-            };
-          }
-
-          const existingMappings = await this.candidateSkillRepository.findByCandidateAndSkillIds({
-            candidateId,
-            skillIds: validSkillIds,
-            includeDeleted: true,
-            manager,
-          });
-
-          const bySkillId = new Map(existingMappings.map((m) => [m.skill_id, m] as const));
-
-          const added: string[] = [];
-          const reactivated: string[] = [];
-          const skipped: string[] = [];
-
-          for (const skillId of validSkillIds) {
-            const existing = bySkillId.get(skillId);
-            if (!existing) {
-              await this.candidateSkillRepository.createAndSave(
+        const perCandidate = await this.dataSource.transaction(
+          async (manager) => {
+            const candidate =
+              await this.candidateRepository.findByIdIncludingDeleted(
+                candidateId,
                 {
-                  candidate_id: candidateId,
-                  skill_id: skillId,
-                  years_of_experience: null,
-                  proficiency_level: null,
-                  is_primary: false,
-                  deleted_at: null,
+                  manager,
                 },
+              );
+            if (!candidate) {
+              return {
+                kind: 'fail' as const,
+                failure: {
+                  message: 'Candidate not found',
+                  code: 'CANDIDATE_NOT_FOUND',
+                },
+              };
+            }
+            if (candidate.deleted_at) {
+              return {
+                kind: 'fail' as const,
+                failure: {
+                  message: 'Candidate is deleted and was skipped',
+                  code: 'CANDIDATE_DELETED_SKIPPED',
+                },
+              };
+            }
+
+            const existingMappings =
+              await this.candidateSkillRepository.findByCandidateAndSkillIds({
+                candidateId,
+                skillIds: validSkillIds,
+                includeDeleted: true,
+                manager,
+              });
+
+            const bySkillId = new Map(
+              existingMappings.map((m) => [m.skill_id, m] as const),
+            );
+
+            const added: string[] = [];
+            const reactivated: string[] = [];
+            const skipped: string[] = [];
+
+            for (const skillId of validSkillIds) {
+              const existing = bySkillId.get(skillId);
+              if (!existing) {
+                await this.candidateSkillRepository.createAndSave(
+                  {
+                    candidate_id: candidateId,
+                    skill_id: skillId,
+                    years_of_experience: null,
+                    proficiency_level: null,
+                    is_primary: false,
+                    deleted_at: null,
+                  },
+                  { manager },
+                );
+                added.push(skillId);
+                continue;
+              }
+
+              if (existing.deleted_at) {
+                existing.deleted_at = null;
+                await this.candidateSkillRepository.save(existing, { manager });
+                reactivated.push(skillId);
+                continue;
+              }
+
+              skipped.push(skillId);
+            }
+
+            if (options.actorUserId) {
+              await this.activityWriter.log(
+                ActivityLogBuilder.build({
+                  entityType: ActivityEntityType.CANDIDATE,
+                  entityId: candidateId,
+                  actionType: ActivityActionType.UPDATE,
+                  actorUserId: options.actorUserId,
+                  oldValues: { changed_fields: ['skills'] },
+                  newValues: {
+                    changed_fields: ['skills'],
+                    added_skill_ids: added,
+                    reactivated_skill_ids: reactivated,
+                  },
+                  actionAt: new Date(),
+                  ipAddress: null,
+                  userAgent: null,
+                }),
                 { manager },
               );
-              added.push(skillId);
-              continue;
             }
 
-            if (existing.deleted_at) {
-              existing.deleted_at = null;
-              await this.candidateSkillRepository.save(existing, { manager });
-              reactivated.push(skillId);
-              continue;
-            }
-
-            skipped.push(skillId);
-          }
-
-          if (options.actorUserId) {
-            await this.activityWriter.log(
-              ActivityLogBuilder.build({
-                entityType: ActivityEntityType.CANDIDATE,
-                entityId: candidateId,
-                actionType: ActivityActionType.UPDATE,
-                actorUserId: options.actorUserId,
-                oldValues: { changed_fields: ['skills'] },
-                newValues: {
-                  changed_fields: ['skills'],
-                  added_skill_ids: added,
-                  reactivated_skill_ids: reactivated,
-                },
-                actionAt: new Date(),
-                ipAddress: null,
-                userAgent: null,
-              }),
-              { manager },
-            );
-          }
-
-          return {
-            kind: 'ok' as const,
-            result: {
-              candidate_id: candidateId,
-              added_skill_ids: added,
-              reactivated_skill_ids: reactivated,
-              skipped_existing_skill_ids: skipped,
-            },
-          };
-        });
+            return {
+              kind: 'ok' as const,
+              result: {
+                candidate_id: candidateId,
+                added_skill_ids: added,
+                reactivated_skill_ids: reactivated,
+                skipped_existing_skill_ids: skipped,
+              },
+            };
+          },
+        );
 
         if (perCandidate.kind === 'fail') {
           failed.push({

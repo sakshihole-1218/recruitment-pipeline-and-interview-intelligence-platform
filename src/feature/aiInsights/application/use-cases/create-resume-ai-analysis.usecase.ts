@@ -130,9 +130,12 @@ export class CreateResumeAiAnalysisUseCase {
         await this.resumeAiAnalysisRepository.save(created, { manager });
       }
 
-      const loaded = await this.resumeAiAnalysisRepository.findById(created.id, {
-        manager,
-      });
+      const loaded = await this.resumeAiAnalysisRepository.findById(
+        created.id,
+        {
+          manager,
+        },
+      );
 
       const result = loaded ?? created;
 
@@ -148,7 +151,9 @@ export class CreateResumeAiAnalysisUseCase {
             candidate_document_id: result.candidate_document_id,
             application_id: result.application_id ?? null,
             analysis_status: result.analysis_status,
-            analyzed_at: result.analyzed_at ? result.analyzed_at.toISOString() : null,
+            analyzed_at: result.analyzed_at
+              ? result.analyzed_at.toISOString()
+              : null,
             ai_fit_score: result.ai_fit_score,
             extracted_text_length:
               typeof result.extracted_text === 'string'

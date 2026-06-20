@@ -34,9 +34,12 @@ export class StartResumeAiAnalysisUseCase {
     const actorId = options.actorUserId;
 
     return this.dataSource.transaction(async (manager) => {
-      const entity = await this.resumeAiAnalysisRepository.findById(options.id, {
-        manager,
-      });
+      const entity = await this.resumeAiAnalysisRepository.findById(
+        options.id,
+        {
+          manager,
+        },
+      );
 
       if (!entity) {
         throw new NotFoundException({
@@ -47,7 +50,9 @@ export class StartResumeAiAnalysisUseCase {
 
       const oldValues = {
         analysis_status: entity.analysis_status,
-        analyzed_at: entity.analyzed_at ? entity.analyzed_at.toISOString() : null,
+        analyzed_at: entity.analyzed_at
+          ? entity.analyzed_at.toISOString()
+          : null,
         ai_fit_score: entity.ai_fit_score,
       };
 
@@ -96,8 +101,9 @@ export class StartResumeAiAnalysisUseCase {
       await this.resumeAiAnalysisRepository.save(entity, { manager });
 
       const loaded =
-        (await this.resumeAiAnalysisRepository.findById(entity.id, { manager })) ??
-        entity;
+        (await this.resumeAiAnalysisRepository.findById(entity.id, {
+          manager,
+        })) ?? entity;
 
       await this.activityWriter.log(
         ActivityLogBuilder.build({
@@ -108,7 +114,9 @@ export class StartResumeAiAnalysisUseCase {
           oldValues,
           newValues: {
             analysis_status: loaded.analysis_status,
-            analyzed_at: loaded.analyzed_at ? loaded.analyzed_at.toISOString() : null,
+            analyzed_at: loaded.analyzed_at
+              ? loaded.analyzed_at.toISOString()
+              : null,
             ai_fit_score: loaded.ai_fit_score,
             failure_reason: loaded.failure_reason ?? null,
           },

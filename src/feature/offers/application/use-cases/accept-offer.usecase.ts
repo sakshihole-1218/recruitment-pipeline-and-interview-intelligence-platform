@@ -62,9 +62,12 @@ export class AcceptOfferUseCase {
 
       await this.offerRepository.save(offer, { manager });
 
-      const app = await this.applicationRepository.findById(offer.application_id, {
-        manager,
-      });
+      const app = await this.applicationRepository.findById(
+        offer.application_id,
+        {
+          manager,
+        },
+      );
       if (!app) {
         throw new ConflictException({
           message: 'Offer is linked to an invalid application',
@@ -72,7 +75,9 @@ export class AcceptOfferUseCase {
         });
       }
 
-      this.applicationsValidationHelper.ensureNotTerminalStage(app.current_stage);
+      this.applicationsValidationHelper.ensureNotTerminalStage(
+        app.current_stage,
+      );
 
       this.applicationsValidationHelper.ensureStageTransitionAllowed({
         from: app.current_stage,
@@ -107,7 +112,7 @@ export class AcceptOfferUseCase {
           fromStage,
           toStage: ApplicationCurrentStage.HIRED,
           reason: 'Offer accepted',
-          actorUserId: actorUserId!,
+          actorUserId: actorUserId,
           actionAt: now,
           ipAddress: null,
           userAgent: null,
@@ -128,7 +133,7 @@ export class AcceptOfferUseCase {
           entityType: ActivityEntityType.OFFER,
           entityId: loaded.id,
           actionType: ActivityActionType.ACCEPT,
-          actorUserId: actorUserId!,
+          actorUserId: actorUserId,
           oldValues: oldOfferValues,
           newValues: {
             offer_status: loaded.offer_status,

@@ -41,7 +41,9 @@ export class SubmitInterviewerReviewUseCase {
 
       review.technical_score = Number(dto.technical_score).toFixed(2);
       review.communication_score = Number(dto.communication_score).toFixed(2);
-      review.problem_solving_score = Number(dto.problem_solving_score).toFixed(2);
+      review.problem_solving_score = Number(dto.problem_solving_score).toFixed(
+        2,
+      );
       review.culture_fit_score = Number(dto.culture_fit_score).toFixed(2);
       review.overall_score = this.validation.computeOverallScore({
         technical_score: dto.technical_score,
@@ -54,8 +56,7 @@ export class SubmitInterviewerReviewUseCase {
       review.detailed_review = this.validation.normalizeOptionalText(
         dto.detailed_review,
       );
-      review.interviewer_recommendation =
-        dto.interviewer_recommendation as InterviewerRecommendation;
+      review.interviewer_recommendation = dto.interviewer_recommendation;
       review.review_status = InterviewerReviewStatus.SUBMITTED;
       review.reviewed_at = new Date();
       review.updated_by_user_id = actorUserId;

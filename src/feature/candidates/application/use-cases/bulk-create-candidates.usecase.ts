@@ -33,7 +33,10 @@ export class BulkCreateCandidatesUseCase {
 
     if (options.error instanceof HttpException) {
       const res = options.error.getResponse();
-      const obj = typeof res === 'object' && res !== null ? (res as Record<string, unknown>) : {};
+      const obj =
+        typeof res === 'object' && res !== null
+          ? (res as Record<string, unknown>)
+          : {};
       return {
         index: options.index,
         email,
@@ -51,18 +54,27 @@ export class BulkCreateCandidatesUseCase {
     return {
       index: options.index,
       email,
-      message: options.error instanceof Error ? options.error.message : 'Request failed',
+      message:
+        options.error instanceof Error
+          ? options.error.message
+          : 'Request failed',
       code: 'REQUEST_FAILED',
     };
   }
 
-  private static async validateItem(index: number, input: unknown): Promise<{
-    ok: true;
-    dto: CreateCandidateDto;
-  } | {
-    ok: false;
-    failure: BulkCreateCandidatesFailure;
-  }> {
+  private static async validateItem(
+    index: number,
+    input: unknown,
+  ): Promise<
+    | {
+        ok: true;
+        dto: CreateCandidateDto;
+      }
+    | {
+        ok: false;
+        failure: BulkCreateCandidatesFailure;
+      }
+  > {
     const plain = typeof input === 'object' && input !== null ? input : {};
 
     const dto = plainToInstance(CreateCandidateDto, plain, {
@@ -89,7 +101,10 @@ export class BulkCreateCandidatesUseCase {
         ok: false,
         failure: {
           index,
-          email: typeof (dto as any)?.email === 'string' ? (dto as any).email : undefined,
+          email:
+            typeof (dto as any)?.email === 'string'
+              ? (dto as any).email
+              : undefined,
           message: 'Validation failed',
           code: 'VALIDATION_FAILED',
           details: messages.length ? messages : errors,
@@ -113,13 +128,18 @@ export class BulkCreateCandidatesUseCase {
     for (let index = 0; index < input.length; index += 1) {
       const item = input[index];
 
-      const validated = await BulkCreateCandidatesUseCase.validateItem(index, item);
+      const validated = await BulkCreateCandidatesUseCase.validateItem(
+        index,
+        item,
+      );
       if (!validated.ok) {
         failed.push(validated.failure);
         continue;
       }
 
-      const email = String(validated.dto.email ?? '').trim().toLowerCase();
+      const email = String(validated.dto.email ?? '')
+        .trim()
+        .toLowerCase();
       if (email) {
         if (seenEmails.has(email)) {
           failed.push({
@@ -134,7 +154,10 @@ export class BulkCreateCandidatesUseCase {
       }
 
       try {
-        const result = await this.createCandidate.execute(validated.dto, actorUserId);
+        const result = await this.createCandidate.execute(
+          validated.dto,
+          actorUserId,
+        );
         created.push(result);
       } catch (error) {
         failed.push(

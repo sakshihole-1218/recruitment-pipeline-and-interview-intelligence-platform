@@ -82,7 +82,10 @@ export class SkillsController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     const skill = await this.skillsService.update(id, dto, actor?.sub);
-    return ResponseUtil.success('Skill updated successfully', SkillsMapper.toResponse(skill));
+    return ResponseUtil.success(
+      'Skill updated successfully',
+      SkillsMapper.toResponse(skill),
+    );
   }
 
   @Patch(':id/status')
@@ -111,7 +114,10 @@ export class SkillsController {
   @ApiStandardResponse(SkillResponseDto, 'Skill fetched successfully')
   async findById(@Param('id') id: string) {
     const skill = await this.skillsService.findById(id);
-    return ResponseUtil.success('Skill fetched successfully', SkillsMapper.toResponse(skill));
+    return ResponseUtil.success(
+      'Skill fetched successfully',
+      SkillsMapper.toResponse(skill),
+    );
   }
 
   @Get()

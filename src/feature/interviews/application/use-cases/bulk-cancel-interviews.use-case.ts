@@ -45,10 +45,13 @@ export class BulkCancelInterviewsUseCase {
       try {
         await this.dataSource.transaction(async (manager) => {
           const now = new Date();
-          const interview = await this.interviewRepository.findById(interviewId, {
-            manager,
-            withRelations: true,
-          });
+          const interview = await this.interviewRepository.findById(
+            interviewId,
+            {
+              manager,
+              withRelations: true,
+            },
+          );
 
           if (!interview) {
             throw new NotFoundException({

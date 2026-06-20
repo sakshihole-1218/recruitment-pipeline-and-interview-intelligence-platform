@@ -107,7 +107,9 @@ export class CompleteInterviewUseCase {
         return interview;
       }
 
-      const completedAt = dto.completed_at ? new Date(dto.completed_at) : new Date();
+      const completedAt = dto.completed_at
+        ? new Date(dto.completed_at)
+        : new Date();
       if (Number.isNaN(completedAt.getTime())) {
         throw new BadRequestException({
           message: 'Invalid completed_at timestamp',

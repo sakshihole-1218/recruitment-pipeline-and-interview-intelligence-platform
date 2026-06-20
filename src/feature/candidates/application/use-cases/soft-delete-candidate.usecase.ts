@@ -23,7 +23,9 @@ export class SoftDeleteCandidateUseCase {
   async execute(id: string, actorUserId?: string): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
       const now = new Date();
-      const candidate = await this.candidateRepository.findById(id, { manager });
+      const candidate = await this.candidateRepository.findById(id, {
+        manager,
+      });
       if (!candidate) {
         throw new NotFoundException({
           message: 'Candidate not found',
@@ -46,8 +48,12 @@ export class SoftDeleteCandidateUseCase {
         .andWhere('deleted_at IS NULL')
         .execute();
 
-      await this.candidateSkillRepository.softDeleteByCandidateId(id, { manager });
-      await this.candidateDocumentRepository.softDeleteByCandidateId(id, { manager });
+      await this.candidateSkillRepository.softDeleteByCandidateId(id, {
+        manager,
+      });
+      await this.candidateDocumentRepository.softDeleteByCandidateId(id, {
+        manager,
+      });
 
       if (actorUserId) {
         await this.activityWriter.log(

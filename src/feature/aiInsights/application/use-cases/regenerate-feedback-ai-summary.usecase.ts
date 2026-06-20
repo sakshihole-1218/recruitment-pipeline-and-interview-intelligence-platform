@@ -60,7 +60,9 @@ export class RegenerateFeedbackAiSummaryUseCase {
 
       const oldValues = {
         final_ai_recommendation: existing.final_ai_recommendation,
-        generated_at: existing.generated_at ? existing.generated_at.toISOString() : null,
+        generated_at: existing.generated_at
+          ? existing.generated_at.toISOString()
+          : null,
         generation_status: existing.generation_status ?? null,
       };
 
@@ -98,11 +100,13 @@ export class RegenerateFeedbackAiSummaryUseCase {
         existing.technical_summary = result.technical_summary ?? null;
         existing.communication_summary = result.communication_summary ?? null;
         existing.overall_score =
-          result.overall_score !== null && Number.isFinite(Number(result.overall_score))
+          result.overall_score !== null &&
+          Number.isFinite(Number(result.overall_score))
             ? Number(result.overall_score).toFixed(2)
             : null;
         existing.technical_score =
-          result.technical_score !== null && Number.isFinite(Number(result.technical_score))
+          result.technical_score !== null &&
+          Number.isFinite(Number(result.technical_score))
             ? Number(result.technical_score).toFixed(2)
             : null;
         existing.communication_score =
@@ -129,16 +133,21 @@ export class RegenerateFeedbackAiSummaryUseCase {
       } catch (err) {
         existing.generation_status = AiFeedbackSummaryStatus.FAILED;
         existing.failure_reason =
-          err instanceof Error ? err.message : 'Feedback summary regeneration failed';
+          err instanceof Error
+            ? err.message
+            : 'Feedback summary regeneration failed';
         existing.generated_at = null;
         existing.updated_by_user_id = actorId;
       }
 
       await this.feedbackAiSummaryRepository.save(existing, { manager });
 
-      const loaded = await this.feedbackAiSummaryRepository.findById(existing.id, {
-        manager,
-      });
+      const loaded = await this.feedbackAiSummaryRepository.findById(
+        existing.id,
+        {
+          manager,
+        },
+      );
 
       const resultEntity = loaded ?? existing;
 

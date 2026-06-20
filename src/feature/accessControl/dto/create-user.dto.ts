@@ -12,7 +12,10 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { normalizeEmail, normalizePhoneE164 } from '../../../common/utils/normalization.util';
+import {
+  normalizeEmail,
+  normalizePhoneE164,
+} from '../../../common/utils/normalization.util';
 import { SystemRoleCode } from '../enums/system-role-code.enum';
 
 export class CreateUserDto {

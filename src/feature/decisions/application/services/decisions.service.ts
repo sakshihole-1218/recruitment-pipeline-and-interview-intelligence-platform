@@ -25,7 +25,11 @@ export class DecisionsService {
     return this.createUseCase.execute(dto, actorUserId);
   }
 
-  async update(id: string, dto: UpdateApplicationDecisionDto, actorUserId: string) {
+  async update(
+    id: string,
+    dto: UpdateApplicationDecisionDto,
+    actorUserId: string,
+  ) {
     return this.updateUseCase.execute(id, dto, actorUserId);
   }
 

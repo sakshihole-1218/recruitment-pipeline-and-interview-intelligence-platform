@@ -54,7 +54,11 @@ export class ResumeAiAnalysisQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: ResumeAiAnalysisStatus })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(ResumeAiAnalysisStatus)
   analysis_status?: ResumeAiAnalysisStatus;
 

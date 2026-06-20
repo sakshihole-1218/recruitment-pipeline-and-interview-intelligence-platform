@@ -1,6 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 import { DecisionSource } from '../enums/decision-source.enum';
 import { DecisionStatus } from '../enums/decision-status.enum';
@@ -11,7 +17,11 @@ export class CreateApplicationDecisionDto {
   application_id: string;
 
   @ApiProperty({ enum: DecisionStatus })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(DecisionStatus)
   decision_status: DecisionStatus;
 
@@ -62,7 +72,11 @@ export class CreateApplicationDecisionDto {
 
   @ApiPropertyOptional({ enum: DecisionSource })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(DecisionSource)
   decision_source?: DecisionSource;
 }

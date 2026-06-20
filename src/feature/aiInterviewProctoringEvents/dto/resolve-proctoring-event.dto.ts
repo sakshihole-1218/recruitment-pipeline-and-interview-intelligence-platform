@@ -3,7 +3,8 @@ import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class ResolveProctoringEventDto {
   @ApiPropertyOptional({
-    example: 'Reviewed by interviewer; candidate confirmed temporary network issue.',
+    example:
+      'Reviewed by interviewer; candidate confirmed temporary network issue.',
   })
   @IsOptional()
   @IsString()

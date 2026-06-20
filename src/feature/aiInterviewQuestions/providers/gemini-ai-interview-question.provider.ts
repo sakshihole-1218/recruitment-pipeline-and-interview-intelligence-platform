@@ -31,7 +31,9 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
       });
 
       const parsed =
-        GeminiJsonHelper.parseJson<GeminiInterviewQuestionResponse[]>(responseText);
+        GeminiJsonHelper.parseJson<GeminiInterviewQuestionResponse[]>(
+          responseText,
+        );
 
       if (!Array.isArray(parsed)) {
         throw new Error('Gemini returned invalid interview questions payload');
@@ -43,7 +45,8 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
           return (
             list.findIndex(
               (item) =>
-                item.question_text.toLowerCase() === question.question_text.toLowerCase(),
+                item.question_text.toLowerCase() ===
+                question.question_text.toLowerCase(),
             ) === index
           );
         })
@@ -53,8 +56,14 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
         throw new Error('Gemini returned too few interview questions');
       }
 
-      if (!normalized.some((question) => question.question_type === QuestionType.BEHAVIORAL)) {
-        throw new Error('Gemini did not include a behavioral interview question');
+      if (
+        !normalized.some(
+          (question) => question.question_type === QuestionType.BEHAVIORAL,
+        )
+      ) {
+        throw new Error(
+          'Gemini did not include a behavioral interview question',
+        );
       }
 
       return normalized.map((question, index) => ({
@@ -84,13 +93,17 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
       difficulty_level: this.toDifficultyLevel(question.difficulty_level),
       sequence_number: Number(question.sequence_number) || index + 1,
       generated_from: this.toGeneratedFrom(question.generated_from),
-      expected_answer_keywords: this.toKeywords(question.expected_answer_keywords),
+      expected_answer_keywords: this.toKeywords(
+        question.expected_answer_keywords,
+      ),
       parent_sequence_number: null,
     };
   }
 
   private toQuestionType(value: unknown): QuestionType {
-    const normalized = String(value || '').trim().toUpperCase();
+    const normalized = String(value || '')
+      .trim()
+      .toUpperCase();
 
     if (Object.values(QuestionType).includes(normalized as QuestionType)) {
       return normalized as QuestionType;
@@ -100,9 +113,13 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
   }
 
   private toDifficultyLevel(value: unknown): DifficultyLevel {
-    const normalized = String(value || '').trim().toUpperCase();
+    const normalized = String(value || '')
+      .trim()
+      .toUpperCase();
 
-    if (Object.values(DifficultyLevel).includes(normalized as DifficultyLevel)) {
+    if (
+      Object.values(DifficultyLevel).includes(normalized as DifficultyLevel)
+    ) {
       return normalized as DifficultyLevel;
     }
 
@@ -110,7 +127,9 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
   }
 
   private toGeneratedFrom(value: unknown): GeneratedFrom {
-    const normalized = String(value || '').trim().toUpperCase();
+    const normalized = String(value || '')
+      .trim()
+      .toUpperCase();
 
     if (Object.values(GeneratedFrom).includes(normalized as GeneratedFrom)) {
       return normalized as GeneratedFrom;
@@ -125,11 +144,7 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
     }
 
     return Array.from(
-      new Set(
-        value
-          .map((entry) => String(entry || '').trim())
-          .filter(Boolean),
-      ),
+      new Set(value.map((entry) => String(entry || '').trim()).filter(Boolean)),
     ).slice(0, 8);
   }
 }

@@ -10,9 +10,8 @@ export class FindDecisionByApplicationIdUseCase {
   ) {}
 
   async execute(applicationId: string): Promise<ApplicationDecisionEntity> {
-    const decision = await this.decisionRepository.findByApplicationId(
-      applicationId,
-    );
+    const decision =
+      await this.decisionRepository.findByApplicationId(applicationId);
 
     if (!decision) {
       throw new NotFoundException({

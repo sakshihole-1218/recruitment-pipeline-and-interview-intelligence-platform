@@ -69,9 +69,16 @@ export class ListCandidatesQueryDto extends PaginationQueryDto {
   @MaxLength(30)
   phone?: string;
 
-  @ApiPropertyOptional({ enum: CandidateSourceType, example: CandidateSourceType.LINKEDIN })
+  @ApiPropertyOptional({
+    enum: CandidateSourceType,
+    example: CandidateSourceType.LINKEDIN,
+  })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(CandidateSourceType)
   source_type?: CandidateSourceType;
 

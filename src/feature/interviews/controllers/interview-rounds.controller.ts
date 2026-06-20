@@ -37,7 +37,11 @@ import { InterviewsMapper } from '../helpers/interviews.mapper';
 
 @ApiTags('Interviews - Rounds')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('interviews/rounds')
@@ -49,12 +53,18 @@ export class InterviewRoundsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create interview round' })
   @ApiBody({ type: CreateInterviewRoundDto })
-  @ApiStandardResponse(InterviewRoundResponseDto, 'Interview round created successfully')
+  @ApiStandardResponse(
+    InterviewRoundResponseDto,
+    'Interview round created successfully',
+  )
   async create(
     @Body() dto: CreateInterviewRoundDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const round = await this.interviewsService.createInterviewRound(dto, actor?.sub);
+    const round = await this.interviewsService.createInterviewRound(
+      dto,
+      actor?.sub,
+    );
     return ResponseUtil.success(
       'Interview round created successfully',
       InterviewsMapper.toInterviewRoundResponse(round),
@@ -67,13 +77,20 @@ export class InterviewRoundsController {
   @ApiOperation({ summary: 'Update interview round' })
   @ApiParam({ name: 'id', description: 'Interview round UUID' })
   @ApiBody({ type: UpdateInterviewRoundDto })
-  @ApiStandardResponse(InterviewRoundResponseDto, 'Interview round updated successfully')
+  @ApiStandardResponse(
+    InterviewRoundResponseDto,
+    'Interview round updated successfully',
+  )
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateInterviewRoundDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const round = await this.interviewsService.updateInterviewRound(id, dto, actor?.sub);
+    const round = await this.interviewsService.updateInterviewRound(
+      id,
+      dto,
+      actor?.sub,
+    );
     return ResponseUtil.success(
       'Interview round updated successfully',
       InterviewsMapper.toInterviewRoundResponse(round),
@@ -83,9 +100,15 @@ export class InterviewRoundsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List interview rounds by job opening' })
-  @ApiStandardArrayResponse(InterviewRoundResponseDto, 'Interview rounds fetched successfully')
-  async listByJobOpening(@Query() query: GetInterviewRoundsByJobOpeningQueryDto) {
-    const rounds = await this.interviewsService.getInterviewRoundsByJobOpening(query);
+  @ApiStandardArrayResponse(
+    InterviewRoundResponseDto,
+    'Interview rounds fetched successfully',
+  )
+  async listByJobOpening(
+    @Query() query: GetInterviewRoundsByJobOpeningQueryDto,
+  ) {
+    const rounds =
+      await this.interviewsService.getInterviewRoundsByJobOpening(query);
     return ResponseUtil.success(
       'Interview rounds fetched successfully',
       rounds.map(InterviewsMapper.toInterviewRoundResponse),

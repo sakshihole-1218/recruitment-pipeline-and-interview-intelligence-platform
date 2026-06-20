@@ -33,7 +33,9 @@ export class UpsertCandidateSkillsUseCase {
   ) {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
-      const candidate = await this.candidateRepository.findById(candidateId, { manager });
+      const candidate = await this.candidateRepository.findById(candidateId, {
+        manager,
+      });
       if (!candidate) {
         throw new NotFoundException({
           message: 'Candidate not found',
@@ -43,7 +45,10 @@ export class UpsertCandidateSkillsUseCase {
 
       const normalized = this.validationHelper.dedupeAndValidateSkills(skills);
       const skillIds = normalized.map((s) => s.skill_id);
-      const existingSkills = await this.referenceRepository.findSkillsByIds(skillIds, manager);
+      const existingSkills = await this.referenceRepository.findSkillsByIds(
+        skillIds,
+        manager,
+      );
 
       if (existingSkills.length !== skillIds.length) {
         throw new BadRequestException({
@@ -53,15 +58,17 @@ export class UpsertCandidateSkillsUseCase {
       }
 
       for (const input of normalized) {
-        const current = await this.candidateSkillRepository.findByCandidateAndSkill({
-          candidateId,
-          skillId: input.skill_id,
-          includeDeleted: true,
-          manager,
-        });
+        const current =
+          await this.candidateSkillRepository.findByCandidateAndSkill({
+            candidateId,
+            skillId: input.skill_id,
+            includeDeleted: true,
+            manager,
+          });
 
         const years =
-          input.years_of_experience === undefined || input.years_of_experience === null
+          input.years_of_experience === undefined ||
+          input.years_of_experience === null
             ? null
             : String(input.years_of_experience);
 
@@ -85,7 +92,10 @@ export class UpsertCandidateSkillsUseCase {
         }
       }
 
-      const result = await this.candidateSkillRepository.listByCandidateId(candidateId, { manager });
+      const result = await this.candidateSkillRepository.listByCandidateId(
+        candidateId,
+        { manager },
+      );
 
       if (actorUserId) {
         await this.activityWriter.log(

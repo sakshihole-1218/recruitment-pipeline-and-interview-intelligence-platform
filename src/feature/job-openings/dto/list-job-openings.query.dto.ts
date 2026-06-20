@@ -38,16 +38,26 @@ export class ListJobOpeningsQueryDto extends PaginationQueryDto {
   @IsISO8601()
   cursor?: string;
 
-  @ApiPropertyOptional({ example: 'backend', description: 'Filter by title (partial match)' })
+  @ApiPropertyOptional({
+    example: 'backend',
+    description: 'Filter by title (partial match)',
+  })
   @IsOptional()
   @Transform(({ value }) => normalizeSearch(value))
   @IsString()
   @MaxLength(200)
   title?: string;
 
-  @ApiPropertyOptional({ example: 'BE-2026-001', description: 'Filter by job opening code' })
+  @ApiPropertyOptional({
+    example: 'BE-2026-001',
+    description: 'Filter by job opening code',
+  })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsString()
   @MaxLength(50)
   code?: string;
@@ -69,19 +79,31 @@ export class ListJobOpeningsQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: EmploymentType })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(EmploymentType)
   employment_type?: EmploymentType;
 
   @ApiPropertyOptional({ enum: WorkMode })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(WorkMode)
   work_mode?: WorkMode;
 
   @ApiPropertyOptional({ enum: JobOpeningStatus })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(JobOpeningStatus)
   status?: JobOpeningStatus;
 

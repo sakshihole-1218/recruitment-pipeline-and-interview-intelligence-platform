@@ -31,10 +31,18 @@ export class GetProctoringRiskSummaryUseCase {
 
     const events = await this.repository.getEventsForRiskSummary(sessionId);
 
-    const lowCount = events.filter((event) => event.severity === ProctoringSeverity.LOW).length;
-    const mediumCount = events.filter((event) => event.severity === ProctoringSeverity.MEDIUM).length;
-    const highCount = events.filter((event) => event.severity === ProctoringSeverity.HIGH).length;
-    const criticalCount = events.filter((event) => event.severity === ProctoringSeverity.CRITICAL).length;
+    const lowCount = events.filter(
+      (event) => event.severity === ProctoringSeverity.LOW,
+    ).length;
+    const mediumCount = events.filter(
+      (event) => event.severity === ProctoringSeverity.MEDIUM,
+    ).length;
+    const highCount = events.filter(
+      (event) => event.severity === ProctoringSeverity.HIGH,
+    ).length;
+    const criticalCount = events.filter(
+      (event) => event.severity === ProctoringSeverity.CRITICAL,
+    ).length;
     const riskScore = events.reduce(
       (total, event) => total + SEVERITY_POINTS[event.severity],
       0,

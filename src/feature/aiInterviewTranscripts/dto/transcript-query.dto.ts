@@ -1,12 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsEnum,
-  IsISO8601,
-  IsIn,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsEnum, IsISO8601, IsIn, IsOptional, IsUUID } from 'class-validator';
 
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
@@ -45,12 +39,18 @@ export class TranscriptQueryDto extends PaginationQueryDto {
   @IsEnum(TranscriptSpeakerType)
   speaker_type?: TranscriptSpeakerType;
 
-  @ApiPropertyOptional({ description: 'Filter transcripts spoken from this ISO timestamp', example: '2026-06-06T10:00:00.000Z' })
+  @ApiPropertyOptional({
+    description: 'Filter transcripts spoken from this ISO timestamp',
+    example: '2026-06-06T10:00:00.000Z',
+  })
   @IsOptional()
   @IsISO8601()
   spoken_from?: string;
 
-  @ApiPropertyOptional({ description: 'Filter transcripts spoken until this ISO timestamp', example: '2026-06-06T11:00:00.000Z' })
+  @ApiPropertyOptional({
+    description: 'Filter transcripts spoken until this ISO timestamp',
+    example: '2026-06-06T11:00:00.000Z',
+  })
   @IsOptional()
   @IsISO8601()
   spoken_to?: string;
@@ -62,7 +62,8 @@ export class TranscriptQueryDto extends PaginationQueryDto {
   })
   @IsOptional()
   @IsIn(AI_INTERVIEW_TRANSCRIPT_SORT_FIELDS)
-  override sort_by?: (typeof AI_INTERVIEW_TRANSCRIPT_SORT_FIELDS)[number] = 'created_at';
+  override sort_by?: (typeof AI_INTERVIEW_TRANSCRIPT_SORT_FIELDS)[number] =
+    'created_at';
 
   @ApiPropertyOptional({
     example: 'desc',

@@ -29,9 +29,12 @@ export class UpdateResumeAiAnalysisUseCase {
     const actorId = options.actorUserId;
 
     return this.dataSource.transaction(async (manager) => {
-      const entity = await this.resumeAiAnalysisRepository.findById(options.id, {
-        manager,
-      });
+      const entity = await this.resumeAiAnalysisRepository.findById(
+        options.id,
+        {
+          manager,
+        },
+      );
 
       if (!entity) {
         throw new NotFoundException({
@@ -46,7 +49,9 @@ export class UpdateResumeAiAnalysisUseCase {
 
       const oldValues = {
         analysis_status: entity.analysis_status,
-        analyzed_at: entity.analyzed_at ? entity.analyzed_at.toISOString() : null,
+        analyzed_at: entity.analyzed_at
+          ? entity.analyzed_at.toISOString()
+          : null,
         ai_fit_score: entity.ai_fit_score,
       };
 
@@ -65,10 +70,11 @@ export class UpdateResumeAiAnalysisUseCase {
       if (options.dto.certification_summary !== undefined)
         entity.certification_summary = options.dto.certification_summary;
       if (options.dto.total_experience_years_detected !== undefined)
-        entity.total_experience_years_detected =
-          Number.isFinite(Number(options.dto.total_experience_years_detected))
-            ? Number(options.dto.total_experience_years_detected).toFixed(2)
-            : null;
+        entity.total_experience_years_detected = Number.isFinite(
+          Number(options.dto.total_experience_years_detected),
+        )
+          ? Number(options.dto.total_experience_years_detected).toFixed(2)
+          : null;
       if (options.dto.ai_fit_score !== undefined)
         entity.ai_fit_score = Number(options.dto.ai_fit_score).toFixed(2);
       if (options.dto.analysis_status !== undefined)
@@ -81,8 +87,9 @@ export class UpdateResumeAiAnalysisUseCase {
       await this.resumeAiAnalysisRepository.save(entity, { manager });
 
       const loaded =
-        (await this.resumeAiAnalysisRepository.findById(entity.id, { manager })) ??
-        entity;
+        (await this.resumeAiAnalysisRepository.findById(entity.id, {
+          manager,
+        })) ?? entity;
 
       await this.activityWriter.log(
         ActivityLogBuilder.build({
@@ -93,7 +100,9 @@ export class UpdateResumeAiAnalysisUseCase {
           oldValues,
           newValues: {
             analysis_status: loaded.analysis_status,
-            analyzed_at: loaded.analyzed_at ? loaded.analyzed_at.toISOString() : null,
+            analyzed_at: loaded.analyzed_at
+              ? loaded.analyzed_at.toISOString()
+              : null,
             ai_fit_score: loaded.ai_fit_score,
             failure_reason: loaded.failure_reason ?? null,
           },

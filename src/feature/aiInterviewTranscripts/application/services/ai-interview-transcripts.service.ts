@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { BulkCreateTranscriptEntriesDto } from '../../dto/bulk-create-transcript-entries.dto';
 import { CreateTranscriptEntryDto } from '../../dto/create-transcript-entry.dto';
+import { TranscribeAnswerDto } from '../../dto/transcribe-answer.dto';
 import { TranscriptQueryDto } from '../../dto/transcript-query.dto';
 import { UpdateTranscriptEntryDto } from '../../dto/update-transcript-entry.dto';
 
@@ -11,6 +12,7 @@ import { DeleteTranscriptEntryUseCase } from '../use-cases/delete-transcript-ent
 import { GetTranscriptEntryByIdUseCase } from '../use-cases/get-transcript-entry-by-id.usecase';
 import { GetTranscriptBySessionUseCase } from '../use-cases/get-transcript-by-session.usecase';
 import { ListTranscriptEntriesUseCase } from '../use-cases/list-transcript-entries.usecase';
+import { TranscribeAnswerUseCase } from '../use-cases/transcribe-answer.usecase';
 import { UpdateTranscriptEntryUseCase } from '../use-cases/update-transcript-entry.usecase';
 
 @Injectable()
@@ -21,6 +23,7 @@ export class AiInterviewTranscriptsService {
     private readonly getByIdUseCase: GetTranscriptEntryByIdUseCase,
     private readonly getBySessionUseCase: GetTranscriptBySessionUseCase,
     private readonly listUseCase: ListTranscriptEntriesUseCase,
+    private readonly transcribeAnswerUseCase: TranscribeAnswerUseCase,
     private readonly updateUseCase: UpdateTranscriptEntryUseCase,
     private readonly deleteUseCase: DeleteTranscriptEntryUseCase,
   ) {}
@@ -43,6 +46,14 @@ export class AiInterviewTranscriptsService {
 
   list(query: TranscriptQueryDto) {
     return this.listUseCase.execute(query);
+  }
+
+  transcribeAnswer(
+    dto: TranscribeAnswerDto,
+    file: Express.Multer.File | undefined,
+    actorUserId?: string,
+  ) {
+    return this.transcribeAnswerUseCase.execute(dto, file, actorUserId);
   }
 
   update(id: string, dto: UpdateTranscriptEntryDto, actorUserId?: string) {

@@ -9,16 +9,20 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { ApiStandardResponse } from '../../../common/decorators/api-standard-response.decorator';
 import { ResponseUtil } from '../../../common/utils/response.util';
@@ -36,6 +40,7 @@ import { AiInterviewTranscriptResponseDto } from '../dto/ai-interview-transcript
 import { BulkCreateTranscriptEntriesDto } from '../dto/bulk-create-transcript-entries.dto';
 import { CreateTranscriptEntryDto } from '../dto/create-transcript-entry.dto';
 import { DeleteAiInterviewTranscriptResponseDto } from '../dto/delete-ai-interview-transcript.response.dto';
+import { TranscribeAnswerDto } from '../dto/transcribe-answer.dto';
 import { TranscriptQueryDto } from '../dto/transcript-query.dto';
 import { UpdateTranscriptEntryDto } from '../dto/update-transcript-entry.dto';
 import { AiInterviewTranscriptsMapper } from '../helpers/ai-interview-transcripts.mapper';
@@ -54,11 +59,22 @@ import { AiInterviewTranscriptsMapper } from '../helpers/ai-interview-transcript
 export class AiInterviewTranscriptsController {
   constructor(private readonly service: AiInterviewTranscriptsService) {}
 
+  private static getMaxAudioUploadBytes(): number {
+    const fallback = 15 * 1024 * 1024;
+    const raw = Number(process.env.AI_INTERVIEW_AUDIO_MAX_BYTES);
+    return Number.isFinite(raw) && raw > 0 ? raw : fallback;
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a transcript entry for an AI interview session' })
+  @ApiOperation({
+    summary: 'Create a transcript entry for an AI interview session',
+  })
   @ApiBody({ type: CreateTranscriptEntryDto })
-  @ApiStandardResponse(AiInterviewTranscriptResponseDto, 'AI interview transcript entry created successfully')
+  @ApiStandardResponse(
+    AiInterviewTranscriptResponseDto,
+    'AI interview transcript entry created successfully',
+  )
   async create(
     @Body() dto: CreateTranscriptEntryDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -72,7 +88,9 @@ export class AiInterviewTranscriptsController {
 
   @Post('bulk')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Bulk create transcript entries for an AI interview session' })
+  @ApiOperation({
+    summary: 'Bulk create transcript entries for an AI interview session',
+  })
   @ApiBody({ type: BulkCreateTranscriptEntriesDto })
   @ApiAiInterviewTranscriptsArrayResponse(
     AiInterviewTranscriptResponseDto,
@@ -89,9 +107,70 @@ export class AiInterviewTranscriptsController {
     );
   }
 
+  @Post('transcribe-answer')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary:
+      'Upload candidate audio answer and create transcript entry via STT',
+  })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('audio', {
+      limits: {
+        fileSize: AiInterviewTranscriptsController.getMaxAudioUploadBytes(),
+      },
+    }),
+  )
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: [
+        'ai_interview_session_id',
+        'ai_interview_question_id',
+        'audio',
+      ],
+      properties: {
+        ai_interview_session_id: {
+          type: 'string',
+          format: 'uuid',
+        },
+        ai_interview_question_id: {
+          type: 'string',
+          format: 'uuid',
+        },
+        audio: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiStandardResponse(
+    AiInterviewTranscriptResponseDto,
+    'AI interview answer transcribed successfully',
+  )
+  async transcribeAnswer(
+    @Body() dto: TranscribeAnswerDto,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const transcriptEntry = await this.service.transcribeAnswer(
+      dto,
+      file,
+      actor?.sub,
+    );
+    return ResponseUtil.success(
+      'AI interview answer transcribed successfully',
+      AiInterviewTranscriptsMapper.toResponse(transcriptEntry),
+    );
+  }
+
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List AI interview transcript entries with offset or cursor pagination' })
+  @ApiOperation({
+    summary:
+      'List AI interview transcript entries with offset or cursor pagination',
+  })
   @ApiAiInterviewTranscriptsPaginatedResponse(
     AiInterviewTranscriptResponseDto,
     'AI interview transcript entries fetched successfully',
@@ -100,12 +179,15 @@ export class AiInterviewTranscriptsController {
     const result = await this.service.list(query);
 
     if (result.mode === 'cursor') {
-      return ResponseUtil.success('AI interview transcript entries fetched successfully', {
-        data: result.data.map(AiInterviewTranscriptsMapper.toResponse),
-        limit: result.limit,
-        next_cursor: result.next_cursor,
-        has_more: result.has_more,
-      });
+      return ResponseUtil.success(
+        'AI interview transcript entries fetched successfully',
+        {
+          data: result.data.map(AiInterviewTranscriptsMapper.toResponse),
+          limit: result.limit,
+          next_cursor: result.next_cursor,
+          has_more: result.has_more,
+        },
+      );
     }
 
     return ResponseUtil.paginated(
@@ -119,7 +201,9 @@ export class AiInterviewTranscriptsController {
 
   @Get('session/:sessionId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get transcript entries by AI interview session id' })
+  @ApiOperation({
+    summary: 'Get transcript entries by AI interview session id',
+  })
   @ApiParam({ name: 'sessionId', description: 'AI interview session UUID' })
   @ApiAiInterviewTranscriptsArrayResponse(
     AiInterviewTranscriptResponseDto,
@@ -184,6 +268,9 @@ export class AiInterviewTranscriptsController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     await this.service.softDelete(id, actor?.sub);
-    return ResponseUtil.success('AI interview transcript entry deleted successfully', { id });
+    return ResponseUtil.success(
+      'AI interview transcript entry deleted successfully',
+      { id },
+    );
   }
 }

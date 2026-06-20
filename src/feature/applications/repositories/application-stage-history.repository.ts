@@ -12,8 +12,12 @@ export class ApplicationStageHistoryRepository {
     private readonly repository: Repository<ApplicationStageHistoryEntity>,
   ) {}
 
-  private repo(manager?: EntityManager): Repository<ApplicationStageHistoryEntity> {
-    return manager ? manager.getRepository(ApplicationStageHistoryEntity) : this.repository;
+  private repo(
+    manager?: EntityManager,
+  ): Repository<ApplicationStageHistoryEntity> {
+    return manager
+      ? manager.getRepository(ApplicationStageHistoryEntity)
+      : this.repository;
   }
 
   private baseQuery(
@@ -33,9 +37,13 @@ export class ApplicationStageHistoryRepository {
     return this.repo(options.manager).save(entity);
   }
 
-  async listByApplicationId(applicationId: string): Promise<ApplicationStageHistoryEntity[]> {
+  async listByApplicationId(
+    applicationId: string,
+  ): Promise<ApplicationStageHistoryEntity[]> {
     return this.baseQuery('application_stage_history')
-      .andWhere('application_stage_history.application_id = :applicationId', { applicationId })
+      .andWhere('application_stage_history.application_id = :applicationId', {
+        applicationId,
+      })
       .orderBy('application_stage_history.changed_at', 'ASC')
       .addOrderBy('application_stage_history.id', 'ASC')
       .getMany();

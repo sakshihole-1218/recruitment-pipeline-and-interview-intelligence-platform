@@ -11553,6 +11553,82 @@
         ]
       }
     },
+    "/api/ai-interview-transcripts/transcribe-answer": {
+      "post": {
+        "operationId": "AiInterviewTranscriptsController_transcribeAnswer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ai_interview_session_id",
+                  "ai_interview_question_id",
+                  "audio"
+                ],
+                "properties": {
+                  "ai_interview_session_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "ai_interview_question_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "audio": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI interview answer transcribed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewTranscriptResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Upload candidate audio answer and create transcript entry via STT",
+        "tags": [
+          "AI Interview Transcripts"
+        ]
+      }
+    },
     "/api/ai-interview-transcripts/session/{sessionId}": {
       "get": {
         "operationId": "AiInterviewTranscriptsController_getBySession",

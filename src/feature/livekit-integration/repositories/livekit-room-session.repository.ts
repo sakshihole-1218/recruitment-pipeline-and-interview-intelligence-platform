@@ -30,7 +30,9 @@ export class LivekitRoomSessionRepository {
   ) {}
 
   private repo(manager?: EntityManager): Repository<LivekitRoomSessionEntity> {
-    return manager ? manager.getRepository(LivekitRoomSessionEntity) : this.repository;
+    return manager
+      ? manager.getRepository(LivekitRoomSessionEntity)
+      : this.repository;
   }
 
   private baseQuery(
@@ -54,8 +56,10 @@ export class LivekitRoomSessionRepository {
     id: string,
     options?: { manager?: EntityManager; lockForUpdate?: boolean },
   ): Promise<LivekitRoomSessionEntity | null> {
-    const qb = this.baseQuery('livekit_room_sessions', options?.manager)
-      .andWhere('livekit_room_sessions.id = :id', { id });
+    const qb = this.baseQuery(
+      'livekit_room_sessions',
+      options?.manager,
+    ).andWhere('livekit_room_sessions.id = :id', { id });
 
     if (options?.lockForUpdate) {
       qb.setLock('pessimistic_write');
@@ -153,7 +157,9 @@ export class LivekitRoomSessionRepository {
       .execute();
   }
 
-  findAllWithFilters(query: LiveKitRoomQueryDto): Promise<LivekitRoomListResult> {
+  findAllWithFilters(
+    query: LiveKitRoomQueryDto,
+  ): Promise<LivekitRoomListResult> {
     return this.list(query);
   }
 
@@ -204,7 +210,7 @@ export class LivekitRoomSessionRepository {
       'room_status',
     ] as const;
 
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
@@ -219,7 +225,8 @@ export class LivekitRoomSessionRepository {
     if (query.cursor) {
       if ((query.sort_by || 'created_at') !== 'created_at') {
         throw new BadRequestException({
-          message: 'Cursor pagination is only supported with sort_by=created_at',
+          message:
+            'Cursor pagination is only supported with sort_by=created_at',
           code: 'CURSOR_SORT_BY_REQUIRED',
         });
       }
@@ -233,9 +240,13 @@ export class LivekitRoomSessionRepository {
       }
 
       if (orderDirection === 'DESC') {
-        qb.andWhere('livekit_room_sessions.created_at < :cursorDate', { cursorDate });
+        qb.andWhere('livekit_room_sessions.created_at < :cursorDate', {
+          cursorDate,
+        });
       } else {
-        qb.andWhere('livekit_room_sessions.created_at > :cursorDate', { cursorDate });
+        qb.andWhere('livekit_room_sessions.created_at > :cursorDate', {
+          cursorDate,
+        });
       }
 
       const idRows = await qb
@@ -265,7 +276,7 @@ export class LivekitRoomSessionRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

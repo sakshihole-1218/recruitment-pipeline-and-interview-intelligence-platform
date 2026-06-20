@@ -19,7 +19,9 @@ export class UpdateDepartmentDto {
 
   @ApiPropertyOptional({ example: 'Updated description' })
   @IsOptional()
-  @Transform(({ value }) => (value === null ? null : String(value ?? '').trim()))
+  @Transform(({ value }) =>
+    value === null ? null : String(value ?? '').trim(),
+  )
   @IsString()
   @MaxLength(5000)
   description?: string | null;

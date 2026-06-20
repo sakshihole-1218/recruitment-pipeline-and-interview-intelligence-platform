@@ -21,7 +21,11 @@ export class CreateSkillDto {
   name: string;
 
   @ApiProperty({ example: 'TYPESCRIPT', description: 'Unique skill code.' })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsString()
   @MinLength(2)
   @MaxLength(50)
@@ -38,7 +42,11 @@ export class CreateSkillDto {
   description?: string;
 
   @ApiProperty({ enum: SkillCategory, example: SkillCategory.LANGUAGE })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(SkillCategory)
   category: SkillCategory;
 

@@ -35,20 +35,29 @@ export class CreateTranscriptEntryDto {
   @IsNotEmpty()
   message_text: string;
 
-  @ApiPropertyOptional({ description: 'Sequence number within a session', example: 1 })
+  @ApiPropertyOptional({
+    description: 'Sequence number within a session',
+    example: 1,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   sequence_number?: number;
 
-  @ApiPropertyOptional({ description: 'When the message was spoken', example: '2026-06-06T10:30:00.000Z' })
+  @ApiPropertyOptional({
+    description: 'When the message was spoken',
+    example: '2026-06-06T10:30:00.000Z',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   spoken_at?: Date;
 
-  @ApiPropertyOptional({ description: 'Speech-to-text confidence score for future integrations', example: 0.9842 })
+  @ApiPropertyOptional({
+    description: 'Speech-to-text confidence score for future integrations',
+    example: 0.9842,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 4 })

@@ -81,7 +81,11 @@ export class DepartmentsController {
     @Body() dto: UpdateDepartmentDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const department = await this.departmentsService.update(id, dto, actor?.sub);
+    const department = await this.departmentsService.update(
+      id,
+      dto,
+      actor?.sub,
+    );
     return ResponseUtil.success(
       'Department updated successfully',
       DepartmentsMapper.toResponse(department),

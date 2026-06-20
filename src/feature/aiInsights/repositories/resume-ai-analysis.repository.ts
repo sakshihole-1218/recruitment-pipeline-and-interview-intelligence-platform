@@ -135,9 +135,12 @@ export class ResumeAiAnalysisRepository {
     options?: { manager?: EntityManager },
   ): Promise<ResumeAiAnalysisEntity | null> {
     return this.baseQuery('resume_ai_analyses', options?.manager)
-      .andWhere('resume_ai_analyses.candidate_document_id = :candidateDocumentId', {
-        candidateDocumentId,
-      })
+      .andWhere(
+        'resume_ai_analyses.candidate_document_id = :candidateDocumentId',
+        {
+          candidateDocumentId,
+        },
+      )
       .getOne();
   }
 
@@ -235,7 +238,7 @@ export class ResumeAiAnalysisRepository {
       'analysis_status',
     ] as const;
 
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
@@ -301,7 +304,7 @@ export class ResumeAiAnalysisRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

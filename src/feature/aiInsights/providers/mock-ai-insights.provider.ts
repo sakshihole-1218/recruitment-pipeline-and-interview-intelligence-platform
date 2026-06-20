@@ -50,9 +50,11 @@ export class MockAiInsightsProvider implements AiInsightsProvider {
         skills: parsed.skills,
         total: parsed.skills.length,
       },
-      experience_summary: '2 years of backend development experience with Node.js/NestJS.',
+      experience_summary:
+        '2 years of backend development experience with Node.js/NestJS.',
       education_summary: 'B.E. Computer Engineering from Mumbai University.',
-      project_summary: 'Built a Recruitment Platform using NestJS, TypeORM, and PostgreSQL.',
+      project_summary:
+        'Built a Recruitment Platform using NestJS, TypeORM, and PostgreSQL.',
       certification_summary: null,
       total_experience_years_detected: 2,
       ai_fit_score: 78,
@@ -79,9 +81,13 @@ export class MockAiInsightsProvider implements AiInsightsProvider {
 
     return {
       summary_text: `Mocked AI summary for application ${input.applicationId}. Combined ${feedbackCount} feedback entries.`,
-      strengths_summary: 'Strong fundamentals, good communication, consistent delivery.',
-      concerns_summary: feedbackCount ? 'Some gaps in system design depth.' : null,
-      technical_summary: 'Backend fundamentals are strong; overall technical readiness is good.',
+      strengths_summary:
+        'Strong fundamentals, good communication, consistent delivery.',
+      concerns_summary: feedbackCount
+        ? 'Some gaps in system design depth.'
+        : null,
+      technical_summary:
+        'Backend fundamentals are strong; overall technical readiness is good.',
       communication_summary: 'Communication is clear and structured.',
       overall_score: overall,
       technical_score: null,

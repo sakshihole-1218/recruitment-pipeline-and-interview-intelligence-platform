@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { FeedbackGenerationStatus } from '../../../aiInterviewSessions/enums/feedback-generation-status.enum';
@@ -59,7 +56,9 @@ export class UpdateAiInterviewFeedbackUseCase {
 
       await this.referenceRepository.updateSessionFeedbackGenerationStatus({
         session,
-        status: this.toSessionFeedbackGenerationStatus(feedback.feedback_status),
+        status: this.toSessionFeedbackGenerationStatus(
+          feedback.feedback_status,
+        ),
         actorUserId: actorId,
         manager,
       });
@@ -101,7 +100,8 @@ export class UpdateAiInterviewFeedbackUseCase {
       entity.problem_solving_score = dto.problem_solving_score.toFixed(2);
     }
     if (dto.project_understanding_score !== undefined) {
-      entity.project_understanding_score = dto.project_understanding_score.toFixed(2);
+      entity.project_understanding_score =
+        dto.project_understanding_score.toFixed(2);
     }
     if (dto.answer_relevance_score !== undefined) {
       entity.answer_relevance_score = dto.answer_relevance_score.toFixed(2);
@@ -123,23 +123,35 @@ export class UpdateAiInterviewFeedbackUseCase {
     } else if (componentChanged) {
       const overall = this.validation.calculateOverallScore([
         entity.technical_score === null ? null : Number(entity.technical_score),
-        entity.communication_score === null ? null : Number(entity.communication_score),
-        entity.problem_solving_score === null ? null : Number(entity.problem_solving_score),
+        entity.communication_score === null
+          ? null
+          : Number(entity.communication_score),
+        entity.problem_solving_score === null
+          ? null
+          : Number(entity.problem_solving_score),
         entity.project_understanding_score === null
           ? null
           : Number(entity.project_understanding_score),
-        entity.answer_relevance_score === null ? null : Number(entity.answer_relevance_score),
-        entity.confidence_score === null ? null : Number(entity.confidence_score),
+        entity.answer_relevance_score === null
+          ? null
+          : Number(entity.answer_relevance_score),
+        entity.confidence_score === null
+          ? null
+          : Number(entity.confidence_score),
       ]);
 
       entity.overall_score = overall === null ? null : overall.toFixed(2);
     }
 
     if (dto.technical_summary !== undefined) {
-      entity.technical_summary = this.validation.normalizeText(dto.technical_summary);
+      entity.technical_summary = this.validation.normalizeText(
+        dto.technical_summary,
+      );
     }
     if (dto.communication_summary !== undefined) {
-      entity.communication_summary = this.validation.normalizeText(dto.communication_summary);
+      entity.communication_summary = this.validation.normalizeText(
+        dto.communication_summary,
+      );
     }
     if (dto.problem_solving_summary !== undefined) {
       entity.problem_solving_summary = this.validation.normalizeText(
@@ -158,7 +170,9 @@ export class UpdateAiInterviewFeedbackUseCase {
       entity.concerns = this.validation.normalizeText(dto.concerns);
     }
     if (dto.improvement_areas !== undefined) {
-      entity.improvement_areas = this.validation.normalizeText(dto.improvement_areas);
+      entity.improvement_areas = this.validation.normalizeText(
+        dto.improvement_areas,
+      );
     }
 
     if (dto.ai_recommendation !== undefined) {
@@ -179,15 +193,19 @@ export class UpdateAiInterviewFeedbackUseCase {
 
     if (dto.generated_at !== undefined) {
       entity.generated_at = new Date(dto.generated_at);
-    } else if (dto.feedback_status === AiInterviewFeedbackStatus.COMPLETED && !entity.generated_at) {
+    } else if (
+      dto.feedback_status === AiInterviewFeedbackStatus.COMPLETED &&
+      !entity.generated_at
+    ) {
       entity.generated_at = new Date();
     } else if (
       dto.feedback_status !== undefined &&
       dto.feedback_status !== AiInterviewFeedbackStatus.COMPLETED
     ) {
-      entity.generated_at = dto.feedback_status === AiInterviewFeedbackStatus.FAILED
-        ? null
-        : entity.generated_at;
+      entity.generated_at =
+        dto.feedback_status === AiInterviewFeedbackStatus.FAILED
+          ? null
+          : entity.generated_at;
     }
 
     if (dto.failure_reason !== undefined) {
@@ -198,8 +216,14 @@ export class UpdateAiInterviewFeedbackUseCase {
       entity.raw_ai_payload = dto.raw_ai_payload;
     }
 
-    if (!dto.ai_recommendation && !entity.ai_recommendation && entity.overall_score !== null) {
-      entity.ai_recommendation = this.validation.toRecommendation(Number(entity.overall_score));
+    if (
+      !dto.ai_recommendation &&
+      !entity.ai_recommendation &&
+      entity.overall_score !== null
+    ) {
+      entity.ai_recommendation = this.validation.toRecommendation(
+        Number(entity.overall_score),
+      );
     }
 
     if (entity.feedback_status === AiInterviewFeedbackStatus.FAILED) {

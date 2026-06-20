@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { JobOpeningEntity } from '../../../job-openings/entities/job-opening.entity';
@@ -18,7 +22,10 @@ export class CreateInterviewRoundUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: CreateInterviewRoundDto, actorUserId?: string): Promise<InterviewRoundEntity> {
+  async execute(
+    dto: CreateInterviewRoundDto,
+    actorUserId?: string,
+  ): Promise<InterviewRoundEntity> {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
       const jobOpening = await manager
@@ -36,18 +43,22 @@ export class CreateInterviewRoundUseCase {
       }
 
       const roundName = String(dto.round_name ?? '').trim();
-      const description = dto.description ? String(dto.description).trim() : null;
+      const description = dto.description
+        ? String(dto.description).trim()
+        : null;
 
-      const existing = await this.interviewRoundRepository.findByJobOpeningAndSequence(
-        dto.job_opening_id,
-        dto.sequence_number,
-        { includeDeleted: true, manager },
-      );
+      const existing =
+        await this.interviewRoundRepository.findByJobOpeningAndSequence(
+          dto.job_opening_id,
+          dto.sequence_number,
+          { includeDeleted: true, manager },
+        );
 
       if (existing) {
         if (!existing.deleted_at) {
           throw new ConflictException({
-            message: 'An interview round with this sequence number already exists for this job opening',
+            message:
+              'An interview round with this sequence number already exists for this job opening',
             code: 'INTERVIEW_ROUND_SEQUENCE_ALREADY_EXISTS',
           });
         }
@@ -59,11 +70,15 @@ export class CreateInterviewRoundUseCase {
         existing.description = description;
         existing.deleted_at = null;
         existing.deleted_by_user_id = null;
-        existing.updated_by_user_id = actorUserId ?? existing.updated_by_user_id;
+        existing.updated_by_user_id =
+          actorUserId ?? existing.updated_by_user_id;
 
         await this.interviewRoundRepository.save(existing, { manager });
 
-        const restored = await this.interviewRoundRepository.findById(existing.id, { manager });
+        const restored = await this.interviewRoundRepository.findById(
+          existing.id,
+          { manager },
+        );
         if (!restored) {
           throw new ConflictException({
             message: 'We could not complete the request. Please try again',
@@ -116,7 +131,9 @@ export class CreateInterviewRoundUseCase {
         { manager },
       );
 
-      const loaded = await this.interviewRoundRepository.findById(created.id, { manager });
+      const loaded = await this.interviewRoundRepository.findById(created.id, {
+        manager,
+      });
       if (!loaded) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

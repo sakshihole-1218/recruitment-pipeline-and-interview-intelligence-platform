@@ -4,7 +4,9 @@ import { JobOpeningEntity } from '../entities/job-opening.entity';
 import { JobOpeningSkillEntity } from '../entities/job-opening-skill.entity';
 
 export class JobOpeningsMapper {
-  static toSkillResponse(entity: JobOpeningSkillEntity): JobOpeningSkillResponseDto {
+  static toSkillResponse(
+    entity: JobOpeningSkillEntity,
+  ): JobOpeningSkillResponseDto {
     return {
       id: entity.id,
       skill_id: entity.skill_id,

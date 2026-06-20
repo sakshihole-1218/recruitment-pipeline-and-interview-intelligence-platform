@@ -23,9 +23,12 @@ export class DeleteFeedbackAiSummaryUseCase {
     const actorId = options.actorUserId;
 
     await this.dataSource.transaction(async (manager) => {
-      const existing = await this.feedbackAiSummaryRepository.findById(options.id, {
-        manager,
-      });
+      const existing = await this.feedbackAiSummaryRepository.findById(
+        options.id,
+        {
+          manager,
+        },
+      );
 
       if (!existing) {
         throw new NotFoundException({
@@ -34,10 +37,13 @@ export class DeleteFeedbackAiSummaryUseCase {
         });
       }
 
-      await this.feedbackAiSummaryRepository.softDeleteFeedbackSummary(options.id, {
-        actorUserId: actorId,
-        manager,
-      });
+      await this.feedbackAiSummaryRepository.softDeleteFeedbackSummary(
+        options.id,
+        {
+          actorUserId: actorId,
+          manager,
+        },
+      );
 
       await this.activityWriter.log(
         ActivityLogBuilder.build({

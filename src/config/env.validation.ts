@@ -32,6 +32,7 @@ export const envValidationSchema = Joi.object({
     then: Joi.string().trim().required(),
     otherwise: Joi.string().trim().optional().allow(''),
   }),
+  STT_PROVIDER: Joi.string().valid('mock').default('mock'),
 
   LIVEKIT_API_KEY: Joi.string().required(),
   LIVEKIT_API_SECRET: Joi.string().required(),

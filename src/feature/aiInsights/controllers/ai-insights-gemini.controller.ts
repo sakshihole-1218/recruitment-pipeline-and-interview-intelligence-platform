@@ -1,4 +1,10 @@
-import { Controller, Get, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -18,7 +24,11 @@ import { GeminiTestResponseDto } from '../dto/gemini-test.response.dto';
 
 @ApiTags('AI Insights - Gemini')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('ai-insights/gemini')
@@ -28,7 +38,10 @@ export class AiInsightsGeminiController {
   @Get('test')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Test Gemini API connectivity' })
-  @ApiStandardResponse(GeminiTestResponseDto, 'Gemini test completed successfully')
+  @ApiStandardResponse(
+    GeminiTestResponseDto,
+    'Gemini test completed successfully',
+  )
   async testConnection() {
     const result = await this.geminiService.testConnection();
     return ResponseUtil.success('Gemini test completed successfully', result);

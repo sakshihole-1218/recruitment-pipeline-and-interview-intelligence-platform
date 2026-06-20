@@ -121,7 +121,9 @@ export class CompleteApplicationScreeningUseCase {
         { manager },
       );
 
-      const loaded = await this.applicationRepository.findById(app.id, { manager });
+      const loaded = await this.applicationRepository.findById(app.id, {
+        manager,
+      });
       if (!loaded) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

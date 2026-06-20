@@ -2,7 +2,9 @@ import { LivekitRoomSessionEntity } from '../entities/livekit-room-session.entit
 import { LivekitRoomSessionResponseDto } from '../dto/livekit-room-session.response.dto';
 
 export class LivekitRoomSessionsMapper {
-  static toResponse(entity: LivekitRoomSessionEntity): LivekitRoomSessionResponseDto {
+  static toResponse(
+    entity: LivekitRoomSessionEntity,
+  ): LivekitRoomSessionResponseDto {
     return {
       id: entity.id,
       ai_interview_session_id: entity.ai_interview_session_id,

@@ -57,7 +57,10 @@ export class PublishJobOpeningUseCase {
       opening.published_at = opening.published_at ?? now;
 
       // Publishing implies it is ready to be open for pipeline.
-      if (opening.status === JobOpeningStatus.DRAFT || opening.status === JobOpeningStatus.ON_HOLD) {
+      if (
+        opening.status === JobOpeningStatus.DRAFT ||
+        opening.status === JobOpeningStatus.ON_HOLD
+      ) {
         opening.status = JobOpeningStatus.OPEN;
       }
 
@@ -67,7 +70,9 @@ export class PublishJobOpeningUseCase {
 
       await this.jobOpeningRepository.save(opening, { manager });
 
-      const updated = await this.jobOpeningRepository.findById(opening.id, { manager });
+      const updated = await this.jobOpeningRepository.findById(opening.id, {
+        manager,
+      });
       if (!updated) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

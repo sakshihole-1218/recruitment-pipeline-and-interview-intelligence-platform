@@ -24,7 +24,11 @@ export class ProfileResponseDto {
   @ApiProperty({ example: '2026-01-15T10:30:00.000Z', nullable: true })
   last_login_at: Date | null;
 
-  @ApiProperty({ isArray: true, enum: SystemRoleCode, example: [SystemRoleCode.RECRUITER] })
+  @ApiProperty({
+    isArray: true,
+    enum: SystemRoleCode,
+    example: [SystemRoleCode.RECRUITER],
+  })
   roles: SystemRoleCode[];
 
   @ApiProperty({ example: '2026-01-15T10:30:00.000Z' })

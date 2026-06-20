@@ -13,7 +13,9 @@ export class SkillsValidationHelper {
   constructor(private readonly skillRepository: SkillRepository) {}
 
   normalizeCode(code: string): string {
-    const normalized = String(code ?? '').trim().toUpperCase();
+    const normalized = String(code ?? '')
+      .trim()
+      .toUpperCase();
     if (!normalized) {
       throw new BadRequestException({
         message: 'Skill code is required',

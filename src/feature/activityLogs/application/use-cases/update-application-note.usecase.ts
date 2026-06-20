@@ -89,9 +89,12 @@ export class UpdateApplicationNoteUseCase {
         is_private: note.is_private,
       };
 
-      if (typeof patch.note_type !== 'undefined') note.note_type = patch.note_type;
-      if (typeof patch.note_text !== 'undefined') note.note_text = patch.note_text;
-      if (typeof patch.is_private !== 'undefined') note.is_private = patch.is_private;
+      if (typeof patch.note_type !== 'undefined')
+        note.note_type = patch.note_type;
+      if (typeof patch.note_text !== 'undefined')
+        note.note_text = patch.note_text;
+      if (typeof patch.is_private !== 'undefined')
+        note.is_private = patch.is_private;
 
       note.updated_by_user_id = actorUserId;
 

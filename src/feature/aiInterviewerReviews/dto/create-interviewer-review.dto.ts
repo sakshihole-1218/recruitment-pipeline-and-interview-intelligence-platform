@@ -79,7 +79,10 @@ export class CreateInterviewerReviewDto {
   @IsEnum(InterviewerRecommendation)
   interviewer_recommendation?: InterviewerRecommendation;
 
-  @ApiPropertyOptional({ enum: InterviewerReviewStatus, default: InterviewerReviewStatus.DRAFT })
+  @ApiPropertyOptional({
+    enum: InterviewerReviewStatus,
+    default: InterviewerReviewStatus.DRAFT,
+  })
   @IsOptional()
   @IsEnum(InterviewerReviewStatus)
   review_status?: InterviewerReviewStatus;

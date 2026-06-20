@@ -33,10 +33,16 @@ export class BulkUpdateCandidateStatusUseCase {
     );
   }
 
-  private static toFailure(error: unknown, candidateId?: string): BulkUpdateCandidateStatusFailure {
+  private static toFailure(
+    error: unknown,
+    candidateId?: string,
+  ): BulkUpdateCandidateStatusFailure {
     if (error instanceof HttpException) {
       const res = error.getResponse();
-      const obj = typeof res === 'object' && res !== null ? (res as Record<string, unknown>) : {};
+      const obj =
+        typeof res === 'object' && res !== null
+          ? (res as Record<string, unknown>)
+          : {};
       return {
         candidate_id: candidateId,
         message:
@@ -91,7 +97,8 @@ export class BulkUpdateCandidateStatusUseCase {
       seen.add(candidateId);
 
       try {
-        const candidate = await this.candidateRepository.findByIdIncludingDeleted(candidateId);
+        const candidate =
+          await this.candidateRepository.findByIdIncludingDeleted(candidateId);
         if (!candidate) {
           failed.push({
             candidate_id: candidateId,
@@ -134,7 +141,9 @@ export class BulkUpdateCandidateStatusUseCase {
 
         updated.push({ candidate_id: candidateId, is_active: isActive });
       } catch (error) {
-        failed.push(BulkUpdateCandidateStatusUseCase.toFailure(error, candidateId));
+        failed.push(
+          BulkUpdateCandidateStatusUseCase.toFailure(error, candidateId),
+        );
       }
     }
 

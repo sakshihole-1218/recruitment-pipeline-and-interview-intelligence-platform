@@ -1,4 +1,8 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 
 import { ApplicationCurrentStage } from '../enums/application-current-stage.enum';
 
@@ -7,7 +11,8 @@ export class ApplicationScreeningValidationHelper {
   ensureCanStartScreening(currentStage: ApplicationCurrentStage): void {
     if (currentStage !== ApplicationCurrentStage.APPLIED) {
       throw new ConflictException({
-        message: 'Screening can only be started when application is in APPLIED stage',
+        message:
+          'Screening can only be started when application is in APPLIED stage',
         code: 'APPLICATION_SCREENING_START_INVALID_STAGE',
         meta: { current_stage: currentStage },
       });
@@ -17,14 +22,20 @@ export class ApplicationScreeningValidationHelper {
   ensureCanCompleteScreening(currentStage: ApplicationCurrentStage): void {
     if (currentStage !== ApplicationCurrentStage.SCREENING) {
       throw new ConflictException({
-        message: 'Screening can only be completed when application is in SCREENING stage',
+        message:
+          'Screening can only be completed when application is in SCREENING stage',
         code: 'APPLICATION_SCREENING_COMPLETE_INVALID_STAGE',
         meta: { current_stage: currentStage },
       });
     }
   }
 
-  ensureScoreInRange(options: { field: string; value: number; min: number; max: number }): void {
+  ensureScoreInRange(options: {
+    field: string;
+    value: number;
+    min: number;
+    max: number;
+  }): void {
     const value = Number(options.value);
 
     if (!Number.isFinite(value)) {

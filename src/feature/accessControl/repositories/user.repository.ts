@@ -4,7 +4,10 @@ import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { ListUsersQueryDto } from '../dto/list-users.query.dto';
 import { UserEntity } from '../entities/user.entity';
-import { normalizeEmail, normalizeSearch } from '../../../common/utils/normalization.util';
+import {
+  normalizeEmail,
+  normalizeSearch,
+} from '../../../common/utils/normalization.util';
 
 export type UserListResult =
   | {
@@ -44,11 +47,7 @@ export class UserRepository {
         'user_roles',
         'user_roles.deleted_at IS NULL',
       )
-      .leftJoinAndSelect(
-        'user_roles.role',
-        'roles',
-        'roles.deleted_at IS NULL',
-      )
+      .leftJoinAndSelect('user_roles.role', 'roles', 'roles.deleted_at IS NULL')
       .where(`${alias}.deleted_at IS NULL`);
   }
 
@@ -173,7 +172,7 @@ export class UserRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 
@@ -200,10 +199,7 @@ export class UserRepository {
     const idSelect = qb.clone();
 
     const idRows = await idSelect
-      .select([
-        'users.id AS id',
-        `users.${sortBy} AS sort_value`,
-      ])
+      .select(['users.id AS id', `users.${sortBy} AS sort_value`])
       .distinct(true)
       .skip(skip)
       .take(limit)

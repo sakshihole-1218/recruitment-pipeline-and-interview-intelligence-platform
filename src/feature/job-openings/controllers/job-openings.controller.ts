@@ -57,7 +57,10 @@ export class JobOpeningsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create job opening' })
   @ApiBody({ type: CreateJobOpeningDto })
-  @ApiStandardResponse(JobOpeningResponseDto, 'Job opening created successfully')
+  @ApiStandardResponse(
+    JobOpeningResponseDto,
+    'Job opening created successfully',
+  )
   async create(
     @Body() dto: CreateJobOpeningDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -72,10 +75,15 @@ export class JobOpeningsController {
   @Patch(':id')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Update job opening fields (skills via /:id/skills)' })
+  @ApiOperation({
+    summary: 'Update job opening fields (skills via /:id/skills)',
+  })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
   @ApiBody({ type: UpdateJobOpeningDto })
-  @ApiStandardResponse(JobOpeningResponseDto, 'Job opening updated successfully')
+  @ApiStandardResponse(
+    JobOpeningResponseDto,
+    'Job opening updated successfully',
+  )
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateJobOpeningDto,
@@ -92,7 +100,10 @@ export class JobOpeningsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get job opening by id' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
-  @ApiStandardResponse(JobOpeningResponseDto, 'Job opening fetched successfully')
+  @ApiStandardResponse(
+    JobOpeningResponseDto,
+    'Job opening fetched successfully',
+  )
   async findById(@Param('id') id: string) {
     const opening = await this.jobOpeningsService.findById(id);
     return ResponseUtil.success(
@@ -134,7 +145,10 @@ export class JobOpeningsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Publish a job opening' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })
-  @ApiStandardResponse(JobOpeningResponseDto, 'Job opening published successfully')
+  @ApiStandardResponse(
+    JobOpeningResponseDto,
+    'Job opening published successfully',
+  )
   async publish(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     const opening = await this.jobOpeningsService.publish(id, actor?.sub);
     return ResponseUtil.success(

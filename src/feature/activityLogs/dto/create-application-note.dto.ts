@@ -1,16 +1,30 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 import { NoteType } from '../enums/note-type.enum';
 
 export class CreateApplicationNoteDto {
   @ApiProperty({ enum: NoteType, example: NoteType.RECRUITER_NOTE })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(NoteType)
   note_type: NoteType;
 
-  @ApiProperty({ example: 'Candidate seems strong in system design. Follow up on leadership experience.' })
+  @ApiProperty({
+    example:
+      'Candidate seems strong in system design. Follow up on leadership experience.',
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(5000)

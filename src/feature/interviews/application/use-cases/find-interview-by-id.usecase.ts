@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { InterviewRepository } from '../../repositories/interview.repository';
 import { InterviewPanelMemberRepository } from '../../repositories/interview-panel-member.repository';
@@ -32,10 +36,8 @@ export class FindInterviewByIdUseCase {
     }
 
     if (isInterviewerOnly && actor?.sub) {
-      const membership = await this.panelMemberRepository.findByInterviewAndUser(
-        id,
-        actor.sub,
-      );
+      const membership =
+        await this.panelMemberRepository.findByInterviewAndUser(id, actor.sub);
 
       if (!membership) {
         throw new ForbiddenException({

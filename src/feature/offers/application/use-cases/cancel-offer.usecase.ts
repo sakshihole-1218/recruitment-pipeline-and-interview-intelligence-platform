@@ -59,9 +59,12 @@ export class CancelOfferUseCase {
 
       await this.offerRepository.save(offer, { manager });
 
-      const app = await this.applicationRepository.findById(offer.application_id, {
-        manager,
-      });
+      const app = await this.applicationRepository.findById(
+        offer.application_id,
+        {
+          manager,
+        },
+      );
       if (!app) {
         throw new ConflictException({
           message: 'Offer is linked to an invalid application',
@@ -69,7 +72,9 @@ export class CancelOfferUseCase {
         });
       }
 
-      this.applicationsValidationHelper.ensureNotTerminalStage(app.current_stage);
+      this.applicationsValidationHelper.ensureNotTerminalStage(
+        app.current_stage,
+      );
 
       const targetStage = ApplicationCurrentStage.OFFER;
       const fromStage = app.current_stage;
@@ -84,7 +89,7 @@ export class CancelOfferUseCase {
             application_id: app.id,
             from_stage: fromStage,
             to_stage: targetStage,
-            changed_by_user_id: actorUserId!,
+            changed_by_user_id: actorUserId,
             change_reason: 'Offer cancelled',
             changed_at: now,
           },
@@ -101,7 +106,7 @@ export class CancelOfferUseCase {
             fromStage,
             toStage: targetStage,
             reason: 'Offer cancelled',
-            actorUserId: actorUserId!,
+            actorUserId: actorUserId,
             actionAt: now,
             ipAddress: null,
             userAgent: null,
@@ -127,7 +132,7 @@ export class CancelOfferUseCase {
           entityType: ActivityEntityType.OFFER,
           entityId: loaded.id,
           actionType: ActivityActionType.STATUS_CHANGE,
-          actorUserId: actorUserId!,
+          actorUserId: actorUserId,
           oldValues: oldOfferValues,
           newValues: { offer_status: loaded.offer_status },
           actionAt: now,

@@ -1,17 +1,15 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsEnum,
-  IsIn,
-  IsISO8601,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsEnum, IsIn, IsISO8601, IsOptional, IsUUID } from 'class-validator';
 
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 import { InterviewRecommendation } from '../enums/interview-recommendation.enum';
 
-const FEEDBACK_SORT_FIELDS = ['created_at', 'updated_at', 'submitted_at'] as const;
+const FEEDBACK_SORT_FIELDS = [
+  'created_at',
+  'updated_at',
+  'submitted_at',
+] as const;
 
 export class ListInterviewFeedbackQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional({

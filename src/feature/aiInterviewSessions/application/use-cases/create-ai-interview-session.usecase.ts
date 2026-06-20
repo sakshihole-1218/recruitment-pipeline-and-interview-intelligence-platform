@@ -48,8 +48,10 @@ export class CreateAiInterviewSessionUseCase {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
 
-      const interview = await this.referenceRepository
-        .findInterviewById(dto.interview_id, manager);
+      const interview = await this.referenceRepository.findInterviewById(
+        dto.interview_id,
+        manager,
+      );
 
       if (!interview) {
         throw new NotFoundException({
@@ -58,9 +60,7 @@ export class CreateAiInterviewSessionUseCase {
         });
       }
 
-      this.validation.ensureInterviewIsSchedulable(
-        interview.interview_status as InterviewStatus,
-      );
+      this.validation.ensureInterviewIsSchedulable(interview.interview_status);
 
       // Lock on interview row to avoid duplicate active session creation
       await manager
@@ -78,7 +78,8 @@ export class CreateAiInterviewSessionUseCase {
 
       if (existingActive) {
         throw new ConflictException({
-          message: 'An active AI interview session already exists for this interview',
+          message:
+            'An active AI interview session already exists for this interview',
           code: 'AI_SESSION_DUPLICATE_ACTIVE_FOR_INTERVIEW',
           meta: { session_id: existingActive.id },
         });
@@ -133,7 +134,8 @@ export class CreateAiInterviewSessionUseCase {
 
         if (resume.application_id && resume.application_id !== application.id) {
           throw new BadRequestException({
-            message: 'Resume analysis does not belong to the application context',
+            message:
+              'Resume analysis does not belong to the application context',
             code: 'RESUME_ANALYSIS_APPLICATION_MISMATCH',
             meta: { application_id: application.id },
           });
@@ -141,7 +143,8 @@ export class CreateAiInterviewSessionUseCase {
 
         if (resume.analysis_status !== ResumeAiAnalysisStatus.COMPLETED) {
           throw new BadRequestException({
-            message: 'Resume analysis must be COMPLETED to create an AI interview session',
+            message:
+              'Resume analysis must be COMPLETED to create an AI interview session',
             code: 'RESUME_ANALYSIS_NOT_COMPLETED',
             meta: { analysis_status: resume.analysis_status },
           });
@@ -168,9 +171,12 @@ export class CreateAiInterviewSessionUseCase {
       let sessionCode: string | null = null;
       for (let attempt = 0; attempt < 8; attempt += 1) {
         const candidateCode = generateSessionCodeCandidate();
-        const exists = await this.repository.checkSessionCodeExists(candidateCode, {
-          manager,
-        });
+        const exists = await this.repository.checkSessionCodeExists(
+          candidateCode,
+          {
+            manager,
+          },
+        );
         if (!exists) {
           sessionCode = candidateCode;
           break;

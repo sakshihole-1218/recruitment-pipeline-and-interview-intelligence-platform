@@ -24,7 +24,11 @@ export class AssignRoleToUserUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(userId: string, roleId: string, actorUserId: string): Promise<UserRoleEntity> {
+  async execute(
+    userId: string,
+    roleId: string,
+    actorUserId: string,
+  ): Promise<UserRoleEntity> {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
       const user = await this.userRepository.findById(userId, { manager });
@@ -58,7 +62,9 @@ export class AssignRoleToUserUseCase {
 
       if (existing && existing.deleted_at) {
         existing.deleted_at = null;
-        const restored = await this.userRoleRepository.save(existing, { manager });
+        const restored = await this.userRoleRepository.save(existing, {
+          manager,
+        });
         restored.role = role;
 
         if (actorUserId) {

@@ -21,7 +21,9 @@ export class AiInterviewQuestionsValidationHelper {
     }
   }
 
-  ensureSessionSupportsQuestionGeneration(status: AiInterviewSessionStatus): void {
+  ensureSessionSupportsQuestionGeneration(
+    status: AiInterviewSessionStatus,
+  ): void {
     const allowed = new Set<AiInterviewSessionStatus>([
       AiInterviewSessionStatus.READY,
       AiInterviewSessionStatus.IN_PROGRESS,
@@ -29,7 +31,8 @@ export class AiInterviewQuestionsValidationHelper {
 
     if (!allowed.has(status)) {
       throw new ConflictException({
-        message: 'Interview plan can only be generated for READY or IN_PROGRESS sessions',
+        message:
+          'Interview plan can only be generated for READY or IN_PROGRESS sessions',
         code: 'AI_INTERVIEW_SESSION_INVALID_FOR_PLAN_GENERATION',
         meta: { session_status: status },
       });
@@ -76,7 +79,10 @@ export class AiInterviewQuestionsValidationHelper {
     }
   }
 
-  ensureSequenceNumberAvailable(sequenceNumber: number, existing: number[]): void {
+  ensureSequenceNumberAvailable(
+    sequenceNumber: number,
+    existing: number[],
+  ): void {
     if (existing.includes(sequenceNumber)) {
       throw new ConflictException({
         message: 'Sequence number already exists in this AI interview session',
@@ -86,7 +92,10 @@ export class AiInterviewQuestionsValidationHelper {
     }
   }
 
-  ensureAnsweredAfterAsked(askedAt: Date | null, answeredAt: Date | null): void {
+  ensureAnsweredAfterAsked(
+    askedAt: Date | null,
+    answeredAt: Date | null,
+  ): void {
     if (askedAt && answeredAt && answeredAt.getTime() < askedAt.getTime()) {
       throw new BadRequestException({
         message: 'answered_at cannot be before asked_at',

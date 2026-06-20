@@ -158,12 +158,9 @@ const DECISION_TRANSITIONS: Map<DecisionStatus, Set<DecisionStatus>> = new Map([
   ],
   [
     DecisionStatus.OFFERED,
-    new Set([
-      DecisionStatus.OFFERED,
-      DecisionStatus.HIRED,
-    ]),
+    new Set([DecisionStatus.OFFERED, DecisionStatus.HIRED]),
   ],
- 
+
   [DecisionStatus.REJECTED, new Set([DecisionStatus.REJECTED])],
   [DecisionStatus.HIRED, new Set([DecisionStatus.HIRED])],
 ]);

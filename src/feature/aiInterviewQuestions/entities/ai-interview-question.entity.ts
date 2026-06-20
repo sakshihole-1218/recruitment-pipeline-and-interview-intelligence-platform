@@ -18,9 +18,13 @@ import { GeneratedFrom } from '../enums/generated-from.enum';
 import { QuestionType } from '../enums/question-type.enum';
 
 @Entity({ name: 'ai_interview_questions' })
-@Index('idx_ai_interview_questions_session_id_active', ['ai_interview_session_id'], {
-  where: '"deleted_at" IS NULL',
-})
+@Index(
+  'idx_ai_interview_questions_session_id_active',
+  ['ai_interview_session_id'],
+  {
+    where: '"deleted_at" IS NULL',
+  },
+)
 @Index('idx_ai_interview_questions_parent_id_active', ['parent_question_id'], {
   where: '"deleted_at" IS NULL',
 })
@@ -97,13 +101,20 @@ export class AiInterviewQuestionEntity {
   @JoinColumn({ name: 'ai_interview_session_id' })
   ai_interview_session?: AiInterviewSessionEntity;
 
-  @ManyToOne(() => AiInterviewQuestionEntity, (question) => question.follow_up_questions, {
-    onDelete: 'RESTRICT',
-    nullable: true,
-  })
+  @ManyToOne(
+    () => AiInterviewQuestionEntity,
+    (question) => question.follow_up_questions,
+    {
+      onDelete: 'RESTRICT',
+      nullable: true,
+    },
+  )
   @JoinColumn({ name: 'parent_question_id' })
   parent_question?: AiInterviewQuestionEntity | null;
 
-  @OneToMany(() => AiInterviewQuestionEntity, (question) => question.parent_question)
+  @OneToMany(
+    () => AiInterviewQuestionEntity,
+    (question) => question.parent_question,
+  )
   follow_up_questions?: AiInterviewQuestionEntity[];
 }

@@ -55,7 +55,9 @@ export class AiInterviewFeedbackController {
 
   @Post('generate')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Generate AI interview feedback from AI interview transcript' })
+  @ApiOperation({
+    summary: 'Generate AI interview feedback from AI interview transcript',
+  })
   @ApiBody({ type: GenerateAiInterviewFeedbackDto })
   @ApiStandardResponse(
     AiInterviewFeedbackResponseDto,
@@ -93,7 +95,9 @@ export class AiInterviewFeedbackController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List AI interview feedback with offset or cursor pagination' })
+  @ApiOperation({
+    summary: 'List AI interview feedback with offset or cursor pagination',
+  })
   @ApiAiInterviewFeedbackPaginatedResponse(
     AiInterviewFeedbackResponseDto,
     'AI interview feedback fetched successfully',
@@ -102,12 +106,15 @@ export class AiInterviewFeedbackController {
     const result = await this.service.list(query);
 
     if (result.mode === 'cursor') {
-      return ResponseUtil.success('AI interview feedback fetched successfully', {
-        data: result.data.map(AiInterviewFeedbackMapper.toResponse),
-        limit: result.limit,
-        next_cursor: result.next_cursor,
-        has_more: result.has_more,
-      });
+      return ResponseUtil.success(
+        'AI interview feedback fetched successfully',
+        {
+          data: result.data.map(AiInterviewFeedbackMapper.toResponse),
+          limit: result.limit,
+          next_cursor: result.next_cursor,
+          has_more: result.has_more,
+        },
+      );
     }
 
     return ResponseUtil.paginated(
@@ -121,7 +128,9 @@ export class AiInterviewFeedbackController {
 
   @Get('session/:sessionId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get AI interview feedback by AI interview session id' })
+  @ApiOperation({
+    summary: 'Get AI interview feedback by AI interview session id',
+  })
   @ApiParam({ name: 'sessionId', description: 'AI interview session UUID' })
   @ApiStandardResponse(
     AiInterviewFeedbackResponseDto,
@@ -186,6 +195,8 @@ export class AiInterviewFeedbackController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     await this.service.softDelete(id, actor?.sub);
-    return ResponseUtil.success('AI interview feedback deleted successfully', { id });
+    return ResponseUtil.success('AI interview feedback deleted successfully', {
+      id,
+    });
   }
 }

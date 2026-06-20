@@ -37,19 +37,32 @@ import { AiInsightsMapper } from '../helpers/ai-insights.mapper';
 
 @ApiTags('AI Insights - Feedback Summaries')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('ai-insights/feedback-summaries')
 export class FeedbackAiSummariesController {
-  constructor(private readonly feedbackAiSummariesService: FeedbackAiSummariesService) {}
+  constructor(
+    private readonly feedbackAiSummariesService: FeedbackAiSummariesService,
+  ) {}
 
   @Post()
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Generate feedback AI summary for an application' })
   @ApiBody({ type: GenerateFeedbackAiSummaryDto })
-  @ApiStandardResponse(FeedbackAiSummaryResponseDto, 'Feedback AI summary generated successfully')
+  @ApiStandardResponse(
+    FeedbackAiSummaryResponseDto,
+    'Feedback AI summary generated successfully',
+  )
   async generate(
     @Body() dto: GenerateFeedbackAiSummaryDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -62,11 +75,18 @@ export class FeedbackAiSummariesController {
   }
 
   @Post('generate')
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Generate feedback AI summary (alias endpoint)' })
   @ApiBody({ type: GenerateFeedbackAiSummaryDto })
-  @ApiStandardResponse(FeedbackAiSummaryResponseDto, 'Feedback AI summary generated successfully')
+  @ApiStandardResponse(
+    FeedbackAiSummaryResponseDto,
+    'Feedback AI summary generated successfully',
+  )
   async generateAlias(
     @Body() dto: GenerateFeedbackAiSummaryDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -75,11 +95,18 @@ export class FeedbackAiSummariesController {
   }
 
   @Post(':id/regenerate')
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Regenerate feedback AI summary by id' })
   @ApiParam({ name: 'id', description: 'Feedback AI summary UUID' })
-  @ApiStandardResponse(FeedbackAiSummaryResponseDto, 'Feedback AI summary regenerated successfully')
+  @ApiStandardResponse(
+    FeedbackAiSummaryResponseDto,
+    'Feedback AI summary regenerated successfully',
+  )
   async regenerateById(
     @Param('id') id: string,
     @CurrentUser() actor: AuthJwtPayload,
@@ -96,11 +123,20 @@ export class FeedbackAiSummariesController {
   }
 
   @Post('by-application/:applicationId/regenerate')
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Regenerate feedback AI summary for an application' })
+  @ApiOperation({
+    summary: 'Regenerate feedback AI summary for an application',
+  })
   @ApiParam({ name: 'applicationId', description: 'Application UUID' })
-  @ApiStandardResponse(FeedbackAiSummaryResponseDto, 'Feedback AI summary regenerated successfully')
+  @ApiStandardResponse(
+    FeedbackAiSummaryResponseDto,
+    'Feedback AI summary regenerated successfully',
+  )
   async regenerate(
     @Param('applicationId') applicationId: string,
     @CurrentUser() actor: AuthJwtPayload,
@@ -119,7 +155,10 @@ export class FeedbackAiSummariesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get feedback AI summary by id' })
   @ApiParam({ name: 'id', description: 'Feedback AI summary UUID' })
-  @ApiStandardResponse(FeedbackAiSummaryResponseDto, 'Feedback AI summary fetched successfully')
+  @ApiStandardResponse(
+    FeedbackAiSummaryResponseDto,
+    'Feedback AI summary fetched successfully',
+  )
   async findById(@Param('id') id: string) {
     const row = await this.feedbackAiSummariesService.findById(id);
     return ResponseUtil.success(
@@ -132,9 +171,13 @@ export class FeedbackAiSummariesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get feedback AI summary by application id' })
   @ApiParam({ name: 'applicationId', description: 'Application UUID' })
-  @ApiStandardResponse(FeedbackAiSummaryResponseDto, 'Feedback AI summary fetched successfully')
+  @ApiStandardResponse(
+    FeedbackAiSummaryResponseDto,
+    'Feedback AI summary fetched successfully',
+  )
   async findByApplicationId(@Param('applicationId') applicationId: string) {
-    const row = await this.feedbackAiSummariesService.findByApplicationId(applicationId);
+    const row =
+      await this.feedbackAiSummariesService.findByApplicationId(applicationId);
     return ResponseUtil.success(
       'Feedback AI summary fetched successfully',
       AiInsightsMapper.toFeedbackSummaryResponse(row),
@@ -143,16 +186,25 @@ export class FeedbackAiSummariesController {
 
   @Get('application/:applicationId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get feedback AI summary by application id (alias)' })
+  @ApiOperation({
+    summary: 'Get feedback AI summary by application id (alias)',
+  })
   @ApiParam({ name: 'applicationId', description: 'Application UUID' })
-  @ApiStandardResponse(FeedbackAiSummaryResponseDto, 'Feedback AI summary fetched successfully')
-  async findByApplicationIdAlias(@Param('applicationId') applicationId: string) {
+  @ApiStandardResponse(
+    FeedbackAiSummaryResponseDto,
+    'Feedback AI summary fetched successfully',
+  )
+  async findByApplicationIdAlias(
+    @Param('applicationId') applicationId: string,
+  ) {
     return this.findByApplicationId(applicationId);
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List feedback AI summaries (offset or cursor pagination)' })
+  @ApiOperation({
+    summary: 'List feedback AI summaries (offset or cursor pagination)',
+  })
   @ApiFeedbackAiSummariesPaginatedResponse(
     FeedbackAiSummaryResponseDto,
     'Feedback AI summaries fetched successfully',
@@ -161,12 +213,15 @@ export class FeedbackAiSummariesController {
     const result = await this.feedbackAiSummariesService.list(query);
 
     if (result.mode === 'cursor') {
-      return ResponseUtil.success('Feedback AI summaries fetched successfully', {
-        data: result.data.map(AiInsightsMapper.toFeedbackSummaryResponse),
-        limit: result.limit,
-        next_cursor: result.next_cursor,
-        has_more: result.has_more,
-      });
+      return ResponseUtil.success(
+        'Feedback AI summaries fetched successfully',
+        {
+          data: result.data.map(AiInsightsMapper.toFeedbackSummaryResponse),
+          limit: result.limit,
+          next_cursor: result.next_cursor,
+          has_more: result.has_more,
+        },
+      );
     }
 
     return ResponseUtil.paginated(
@@ -179,13 +234,19 @@ export class FeedbackAiSummariesController {
   }
 
   @Delete(':id')
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete (soft) feedback AI summary by id' })
   @ApiParam({ name: 'id', description: 'Feedback AI summary UUID' })
   @ApiStandardResponse(Object, 'Feedback AI summary deleted successfully')
   async remove(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     await this.feedbackAiSummariesService.delete(id, actor?.sub);
-    return ResponseUtil.success('Feedback AI summary deleted successfully', { id });
+    return ResponseUtil.success('Feedback AI summary deleted successfully', {
+      id,
+    });
   }
 }

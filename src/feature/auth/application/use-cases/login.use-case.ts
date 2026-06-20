@@ -66,7 +66,8 @@ export class LoginUseCase {
       expiresIn: refreshExpiresIn,
     });
 
-    user.refresh_token_hash = await AuthPasswordHashingHelper.hash(refreshToken);
+    user.refresh_token_hash =
+      await AuthPasswordHashingHelper.hash(refreshToken);
     user.last_login_at = new Date();
     user.updated_by_user_id = user.id;
 
@@ -79,7 +80,9 @@ export class LoginUseCase {
         actionType: ActivityActionType.LOGIN,
         actorUserId: user.id,
         oldValues: null,
-        newValues: { last_login_at: user.last_login_at?.toISOString?.() ?? null },
+        newValues: {
+          last_login_at: user.last_login_at?.toISOString?.() ?? null,
+        },
         actionAt: user.last_login_at,
         ipAddress: null,
         userAgent: null,

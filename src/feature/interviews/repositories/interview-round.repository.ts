@@ -12,7 +12,9 @@ export class InterviewRoundRepository {
   ) {}
 
   private repo(manager?: EntityManager): Repository<InterviewRoundEntity> {
-    return manager ? manager.getRepository(InterviewRoundEntity) : this.repository;
+    return manager
+      ? manager.getRepository(InterviewRoundEntity)
+      : this.repository;
   }
 
   private baseQuery(

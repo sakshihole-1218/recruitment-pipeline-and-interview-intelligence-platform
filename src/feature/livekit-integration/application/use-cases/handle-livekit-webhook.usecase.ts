@@ -94,7 +94,9 @@ export class HandleLiveKitWebhookUseCase {
           break;
       }
 
-      const updated = await this.roomRepository.updateRoomSession(room, { manager });
+      const updated = await this.roomRepository.updateRoomSession(room, {
+        manager,
+      });
 
       return {
         processed: true,

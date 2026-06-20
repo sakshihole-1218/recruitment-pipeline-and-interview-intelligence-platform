@@ -11,7 +11,10 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { normalizeEmail, normalizePhoneE164 } from '../../../common/utils/normalization.util';
+import {
+  normalizeEmail,
+  normalizePhoneE164,
+} from '../../../common/utils/normalization.util';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({ example: 'Sakshi' })
@@ -37,7 +40,8 @@ export class UpdateUserDto {
   email?: string;
 
   @ApiPropertyOptional({
-    description: 'Phone number in correct format (e.g. +919876543210). Use null to clear.',
+    description:
+      'Phone number in correct format (e.g. +919876543210). Use null to clear.',
     example: '+919000000000',
   })
   @IsOptional()

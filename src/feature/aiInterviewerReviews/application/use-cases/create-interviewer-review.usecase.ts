@@ -153,7 +153,9 @@ export class CreateInterviewerReviewUseCase {
             overall_score: overallScore,
             strengths: this.validation.normalizeOptionalText(dto.strengths),
             concerns: this.validation.normalizeOptionalText(dto.concerns),
-            detailed_review: this.validation.normalizeOptionalText(dto.detailed_review),
+            detailed_review: this.validation.normalizeOptionalText(
+              dto.detailed_review,
+            ),
             interviewer_recommendation: dto.interviewer_recommendation ?? null,
             review_status: dto.review_status ?? InterviewerReviewStatus.DRAFT,
             reviewed_at: null,

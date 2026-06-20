@@ -14,7 +14,9 @@ export class JobOpeningsValidationHelper {
   constructor(private readonly jobOpeningRepository: JobOpeningRepository) {}
 
   normalizeCode(code: string): string {
-    const normalized = String(code ?? '').trim().toUpperCase();
+    const normalized = String(code ?? '')
+      .trim()
+      .toUpperCase();
     if (!normalized) {
       throw new BadRequestException({
         message: 'Job opening code is required',
@@ -80,7 +82,9 @@ export class JobOpeningsValidationHelper {
     }
   }
 
-  dedupeAndValidateSkills(input?: JobOpeningSkillInputDto[]): JobOpeningSkillInputDto[] {
+  dedupeAndValidateSkills(
+    input?: JobOpeningSkillInputDto[],
+  ): JobOpeningSkillInputDto[] {
     if (!input) {
       return [];
     }

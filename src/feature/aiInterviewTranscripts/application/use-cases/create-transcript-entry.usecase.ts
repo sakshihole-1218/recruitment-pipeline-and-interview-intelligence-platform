@@ -47,9 +47,7 @@ export class CreateTranscriptEntryUseCase {
           });
         }
 
-        this.validation.ensureSessionAllowsCreate(
-          session.session_status as AiInterviewSessionStatus,
-        );
+        this.validation.ensureSessionAllowsCreate(session.session_status);
 
         let question: AiInterviewQuestionEntity | null = null;
         if (dto.ai_interview_question_id) {
@@ -73,7 +71,9 @@ export class CreateTranscriptEntryUseCase {
 
         const sequenceNumber =
           dto.sequence_number ??
-          (await this.repository.getNextSequenceNumber(session.id, { manager }));
+          (await this.repository.getNextSequenceNumber(session.id, {
+            manager,
+          }));
 
         if (dto.sequence_number) {
           const exists = await this.repository.existsSequenceNumberForSession(
@@ -115,7 +115,8 @@ export class CreateTranscriptEntryUseCase {
     } catch (error: any) {
       if (String(error?.code) === '23505') {
         throw new ConflictException({
-          message: 'Sequence number already exists in this AI interview session',
+          message:
+            'Sequence number already exists in this AI interview session',
           code: 'TRANSCRIPT_SEQUENCE_NUMBER_CONFLICT',
         });
       }
@@ -137,17 +138,27 @@ export class CreateTranscriptEntryUseCase {
     const effectiveTimestamp = options.spokenAt ?? new Date();
 
     if (options.speakerType === TranscriptSpeakerType.AI_INTERVIEWER) {
-      options.question.asked_at = options.question.asked_at ?? effectiveTimestamp;
+      options.question.asked_at =
+        options.question.asked_at ?? effectiveTimestamp;
       options.question.updated_by_user_id = options.actorUserId;
-      await this.referenceRepository.saveQuestion(options.question, options.manager);
+      await this.referenceRepository.saveQuestion(
+        options.question,
+        options.manager,
+      );
       return;
     }
 
     if (options.speakerType === TranscriptSpeakerType.CANDIDATE) {
-      options.question.answered_at = options.question.answered_at ?? effectiveTimestamp;
+      options.question.asked_at =
+        options.question.asked_at ?? effectiveTimestamp;
+      options.question.answered_at =
+        options.question.answered_at ?? effectiveTimestamp;
       options.question.is_answered = true;
       options.question.updated_by_user_id = options.actorUserId;
-      await this.referenceRepository.saveQuestion(options.question, options.manager);
+      await this.referenceRepository.saveQuestion(
+        options.question,
+        options.manager,
+      );
     }
   }
 }
