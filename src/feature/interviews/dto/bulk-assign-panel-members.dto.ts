@@ -8,7 +8,10 @@ export class BulkAssignPanelMembersDto {
   @IsUUID('4', { each: true })
   interview_ids: string[];
 
-  @ApiProperty({ type: [String], description: 'User UUIDs to add as panel members' })
+  @ApiProperty({
+    type: [String],
+    description: 'User UUIDs to add as panel members',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @IsUUID('4', { each: true })

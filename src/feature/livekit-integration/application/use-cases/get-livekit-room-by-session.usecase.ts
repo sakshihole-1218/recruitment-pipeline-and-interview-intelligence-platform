@@ -7,8 +7,11 @@ import { LivekitRoomSessionRepository } from '../../repositories/livekit-room-se
 export class GetLiveKitRoomBySessionUseCase {
   constructor(private readonly repository: LivekitRoomSessionRepository) {}
 
-  async execute(aiInterviewSessionId: string): Promise<LivekitRoomSessionEntity> {
-    const room = await this.repository.findByAiInterviewSessionId(aiInterviewSessionId);
+  async execute(
+    aiInterviewSessionId: string,
+  ): Promise<LivekitRoomSessionEntity> {
+    const room =
+      await this.repository.findByAiInterviewSessionId(aiInterviewSessionId);
 
     if (!room) {
       throw new NotFoundException({

@@ -46,7 +46,10 @@ export class ActivityLogsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get activity log by id' })
   @ApiParam({ name: 'id', description: 'Activity log UUID' })
-  @ApiStandardResponse(ActivityLogResponseDto, 'Activity log fetched successfully')
+  @ApiStandardResponse(
+    ActivityLogResponseDto,
+    'Activity log fetched successfully',
+  )
   async findById(@Param('id') id: string) {
     const row = await this.activityLogsService.findById(id);
     return ResponseUtil.success(
@@ -58,7 +61,10 @@ export class ActivityLogsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List activity logs (offset or cursor pagination)' })
-  @ApiActivityLogsPaginatedResponse(ActivityLogResponseDto, 'Activity logs fetched successfully')
+  @ApiActivityLogsPaginatedResponse(
+    ActivityLogResponseDto,
+    'Activity logs fetched successfully',
+  )
   async list(@Query() query: ListActivityLogsQueryDto) {
     const result = await this.activityLogsService.list(query);
 

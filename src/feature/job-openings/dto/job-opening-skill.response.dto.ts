@@ -9,7 +9,10 @@ export class JobOpeningSkillResponseDto {
   @ApiProperty({ description: 'Skill UUID' })
   skill_id: string;
 
-  @ApiProperty({ enum: SkillProficiencyLevel, example: SkillProficiencyLevel.INTERMEDIATE })
+  @ApiProperty({
+    enum: SkillProficiencyLevel,
+    example: SkillProficiencyLevel.INTERMEDIATE,
+  })
   proficiency_level: SkillProficiencyLevel;
 
   @ApiProperty({ example: true })

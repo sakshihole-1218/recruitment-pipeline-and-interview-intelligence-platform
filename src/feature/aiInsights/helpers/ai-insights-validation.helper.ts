@@ -110,7 +110,9 @@ export class AiInsightsValidationHelper {
     return app;
   }
 
-  ensureNoDuplicateActiveResumeAnalysis(existing: ResumeAiAnalysisEntity | null): void {
+  ensureNoDuplicateActiveResumeAnalysis(
+    existing: ResumeAiAnalysisEntity | null,
+  ): void {
     if (existing) {
       throw new ConflictException({
         message:
@@ -120,7 +122,9 @@ export class AiInsightsValidationHelper {
     }
   }
 
-  ensureNoDuplicateActiveFeedbackSummary(existing: FeedbackAiSummaryEntity | null): void {
+  ensureNoDuplicateActiveFeedbackSummary(
+    existing: FeedbackAiSummaryEntity | null,
+  ): void {
     if (existing) {
       throw new ConflictException({
         message:

@@ -75,7 +75,9 @@ export class InterviewFeedbackRepository {
     return this.repo(options?.manager).save(entity);
   }
 
-  async list(query: ListInterviewFeedbackQueryDto): Promise<InterviewFeedbackListResult> {
+  async list(
+    query: ListInterviewFeedbackQueryDto,
+  ): Promise<InterviewFeedbackListResult> {
     const qb = this.baseQuery('interview_feedback');
 
     if (query.interview_id) {
@@ -85,9 +87,12 @@ export class InterviewFeedbackRepository {
     }
 
     if (query.interviewer_user_id) {
-      qb.andWhere('interview_feedback.interviewer_user_id = :interviewerUserId', {
-        interviewerUserId: query.interviewer_user_id,
-      });
+      qb.andWhere(
+        'interview_feedback.interviewer_user_id = :interviewerUserId',
+        {
+          interviewerUserId: query.interviewer_user_id,
+        },
+      );
     }
 
     if (query.recommendation) {
@@ -112,7 +117,7 @@ export class InterviewFeedbackRepository {
     const sortBy = query.sort_by || 'created_at';
 
     const allowedSort = ['created_at', 'updated_at', 'submitted_at'] as const;
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
@@ -134,9 +139,13 @@ export class InterviewFeedbackRepository {
       }
 
       if (orderDirection === 'DESC') {
-        qb.andWhere('interview_feedback.created_at < :cursorDate', { cursorDate });
+        qb.andWhere('interview_feedback.created_at < :cursorDate', {
+          cursorDate,
+        });
       } else {
-        qb.andWhere('interview_feedback.created_at > :cursorDate', { cursorDate });
+        qb.andWhere('interview_feedback.created_at > :cursorDate', {
+          cursorDate,
+        });
       }
 
       const idRows = await qb
@@ -166,7 +175,7 @@ export class InterviewFeedbackRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 
@@ -192,7 +201,10 @@ export class InterviewFeedbackRepository {
 
     const idRows = await qb
       .clone()
-      .select(['interview_feedback.id AS id', `interview_feedback.${sortBy} AS sort_value`])
+      .select([
+        'interview_feedback.id AS id',
+        `interview_feedback.${sortBy} AS sort_value`,
+      ])
       .distinct(true)
       .skip(skip)
       .take(limit)

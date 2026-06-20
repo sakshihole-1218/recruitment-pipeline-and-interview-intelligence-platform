@@ -39,7 +39,9 @@ async function bootstrap() {
   app.enableCors();
   app.use(helmet());
 
-  app.setGlobalPrefix(configService.get<string>('APP_GLOBAL_PREFIX') || 'admin');
+  app.setGlobalPrefix(
+    configService.get<string>('APP_GLOBAL_PREFIX') || 'admin',
+  );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle(

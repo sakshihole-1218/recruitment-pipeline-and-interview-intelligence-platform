@@ -18,7 +18,11 @@ export class JobOpeningResponseDto {
   @ApiProperty({ description: 'Department UUID' })
   department_id: string;
 
-  @ApiPropertyOptional({ description: 'Department name', nullable: true, example: 'Engineering' })
+  @ApiPropertyOptional({
+    description: 'Department name',
+    nullable: true,
+    example: 'Engineering',
+  })
   department_name: string | null;
 
   @ApiProperty({ description: 'Hiring manager user UUID' })

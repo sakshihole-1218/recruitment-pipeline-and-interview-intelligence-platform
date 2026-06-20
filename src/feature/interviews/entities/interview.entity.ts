@@ -23,7 +23,12 @@ import { InterviewFeedbackEntity } from './interview-feedback.entity';
 @Entity({ name: 'interviews' })
 @Index(
   'uq_interviews_schedule_key_active',
-  ['application_id', 'interview_round_id', 'scheduled_start_at', 'scheduled_end_at'],
+  [
+    'application_id',
+    'interview_round_id',
+    'scheduled_start_at',
+    'scheduled_end_at',
+  ],
   {
     unique: true,
     where: '"deleted_at" IS NULL',

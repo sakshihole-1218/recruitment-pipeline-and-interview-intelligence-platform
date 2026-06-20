@@ -27,7 +27,11 @@ export class ReplaceInterviewPanelMembersUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(interviewId: string, dto: AssignInterviewPanelMembersDto, actorUserId: string) {
+  async execute(
+    interviewId: string,
+    dto: AssignInterviewPanelMembersDto,
+    actorUserId: string,
+  ) {
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -80,7 +84,9 @@ export class ReplaceInterviewPanelMembersUseCase {
         .map((m) => m.user_id)
         .sort();
 
-      const existingByUserId = new Map(existingAll.map((m) => [m.user_id, m] as const));
+      const existingByUserId = new Map(
+        existingAll.map((m) => [m.user_id, m] as const),
+      );
       const desiredUserIds = new Set(userIds);
 
       for (const desired of dto.members) {
@@ -88,7 +94,8 @@ export class ReplaceInterviewPanelMembersUseCase {
 
         if (existing) {
           const needsRestore = Boolean(existing.deleted_at);
-          const needsRoleUpdate = existing.role_in_panel !== desired.role_in_panel;
+          const needsRoleUpdate =
+            existing.role_in_panel !== desired.role_in_panel;
 
           if (needsRestore || needsRoleUpdate) {
             existing.deleted_at = null;
@@ -117,9 +124,12 @@ export class ReplaceInterviewPanelMembersUseCase {
         }
       }
 
-      const updated = await this.panelMemberRepository.listByInterviewId(interviewId, {
-        manager,
-      });
+      const updated = await this.panelMemberRepository.listByInterviewId(
+        interviewId,
+        {
+          manager,
+        },
+      );
 
       if (!updated.length) {
         throw new ConflictException({
@@ -128,10 +138,13 @@ export class ReplaceInterviewPanelMembersUseCase {
         });
       }
 
-      const updatedInterview = await this.interviewRepository.findById(interviewId, {
-        manager,
-        withRelations: true,
-      });
+      const updatedInterview = await this.interviewRepository.findById(
+        interviewId,
+        {
+          manager,
+          withRelations: true,
+        },
+      );
 
       if (!updatedInterview) {
         throw new NotFoundException({

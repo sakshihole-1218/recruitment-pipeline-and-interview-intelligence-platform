@@ -9,7 +9,6 @@ import { ApplicationCurrentStage } from '../enums/application-current-stage.enum
 import { ApplicationStatus } from '../enums/application-status.enum';
 import { ApplicationRepository } from '../repositories/application.repository';
 
-
 const ACTIVE_APPLICATION_STATUSES: ApplicationStatus[] = [
   ApplicationStatus.ACTIVE,
   ApplicationStatus.ON_HOLD,
@@ -24,16 +23,18 @@ export class ApplicationsValidationHelper {
     jobOpeningId: string;
     manager?: EntityManager;
   }): Promise<void> {
-    const existing = await this.applicationRepository.findActiveByCandidateAndJobOpening({
-      candidateId: options.candidateId,
-      jobOpeningId: options.jobOpeningId,
-      activeStatuses: ACTIVE_APPLICATION_STATUSES,
-      manager: options.manager,
-    });
+    const existing =
+      await this.applicationRepository.findActiveByCandidateAndJobOpening({
+        candidateId: options.candidateId,
+        jobOpeningId: options.jobOpeningId,
+        activeStatuses: ACTIVE_APPLICATION_STATUSES,
+        manager: options.manager,
+      });
 
     if (existing) {
       throw new ConflictException({
-        message: 'Candidate already has an active application for this job opening',
+        message:
+          'Candidate already has an active application for this job opening',
         code: 'DUPLICATE_ACTIVE_APPLICATION',
       });
     }
@@ -46,7 +47,8 @@ export class ApplicationsValidationHelper {
       stage === ApplicationCurrentStage.HIRED
     ) {
       throw new BadRequestException({
-        message: 'Application is already in a terminal stage and cannot be moved',
+        message:
+          'Application is already in a terminal stage and cannot be moved',
         code: 'APPLICATION_STAGE_TERMINAL',
       });
     }
@@ -88,7 +90,10 @@ export class ApplicationsValidationHelper {
     }
 
     if (to === ApplicationCurrentStage.WITHDRAWN) {
-      if (from === ApplicationCurrentStage.REJECTED || from === ApplicationCurrentStage.HIRED) {
+      if (
+        from === ApplicationCurrentStage.REJECTED ||
+        from === ApplicationCurrentStage.HIRED
+      ) {
         throw new ConflictException({
           message: 'Application cannot be withdrawn from the current stage',
           code: 'INVALID_WITHDRAW_TRANSITION',
@@ -102,14 +107,16 @@ export class ApplicationsValidationHelper {
       const resumeTo = options.resume_from_stage;
       if (!resumeTo) {
         throw new ConflictException({
-          message: 'Application cannot be resumed because previous stage is unknown',
+          message:
+            'Application cannot be resumed because previous stage is unknown',
           code: 'APPLICATION_RESUME_STAGE_UNKNOWN',
         });
       }
 
       if (to !== resumeTo) {
         throw new ConflictException({
-          message: 'Application on hold can only be resumed to the previous stage',
+          message:
+            'Application on hold can only be resumed to the previous stage',
           code: 'INVALID_RESUME_TRANSITION',
         });
       }
@@ -117,7 +124,10 @@ export class ApplicationsValidationHelper {
       return;
     }
 
-    const forwardMap: Record<ApplicationCurrentStage, ApplicationCurrentStage[]> = {
+    const forwardMap: Record<
+      ApplicationCurrentStage,
+      ApplicationCurrentStage[]
+    > = {
       [ApplicationCurrentStage.APPLIED]: [ApplicationCurrentStage.SCREENING],
       [ApplicationCurrentStage.SCREENING]: [
         ApplicationCurrentStage.SHORTLISTED,

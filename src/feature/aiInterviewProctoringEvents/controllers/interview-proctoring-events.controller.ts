@@ -57,7 +57,9 @@ export class InterviewProctoringEventsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a proctoring event for an AI interview session' })
+  @ApiOperation({
+    summary: 'Create a proctoring event for an AI interview session',
+  })
   @ApiBody({ type: CreateProctoringEventDto })
   @ApiStandardResponse(
     InterviewProctoringEventResponseDto,
@@ -76,7 +78,9 @@ export class InterviewProctoringEventsController {
 
   @Post('bulk')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Bulk create proctoring events for an AI interview session' })
+  @ApiOperation({
+    summary: 'Bulk create proctoring events for an AI interview session',
+  })
   @ApiBody({ type: BulkCreateProctoringEventsDto })
   @ApiInterviewProctoringEventsArrayResponse(
     InterviewProctoringEventResponseDto,
@@ -95,7 +99,10 @@ export class InterviewProctoringEventsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List interview proctoring events with offset or cursor pagination' })
+  @ApiOperation({
+    summary:
+      'List interview proctoring events with offset or cursor pagination',
+  })
   @ApiInterviewProctoringEventsPaginatedResponse(
     InterviewProctoringEventResponseDto,
     'Interview proctoring events fetched successfully',
@@ -104,12 +111,15 @@ export class InterviewProctoringEventsController {
     const result = await this.service.list(query);
 
     if (result.mode === 'cursor') {
-      return ResponseUtil.success('Interview proctoring events fetched successfully', {
-        data: result.data.map(InterviewProctoringEventsMapper.toResponse),
-        limit: result.limit,
-        next_cursor: result.next_cursor,
-        has_more: result.has_more,
-      });
+      return ResponseUtil.success(
+        'Interview proctoring events fetched successfully',
+        {
+          data: result.data.map(InterviewProctoringEventsMapper.toResponse),
+          limit: result.limit,
+          next_cursor: result.next_cursor,
+          has_more: result.has_more,
+        },
+      );
     }
 
     return ResponseUtil.paginated(
@@ -123,7 +133,9 @@ export class InterviewProctoringEventsController {
 
   @Get('session/:sessionId/risk-summary')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get proctoring risk summary for an AI interview session' })
+  @ApiOperation({
+    summary: 'Get proctoring risk summary for an AI interview session',
+  })
   @ApiParam({ name: 'sessionId', description: 'AI interview session UUID' })
   @ApiStandardResponse(
     ProctoringRiskSummaryResponseDto,
@@ -204,6 +216,9 @@ export class InterviewProctoringEventsController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     await this.service.softDelete(id, actor?.sub);
-    return ResponseUtil.success('Interview proctoring event deleted successfully', { id });
+    return ResponseUtil.success(
+      'Interview proctoring event deleted successfully',
+      { id },
+    );
   }
 }

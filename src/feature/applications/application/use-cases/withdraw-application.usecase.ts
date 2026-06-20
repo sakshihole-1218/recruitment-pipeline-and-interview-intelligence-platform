@@ -41,7 +41,9 @@ export class WithdrawApplicationUseCase {
     }
 
     return this.dataSource.transaction(async (manager) => {
-      const app = await this.applicationRepository.findById(applicationId, { manager });
+      const app = await this.applicationRepository.findById(applicationId, {
+        manager,
+      });
       if (!app) {
         throw new NotFoundException({
           message: 'Application not found',
@@ -87,7 +89,9 @@ export class WithdrawApplicationUseCase {
         { manager },
       );
 
-      const loaded = await this.applicationRepository.findById(app.id, { manager });
+      const loaded = await this.applicationRepository.findById(app.id, {
+        manager,
+      });
       if (!loaded) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

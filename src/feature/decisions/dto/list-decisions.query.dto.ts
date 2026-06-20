@@ -30,7 +30,11 @@ export class ListDecisionsQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: DecisionStatus })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(DecisionStatus)
   decision_status?: DecisionStatus;
 
@@ -41,7 +45,11 @@ export class ListDecisionsQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: DecisionSource })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(DecisionSource)
   decision_source?: DecisionSource;
 

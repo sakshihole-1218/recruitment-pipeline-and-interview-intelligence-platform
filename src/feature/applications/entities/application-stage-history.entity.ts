@@ -44,9 +44,13 @@ export class ApplicationStageHistoryEntity {
   @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
   deleted_at: Date | null;
 
-  @ManyToOne(() => ApplicationEntity, (a: ApplicationEntity) => a.stage_history, {
-    onDelete: 'RESTRICT',
-  })
+  @ManyToOne(
+    () => ApplicationEntity,
+    (a: ApplicationEntity) => a.stage_history,
+    {
+      onDelete: 'RESTRICT',
+    },
+  )
   @JoinColumn({ name: 'application_id' })
   application: ApplicationEntity;
 }

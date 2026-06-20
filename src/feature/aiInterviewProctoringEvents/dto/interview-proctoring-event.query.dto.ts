@@ -94,7 +94,8 @@ export class InterviewProctoringEventQueryDto extends PaginationQueryDto {
   })
   @IsOptional()
   @IsIn(INTERVIEW_PROCTORING_EVENT_SORT_FIELDS)
-  override sort_by?: (typeof INTERVIEW_PROCTORING_EVENT_SORT_FIELDS)[number] = 'occurred_at';
+  override sort_by?: (typeof INTERVIEW_PROCTORING_EVENT_SORT_FIELDS)[number] =
+    'occurred_at';
 
   @ApiPropertyOptional({
     example: 'desc',

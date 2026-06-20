@@ -73,7 +73,9 @@ export class CandidatesValidationHelper {
     }
   }
 
-  dedupeAndValidateSkills(inputs: CandidateSkillInputDto[]): CandidateSkillInputDto[] {
+  dedupeAndValidateSkills(
+    inputs: CandidateSkillInputDto[],
+  ): CandidateSkillInputDto[] {
     const list = Array.isArray(inputs) ? inputs : [];
 
     const seen = new Set<string>();
@@ -99,8 +101,14 @@ export class CandidatesValidationHelper {
     return deduped;
   }
 
-  ensureLatestFlagValid(options: { document_type: CandidateDocumentType; is_latest?: boolean }): void {
-    if (options.is_latest && options.document_type !== CandidateDocumentType.RESUME) {
+  ensureLatestFlagValid(options: {
+    document_type: CandidateDocumentType;
+    is_latest?: boolean;
+  }): void {
+    if (
+      options.is_latest &&
+      options.document_type !== CandidateDocumentType.RESUME
+    ) {
       throw new BadRequestException({
         message: 'is_latest is only supported for RESUME documents',
         code: 'CANDIDATE_DOCUMENT_LATEST_UNSUPPORTED_TYPE',
@@ -132,8 +140,12 @@ export class CandidatesValidationHelper {
       });
     }
 
-    const mime = String(options.mime_type ?? '').trim().toLowerCase();
-    const name = String(options.file_name ?? '').trim().toLowerCase();
+    const mime = String(options.mime_type ?? '')
+      .trim()
+      .toLowerCase();
+    const name = String(options.file_name ?? '')
+      .trim()
+      .toLowerCase();
 
     const allowedCommon = new Set([
       'application/pdf',

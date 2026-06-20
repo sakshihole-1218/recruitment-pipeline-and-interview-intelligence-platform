@@ -29,7 +29,9 @@ export class InterviewerReviewRepository {
   ) {}
 
   private repo(manager?: EntityManager): Repository<InterviewerReviewEntity> {
-    return manager ? manager.getRepository(InterviewerReviewEntity) : this.repository;
+    return manager
+      ? manager.getRepository(InterviewerReviewEntity)
+      : this.repository;
   }
 
   private baseQuery(
@@ -224,7 +226,8 @@ export class InterviewerReviewRepository {
       qb.andWhere('interviewer_reviews.reviewed_at <= :to', { to });
     }
 
-    const orderDirection = (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
+    const orderDirection =
+      (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
     const sortBy = query.sort_by || 'created_at';
     const allowedSort = [
       'created_at',
@@ -235,14 +238,18 @@ export class InterviewerReviewRepository {
       'interviewer_recommendation',
     ] as const;
 
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
       });
     }
 
-    qb.orderBy(`interviewer_reviews.${sortBy}`, orderDirection, sortBy === 'reviewed_at' ? 'NULLS LAST' : undefined);
+    qb.orderBy(
+      `interviewer_reviews.${sortBy}`,
+      orderDirection,
+      sortBy === 'reviewed_at' ? 'NULLS LAST' : undefined,
+    );
     qb.addOrderBy('interviewer_reviews.id', 'ASC');
 
     const limit = query.limit || 10;
@@ -250,7 +257,8 @@ export class InterviewerReviewRepository {
     if (query.cursor) {
       if ((query.sort_by || 'created_at') !== 'created_at') {
         throw new BadRequestException({
-          message: 'Cursor pagination is only supported with sort_by=created_at',
+          message:
+            'Cursor pagination is only supported with sort_by=created_at',
           code: 'CURSOR_SORT_BY_REQUIRED',
         });
       }
@@ -264,16 +272,23 @@ export class InterviewerReviewRepository {
       }
 
       if (orderDirection === 'DESC') {
-        qb.andWhere('interviewer_reviews.created_at < :cursorDate', { cursorDate });
+        qb.andWhere('interviewer_reviews.created_at < :cursorDate', {
+          cursorDate,
+        });
       } else {
-        qb.andWhere('interviewer_reviews.created_at > :cursorDate', { cursorDate });
+        qb.andWhere('interviewer_reviews.created_at > :cursorDate', {
+          cursorDate,
+        });
       }
 
-      const rows = await qb.clone().take(limit + 1).getMany();
+      const rows = await qb
+        .clone()
+        .take(limit + 1)
+        .getMany();
       const hasMore = rows.length > limit;
       const data = hasMore ? rows.slice(0, limit) : rows;
       const nextCursor = hasMore
-        ? data[data.length - 1]?.created_at?.toISOString() ?? null
+        ? (data[data.length - 1]?.created_at?.toISOString() ?? null)
         : null;
 
       return {

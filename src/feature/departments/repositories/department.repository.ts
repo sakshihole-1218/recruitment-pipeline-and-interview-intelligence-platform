@@ -55,7 +55,9 @@ export class DepartmentRepository {
     code: string,
     options?: { includeDeleted?: boolean; manager?: EntityManager },
   ): Promise<DepartmentEntity | null> {
-    const normalized = String(code ?? '').trim().toUpperCase();
+    const normalized = String(code ?? '')
+      .trim()
+      .toUpperCase();
     if (!normalized) return null;
 
     const repo = this.repo(options?.manager);
@@ -148,7 +150,10 @@ export class DepartmentRepository {
 
       const idRows = await qb
         .clone()
-        .select(['departments.id AS id', 'departments.created_at AS created_at'])
+        .select([
+          'departments.id AS id',
+          'departments.created_at AS created_at',
+        ])
         .distinct(true)
         .take(limit + 1)
         .getRawMany<{ id: string; created_at: Date }>();
@@ -170,7 +175,7 @@ export class DepartmentRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 
@@ -196,10 +201,7 @@ export class DepartmentRepository {
 
     const idRows = await qb
       .clone()
-      .select([
-        'departments.id AS id',
-        `departments.${sortBy} AS sort_value`,
-      ])
+      .select(['departments.id AS id', `departments.${sortBy} AS sort_value`])
       .distinct(true)
       .skip(skip)
       .take(limit)

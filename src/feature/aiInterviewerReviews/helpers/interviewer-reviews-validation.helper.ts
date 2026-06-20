@@ -27,7 +27,8 @@ export class InterviewerReviewsValidationHelper {
   ensureSessionCompleted(status: AiInterviewSessionStatus): void {
     if (status !== AiInterviewSessionStatus.COMPLETED) {
       throw new ConflictException({
-        message: 'Interviewer review can only be created for COMPLETED AI interview sessions',
+        message:
+          'Interviewer review can only be created for COMPLETED AI interview sessions',
         code: 'AI_INTERVIEW_SESSION_NOT_COMPLETED',
         meta: { session_status: status },
       });
@@ -40,7 +41,8 @@ export class InterviewerReviewsValidationHelper {
   ): void {
     if (feedback.ai_interview_session_id !== sessionId) {
       throw new BadRequestException({
-        message: 'AI interview feedback must belong to the same AI interview session',
+        message:
+          'AI interview feedback must belong to the same AI interview session',
         code: 'AI_INTERVIEW_FEEDBACK_SESSION_MISMATCH',
       });
     }
@@ -120,7 +122,10 @@ export class InterviewerReviewsValidationHelper {
     ) {
       missingFields.push('problem_solving_score');
     }
-    if (input.culture_fit_score === null || input.culture_fit_score === undefined) {
+    if (
+      input.culture_fit_score === null ||
+      input.culture_fit_score === undefined
+    ) {
       missingFields.push('culture_fit_score');
     }
     if (!this.normalizeOptionalText(input.detailed_review)) {
@@ -132,7 +137,8 @@ export class InterviewerReviewsValidationHelper {
 
     if (missingFields.length) {
       throw new BadRequestException({
-        message: 'Submitted interviewer review requires all mandatory review fields',
+        message:
+          'Submitted interviewer review requires all mandatory review fields',
         code: 'INTERVIEWER_REVIEW_SUBMISSION_FIELDS_MISSING',
         meta: { missing_fields: missingFields },
       });

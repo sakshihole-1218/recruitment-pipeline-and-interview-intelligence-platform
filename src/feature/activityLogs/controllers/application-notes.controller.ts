@@ -78,7 +78,10 @@ export class ApplicationNotesController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List application notes by application (offset or cursor pagination)' })
+  @ApiOperation({
+    summary:
+      'List application notes by application (offset or cursor pagination)',
+  })
   @ApiParam({ name: 'applicationId', description: 'Application UUID' })
   @ApiApplicationNotesPaginatedResponse(
     ApplicationNoteResponseDto,

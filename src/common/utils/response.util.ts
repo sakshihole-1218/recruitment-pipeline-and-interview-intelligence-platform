@@ -1,11 +1,7 @@
-import { ApiSuccessResponseInterface } from "../interfaces/api-success-response.dto";
-
+import { ApiSuccessResponseInterface } from '../interfaces/api-success-response.dto';
 
 export class ResponseUtil {
-  static success<T>(
-    message: string,
-    data: T,
-  ): ApiSuccessResponseInterface<T> {
+  static success<T>(message: string, data: T): ApiSuccessResponseInterface<T> {
     return {
       success: true,
       message,

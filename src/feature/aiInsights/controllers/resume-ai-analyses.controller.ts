@@ -40,19 +40,28 @@ import { AiInsightsMapper } from '../helpers/ai-insights.mapper';
 
 @ApiTags('AI Insights - Resume Analyses')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('ai-insights/resume-analyses')
 export class ResumeAiAnalysesController {
-  constructor(private readonly resumeAiAnalysesService: ResumeAiAnalysesService) {}
+  constructor(
+    private readonly resumeAiAnalysesService: ResumeAiAnalysesService,
+  ) {}
 
   @Post()
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create resume AI analysis' })
   @ApiBody({ type: CreateResumeAiAnalysisDto })
-  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis created successfully')
+  @ApiStandardResponse(
+    ResumeAiAnalysisResponseDto,
+    'Resume AI analysis created successfully',
+  )
   async create(
     @Body() dto: CreateResumeAiAnalysisDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -69,7 +78,10 @@ export class ResumeAiAnalysesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Start resume AI analysis by id' })
   @ApiParam({ name: 'id', description: 'Resume AI analysis UUID' })
-  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis started successfully')
+  @ApiStandardResponse(
+    ResumeAiAnalysisResponseDto,
+    'Resume AI analysis started successfully',
+  )
   async start(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     const row = await this.resumeAiAnalysesService.start(id, actor?.sub);
     return ResponseUtil.success(
@@ -84,7 +96,10 @@ export class ResumeAiAnalysesController {
   @ApiOperation({ summary: 'Regenerate resume AI analysis by id' })
   @ApiParam({ name: 'id', description: 'Resume AI analysis UUID' })
   @ApiBody({ type: RegenerateResumeAiAnalysisDto })
-  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis regenerated successfully')
+  @ApiStandardResponse(
+    ResumeAiAnalysisResponseDto,
+    'Resume AI analysis regenerated successfully',
+  )
   async regenerateById(
     @Param('id') id: string,
     @Body() dto: RegenerateResumeAiAnalysisDto,
@@ -106,10 +121,18 @@ export class ResumeAiAnalysesController {
   @Post('by-document/:candidateDocumentId/regenerate')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Regenerate resume AI analysis for a candidate document' })
-  @ApiParam({ name: 'candidateDocumentId', description: 'Candidate document UUID' })
+  @ApiOperation({
+    summary: 'Regenerate resume AI analysis for a candidate document',
+  })
+  @ApiParam({
+    name: 'candidateDocumentId',
+    description: 'Candidate document UUID',
+  })
   @ApiBody({ type: RegenerateResumeAiAnalysisDto })
-  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis regenerated successfully')
+  @ApiStandardResponse(
+    ResumeAiAnalysisResponseDto,
+    'Resume AI analysis regenerated successfully',
+  )
   async regenerate(
     @Param('candidateDocumentId') candidateDocumentId: string,
     @Body() dto: RegenerateResumeAiAnalysisDto,
@@ -130,7 +153,10 @@ export class ResumeAiAnalysesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get resume AI analysis by id' })
   @ApiParam({ name: 'id', description: 'Resume AI analysis UUID' })
-  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis fetched successfully')
+  @ApiStandardResponse(
+    ResumeAiAnalysisResponseDto,
+    'Resume AI analysis fetched successfully',
+  )
   async findById(@Param('id') id: string) {
     const row = await this.resumeAiAnalysesService.findById(id);
     return ResponseUtil.success(
@@ -142,13 +168,21 @@ export class ResumeAiAnalysesController {
   @Get('by-document/:candidateDocumentId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get resume AI analysis by candidate document id' })
-  @ApiParam({ name: 'candidateDocumentId', description: 'Candidate document UUID' })
-  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis fetched successfully')
+  @ApiParam({
+    name: 'candidateDocumentId',
+    description: 'Candidate document UUID',
+  })
+  @ApiStandardResponse(
+    ResumeAiAnalysisResponseDto,
+    'Resume AI analysis fetched successfully',
+  )
   async findByCandidateDocumentId(
     @Param('candidateDocumentId') candidateDocumentId: string,
   ) {
     const row =
-      await this.resumeAiAnalysesService.findByCandidateDocumentId(candidateDocumentId);
+      await this.resumeAiAnalysesService.findByCandidateDocumentId(
+        candidateDocumentId,
+      );
     return ResponseUtil.success(
       'Resume AI analysis fetched successfully',
       AiInsightsMapper.toResumeAnalysisResponse(row),
@@ -159,9 +193,13 @@ export class ResumeAiAnalysesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get latest resume AI analysis by candidate id' })
   @ApiParam({ name: 'candidateId', description: 'Candidate UUID' })
-  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis fetched successfully')
+  @ApiStandardResponse(
+    ResumeAiAnalysisResponseDto,
+    'Resume AI analysis fetched successfully',
+  )
   async findLatestByCandidateId(@Param('candidateId') candidateId: string) {
-    const row = await this.resumeAiAnalysesService.findLatestByCandidateId(candidateId);
+    const row =
+      await this.resumeAiAnalysesService.findLatestByCandidateId(candidateId);
     return ResponseUtil.success(
       'Resume AI analysis fetched successfully',
       AiInsightsMapper.toResumeAnalysisResponse(row),
@@ -170,7 +208,9 @@ export class ResumeAiAnalysesController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List resume AI analyses (offset or cursor pagination)' })
+  @ApiOperation({
+    summary: 'List resume AI analyses (offset or cursor pagination)',
+  })
   @ApiResumeAiAnalysesPaginatedResponse(
     ResumeAiAnalysisResponseDto,
     'Resume AI analyses fetched successfully',
@@ -202,7 +242,10 @@ export class ResumeAiAnalysesController {
   @ApiOperation({ summary: 'Update resume AI analysis by id' })
   @ApiParam({ name: 'id', description: 'Resume AI analysis UUID' })
   @ApiBody({ type: UpdateResumeAiAnalysisDto })
-  @ApiStandardResponse(ResumeAiAnalysisResponseDto, 'Resume AI analysis updated successfully')
+  @ApiStandardResponse(
+    ResumeAiAnalysisResponseDto,
+    'Resume AI analysis updated successfully',
+  )
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateResumeAiAnalysisDto,

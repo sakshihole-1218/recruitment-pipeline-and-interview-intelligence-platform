@@ -37,7 +37,11 @@ export class OffersValidationHelper {
     }
   }
 
-  ensureStatusIn(offer: OfferEntity, allowed: OfferStatus[], code: string): void {
+  ensureStatusIn(
+    offer: OfferEntity,
+    allowed: OfferStatus[],
+    code: string,
+  ): void {
     const set = new Set(allowed);
     if (!set.has(offer.offer_status)) {
       throw new ConflictException({
@@ -79,9 +83,12 @@ export class OffersValidationHelper {
     applicationId: string;
     manager?: EntityManager;
   }): Promise<ApplicationEntity> {
-    const app = await this.applicationRepository.findById(options.applicationId, {
-      manager: options.manager,
-    });
+    const app = await this.applicationRepository.findById(
+      options.applicationId,
+      {
+        manager: options.manager,
+      },
+    );
 
     if (!app) {
       throw new BadRequestException({

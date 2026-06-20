@@ -2,7 +2,9 @@ import { AiInterviewQuestionResponseDto } from '../dto/ai-interview-question.res
 import { AiInterviewQuestionEntity } from '../entities/ai-interview-question.entity';
 
 export class AiInterviewQuestionsMapper {
-  static toResponse(entity: AiInterviewQuestionEntity): AiInterviewQuestionResponseDto {
+  static toResponse(
+    entity: AiInterviewQuestionEntity,
+  ): AiInterviewQuestionResponseDto {
     return {
       id: entity.id,
       ai_interview_session_id: entity.ai_interview_session_id,

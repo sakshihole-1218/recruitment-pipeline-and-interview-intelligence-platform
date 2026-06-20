@@ -47,7 +47,9 @@ export class CandidateDocumentRepository {
     options?: { manager?: EntityManager },
   ): Promise<CandidateDocumentEntity[]> {
     return this.baseQuery('candidate_documents', options?.manager)
-      .andWhere('candidate_documents.candidate_id = :candidateId', { candidateId })
+      .andWhere('candidate_documents.candidate_id = :candidateId', {
+        candidateId,
+      })
       .orderBy('candidate_documents.uploaded_at', 'DESC')
       .addOrderBy('candidate_documents.created_at', 'DESC')
       .getMany();
@@ -80,7 +82,9 @@ export class CandidateDocumentRepository {
       .createQueryBuilder()
       .update(CandidateDocumentEntity)
       .set({ is_latest: false, updated_at: () => 'CURRENT_TIMESTAMP' })
-      .where('candidate_id = :candidateId', { candidateId: options.candidateId })
+      .where('candidate_id = :candidateId', {
+        candidateId: options.candidateId,
+      })
       .andWhere('deleted_at IS NULL')
       .andWhere('document_type = :docType', {
         docType: CandidateDocumentType.RESUME,

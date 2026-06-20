@@ -24,7 +24,10 @@ export class CreateOfferUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: CreateOfferDto, actorUserId?: string): Promise<OfferEntity> {
+  async execute(
+    dto: CreateOfferDto,
+    actorUserId?: string,
+  ): Promise<OfferEntity> {
     this.validationHelper.ensureActorUserRequired(actorUserId);
 
     const expected = new Date(dto.expected_joining_date);
@@ -46,7 +49,10 @@ export class CreateOfferUseCase {
       }
     }
 
-    if (dto.probation_period_months !== undefined && dto.probation_period_months !== null) {
+    if (
+      dto.probation_period_months !== undefined &&
+      dto.probation_period_months !== null
+    ) {
       if (Number(dto.probation_period_months) < 0) {
         throw new BadRequestException({
           message: 'probation_period_months cannot be negative',
@@ -56,10 +62,11 @@ export class CreateOfferUseCase {
     }
 
     return this.dataSource.transaction(async (manager) => {
-      const application = await this.validationHelper.ensureApplicationEligibleForOffer({
-        applicationId: dto.application_id,
-        manager,
-      });
+      const application =
+        await this.validationHelper.ensureApplicationEligibleForOffer({
+          applicationId: dto.application_id,
+          manager,
+        });
 
       await this.validationHelper.ensureNoDuplicateActiveOffer({
         applicationId: application.id,
@@ -110,7 +117,7 @@ export class CreateOfferUseCase {
           entityType: ActivityEntityType.OFFER,
           entityId: loaded.id,
           actionType: ActivityActionType.CREATE,
-          actorUserId: actorUserId!,
+          actorUserId: actorUserId,
           oldValues: null,
           newValues: {
             application_id: loaded.application_id,

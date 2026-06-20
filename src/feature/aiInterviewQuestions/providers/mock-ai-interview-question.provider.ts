@@ -21,12 +21,16 @@ export class MockAiInterviewQuestionProvider implements AiInterviewQuestionProvi
   async generateInterviewPlan(
     input: GenerateInterviewPlanInput,
   ): Promise<GeneratedInterviewPlanQuestion[]> {
-    const parsedResume = this.extractParsedResume(input.resume_analysis.parsed_resume_json);
+    const parsedResume = this.extractParsedResume(
+      input.resume_analysis.parsed_resume_json,
+    );
     const topProject = parsedResume.projects[0];
     const projectName =
       topProject?.name ||
       topProject?.title ||
-      this.extractProjectNameFromSummary(input.resume_analysis.project_summary) ||
+      this.extractProjectNameFromSummary(
+        input.resume_analysis.project_summary,
+      ) ||
       `${input.job_opening.title} implementation`;
 
     const normalizedSkills = this.extractSkillNames(
@@ -65,7 +69,10 @@ export class MockAiInterviewQuestionProvider implements AiInterviewQuestionProvi
       },
       {
         sequence_number: 3,
-        question_text: this.buildTechnicalQuestion(primarySkill, secondarySkill),
+        question_text: this.buildTechnicalQuestion(
+          primarySkill,
+          secondarySkill,
+        ),
         question_type: QuestionType.TECHNICAL,
         topic: `${primarySkill} / ${secondarySkill}`,
         difficulty_level: DifficultyLevel.HARD,
@@ -88,11 +95,18 @@ export class MockAiInterviewQuestionProvider implements AiInterviewQuestionProvi
         topic: 'System Architecture',
         difficulty_level: DifficultyLevel.HARD,
         generated_from: GeneratedFrom.PROJECT,
-        expected_answer_keywords: ['architecture', 'modules', 'data flow', 'scaling', architectureTopic],
+        expected_answer_keywords: [
+          'architecture',
+          'modules',
+          'data flow',
+          'scaling',
+          architectureTopic,
+        ],
       },
       {
         sequence_number: 6,
-        question_text: 'Describe a challenging bug you solved recently, how you debugged it, and what changes prevented it from recurring.',
+        question_text:
+          'Describe a challenging bug you solved recently, how you debugged it, and what changes prevented it from recurring.',
         question_type: QuestionType.BEHAVIORAL,
         topic: 'Problem Solving',
         difficulty_level: DifficultyLevel.MEDIUM,
@@ -112,7 +126,10 @@ export class MockAiInterviewQuestionProvider implements AiInterviewQuestionProvi
     ];
   }
 
-  private buildTechnicalQuestion(primarySkill: string, secondarySkill: string): string {
+  private buildTechnicalQuestion(
+    primarySkill: string,
+    secondarySkill: string,
+  ): string {
     const skillKey = `${primarySkill} ${secondarySkill}`.toLowerCase();
 
     if (skillKey.includes('postgresql') || skillKey.includes('sql')) {

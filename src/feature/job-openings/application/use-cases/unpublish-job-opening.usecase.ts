@@ -65,7 +65,9 @@ export class UnpublishJobOpeningUseCase {
 
       await this.jobOpeningRepository.save(opening, { manager });
 
-      const updated = await this.jobOpeningRepository.findById(opening.id, { manager });
+      const updated = await this.jobOpeningRepository.findById(opening.id, {
+        manager,
+      });
       if (!updated) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

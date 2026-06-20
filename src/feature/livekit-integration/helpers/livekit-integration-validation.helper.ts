@@ -28,7 +28,8 @@ export class LivekitIntegrationValidationHelper {
 
     if (!allowed.has(status)) {
       throw new ConflictException({
-        message: 'LiveKit room can only be created for READY or IN_PROGRESS AI interview sessions',
+        message:
+          'LiveKit room can only be created for READY or IN_PROGRESS AI interview sessions',
         code: 'LIVEKIT_ROOM_SESSION_STATUS_INVALID',
         meta: { session_status: status },
       });
@@ -36,7 +37,10 @@ export class LivekitIntegrationValidationHelper {
   }
 
   ensureRoomAvailableForToken(status: LivekitRoomStatus): void {
-    if (status === LivekitRoomStatus.ENDED || status === LivekitRoomStatus.FAILED) {
+    if (
+      status === LivekitRoomStatus.ENDED ||
+      status === LivekitRoomStatus.FAILED
+    ) {
       throw new ConflictException({
         message: 'LiveKit room is not active for token generation',
         code: 'LIVEKIT_ROOM_NOT_AVAILABLE_FOR_TOKEN',

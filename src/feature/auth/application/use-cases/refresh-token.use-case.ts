@@ -7,7 +7,10 @@ import { UserRepository } from '../../../accessControl/repositories/user.reposit
 import { AuthResponseDto } from '../../dto/auth-response.dto';
 import { RefreshTokenDto } from '../../dto/refresh-token.dto';
 import { AuthMapper } from '../../helpers/auth.mapper';
-import { AuthJwtPayload, JwtPayloadHelper } from '../../helpers/jwt-payload.helper';
+import {
+  AuthJwtPayload,
+  JwtPayloadHelper,
+} from '../../helpers/jwt-payload.helper';
 import { AuthPasswordHashingHelper } from '../../helpers/password-hashing.helper';
 
 @Injectable()
@@ -76,7 +79,8 @@ export class RefreshTokenUseCase {
       expiresIn: refreshExpiresIn,
     });
 
-    user.refresh_token_hash = await AuthPasswordHashingHelper.hash(refreshToken);
+    user.refresh_token_hash =
+      await AuthPasswordHashingHelper.hash(refreshToken);
     user.updated_by_user_id = user.id;
 
     await this.userRepository.save(user);

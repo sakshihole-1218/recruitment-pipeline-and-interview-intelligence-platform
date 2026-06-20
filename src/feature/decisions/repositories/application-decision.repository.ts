@@ -78,7 +78,9 @@ export class ApplicationDecisionRepository {
     return this.repo(options.manager).save(entity);
   }
 
-  async list(query: ListDecisionsQueryDto): Promise<ApplicationDecisionListResult> {
+  async list(
+    query: ListDecisionsQueryDto,
+  ): Promise<ApplicationDecisionListResult> {
     const qb = this.baseQuery('application_decisions');
 
     if (query.application_id) {
@@ -189,9 +191,7 @@ export class ApplicationDecisionRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(
-              pageRows[pageRows.length - 1]!.created_at,
-            ).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

@@ -23,11 +23,17 @@ export class FeedbackAiSummariesService {
     private readonly deleteUseCase: DeleteFeedbackAiSummaryUseCase,
   ) {}
 
-  generate(dto: GenerateFeedbackAiSummaryDto, actorUserId?: string): Promise<FeedbackAiSummaryEntity> {
+  generate(
+    dto: GenerateFeedbackAiSummaryDto,
+    actorUserId?: string,
+  ): Promise<FeedbackAiSummaryEntity> {
     return this.generateUseCase.execute(dto, actorUserId);
   }
 
-  regenerate(applicationId: string, actorUserId?: string): Promise<FeedbackAiSummaryEntity> {
+  regenerate(
+    applicationId: string,
+    actorUserId?: string,
+  ): Promise<FeedbackAiSummaryEntity> {
     return this.regenerateUseCase.execute({ applicationId, actorUserId });
   }
 
@@ -39,7 +45,9 @@ export class FeedbackAiSummariesService {
     return this.findByApplicationIdUseCase.execute(applicationId);
   }
 
-  list(query: ListFeedbackAiSummariesQueryDto): Promise<FeedbackAiSummaryListResult> {
+  list(
+    query: ListFeedbackAiSummariesQueryDto,
+  ): Promise<FeedbackAiSummaryListResult> {
     return this.listUseCase.execute(query);
   }
 

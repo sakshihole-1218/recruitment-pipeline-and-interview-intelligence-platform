@@ -30,7 +30,9 @@ export class SoftDeleteDecisionUseCase {
     }
 
     await this.dataSource.transaction(async (manager) => {
-      const actor = await this.userRepository.findById(actorUserId, { manager });
+      const actor = await this.userRepository.findById(actorUserId, {
+        manager,
+      });
       if (!actor) {
         throw new NotFoundException({
           message: 'User not found',

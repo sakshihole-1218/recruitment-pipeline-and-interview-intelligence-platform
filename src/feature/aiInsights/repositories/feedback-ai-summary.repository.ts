@@ -84,7 +84,10 @@ export class FeedbackAiSummaryRepository {
     applicationId: string,
     options?: { manager?: EntityManager },
   ): Promise<boolean> {
-    const existing = await this.findActiveByApplicationId(applicationId, options);
+    const existing = await this.findActiveByApplicationId(
+      applicationId,
+      options,
+    );
     return Boolean(existing);
   }
 
@@ -152,12 +155,9 @@ export class FeedbackAiSummaryRepository {
     }
 
     if (query.final_ai_recommendation) {
-      qb.andWhere(
-        'feedback_ai_summaries.final_ai_recommendation = :rec',
-        {
-          rec: query.final_ai_recommendation,
-        },
-      );
+      qb.andWhere('feedback_ai_summaries.final_ai_recommendation = :rec', {
+        rec: query.final_ai_recommendation,
+      });
     }
 
     if (query.generation_status) {
@@ -199,7 +199,7 @@ export class FeedbackAiSummaryRepository {
       'final_ai_recommendation',
     ] as const;
 
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
@@ -265,7 +265,7 @@ export class FeedbackAiSummaryRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

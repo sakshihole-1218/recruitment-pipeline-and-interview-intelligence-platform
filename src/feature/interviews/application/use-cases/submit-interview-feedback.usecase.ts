@@ -104,11 +104,12 @@ export class SubmitInterviewFeedbackUseCase {
         });
       }
 
-      const isPanelMember = await this.panelMemberRepository.findByInterviewAndUser(
-        interviewId,
-        actorUserId,
-        { manager },
-      );
+      const isPanelMember =
+        await this.panelMemberRepository.findByInterviewAndUser(
+          interviewId,
+          actorUserId,
+          { manager },
+        );
 
       if (!isPanelMember) {
         throw new ForbiddenException({
@@ -117,11 +118,12 @@ export class SubmitInterviewFeedbackUseCase {
         });
       }
 
-      const existing = await this.feedbackRepository.findByInterviewAndInterviewer(
-        interviewId,
-        actorUserId,
-        { includeDeleted: true, manager },
-      );
+      const existing =
+        await this.feedbackRepository.findByInterviewAndInterviewer(
+          interviewId,
+          actorUserId,
+          { includeDeleted: true, manager },
+        );
 
       if (existing && !existing.deleted_at) {
         throw new ConflictException({
@@ -150,11 +152,12 @@ export class SubmitInterviewFeedbackUseCase {
         existing.submitted_at = now;
 
         await this.feedbackRepository.save(existing, { manager });
-        const loaded = await this.feedbackRepository.findByInterviewAndInterviewer(
-          interviewId,
-          actorUserId,
-          { manager },
-        );
+        const loaded =
+          await this.feedbackRepository.findByInterviewAndInterviewer(
+            interviewId,
+            actorUserId,
+            { manager },
+          );
 
         if (!loaded) {
           throw new ConflictException({
@@ -218,11 +221,12 @@ export class SubmitInterviewFeedbackUseCase {
         { manager },
       );
 
-      const loaded = await this.feedbackRepository.findByInterviewAndInterviewer(
-        interviewId,
-        actorUserId,
-        { manager },
-      );
+      const loaded =
+        await this.feedbackRepository.findByInterviewAndInterviewer(
+          interviewId,
+          actorUserId,
+          { manager },
+        );
 
       if (!loaded) {
         throw new ConflictException({
@@ -315,7 +319,9 @@ export class SubmitInterviewFeedbackUseCase {
       completedWithFeedbackRows.map((r) => r.interview_round_id),
     );
 
-    const missing = mandatoryRounds.filter((r) => !completedWithFeedback.has(r.id));
+    const missing = mandatoryRounds.filter(
+      (r) => !completedWithFeedback.has(r.id),
+    );
     if (missing.length) return;
 
     const fromStage = application.current_stage;

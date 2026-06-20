@@ -17,11 +17,17 @@ export class CreateCandidateUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: CreateCandidateDto, actorUserId?: string): Promise<CandidateEntity> {
+  async execute(
+    dto: CreateCandidateDto,
+    actorUserId?: string,
+  ): Promise<CandidateEntity> {
     const email = this.validationHelper.normalizeEmail(dto.email);
     await this.validationHelper.ensureUniqueEmail({ email });
 
-    const phone = dto.phone !== undefined ? this.validationHelper.normalizePhone(dto.phone) : null;
+    const phone =
+      dto.phone !== undefined
+        ? this.validationHelper.normalizePhone(dto.phone)
+        : null;
     if (phone) {
       await this.validationHelper.ensureUniquePhone({ phone });
     }
@@ -34,7 +40,8 @@ export class CreateCandidateUseCase {
       date_of_birth: dto.date_of_birth ?? null,
       gender: dto.gender ?? null,
       total_experience_years:
-        dto.total_experience_years === undefined || dto.total_experience_years === null
+        dto.total_experience_years === undefined ||
+        dto.total_experience_years === null
           ? null
           : String(dto.total_experience_years),
       current_company: dto.current_company ?? null,

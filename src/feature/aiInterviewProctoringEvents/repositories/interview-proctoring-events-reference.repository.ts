@@ -11,7 +11,10 @@ export class InterviewProctoringEventsReferenceRepository {
     private readonly sessions: Repository<AiInterviewSessionEntity>,
   ) {}
 
-  private repo<T extends ObjectLiteral>(repo: Repository<T>, manager?: EntityManager): Repository<T> {
+  private repo<T extends ObjectLiteral>(
+    repo: Repository<T>,
+    manager?: EntityManager,
+  ): Repository<T> {
     return manager ? manager.getRepository<T>(repo.target as any) : repo;
   }
 

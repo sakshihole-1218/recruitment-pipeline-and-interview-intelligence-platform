@@ -58,7 +58,11 @@ export class LiveKitRoomQueryDto extends PaginationQueryDto {
   @IsIn(LIVEKIT_ROOM_SORT_FIELDS)
   override sort_by?: (typeof LIVEKIT_ROOM_SORT_FIELDS)[number] = 'created_at';
 
-  @ApiPropertyOptional({ example: 'desc', enum: ['asc', 'desc'], default: 'desc' })
+  @ApiPropertyOptional({
+    example: 'desc',
+    enum: ['asc', 'desc'],
+    default: 'desc',
+  })
   @IsOptional()
   @Transform(({ value }) => String(value).toLowerCase())
   @IsIn(['asc', 'desc'])

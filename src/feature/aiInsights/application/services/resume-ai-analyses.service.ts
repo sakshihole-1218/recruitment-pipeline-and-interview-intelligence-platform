@@ -32,7 +32,10 @@ export class ResumeAiAnalysesService {
     private readonly deleteUseCase: DeleteResumeAiAnalysisUseCase,
   ) {}
 
-  create(dto: CreateResumeAiAnalysisDto, actorUserId?: string): Promise<ResumeAiAnalysisEntity> {
+  create(
+    dto: CreateResumeAiAnalysisDto,
+    actorUserId?: string,
+  ): Promise<ResumeAiAnalysisEntity> {
     return this.createUseCase.execute(dto, actorUserId);
   }
 
@@ -52,11 +55,15 @@ export class ResumeAiAnalysesService {
     return this.findByIdUseCase.execute(id);
   }
 
-  findByCandidateDocumentId(candidateDocumentId: string): Promise<ResumeAiAnalysisEntity> {
+  findByCandidateDocumentId(
+    candidateDocumentId: string,
+  ): Promise<ResumeAiAnalysisEntity> {
     return this.findByCandidateDocumentIdUseCase.execute(candidateDocumentId);
   }
 
-  list(query: ListResumeAiAnalysesQueryDto): Promise<ResumeAiAnalysisListResult> {
+  list(
+    query: ListResumeAiAnalysesQueryDto,
+  ): Promise<ResumeAiAnalysisListResult> {
     return this.listUseCase.execute(query);
   }
 
@@ -64,7 +71,9 @@ export class ResumeAiAnalysesService {
     return this.startUseCase.execute({ id, actorUserId });
   }
 
-  findLatestByCandidateId(candidateId: string): Promise<ResumeAiAnalysisEntity> {
+  findLatestByCandidateId(
+    candidateId: string,
+  ): Promise<ResumeAiAnalysisEntity> {
     return this.findLatestByCandidateUseCase.execute(candidateId);
   }
 

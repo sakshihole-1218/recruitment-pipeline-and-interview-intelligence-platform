@@ -33,11 +33,19 @@ export class OfferRepository {
     return manager ? manager.getRepository(OfferEntity) : this.repository;
   }
 
-  private baseQuery(alias = 'offers', manager?: EntityManager): SelectQueryBuilder<OfferEntity> {
-    return this.repo(manager).createQueryBuilder(alias).where(`${alias}.deleted_at IS NULL`);
+  private baseQuery(
+    alias = 'offers',
+    manager?: EntityManager,
+  ): SelectQueryBuilder<OfferEntity> {
+    return this.repo(manager)
+      .createQueryBuilder(alias)
+      .where(`${alias}.deleted_at IS NULL`);
   }
 
-  async findById(id: string, options?: { manager?: EntityManager }): Promise<OfferEntity | null> {
+  async findById(
+    id: string,
+    options?: { manager?: EntityManager },
+  ): Promise<OfferEntity | null> {
     return this.baseQuery('offers', options?.manager)
       .andWhere('offers.id = :id', { id })
       .getOne();
@@ -74,7 +82,10 @@ export class OfferRepository {
     return this.repo(options?.manager).save(entity);
   }
 
-  async save(entity: OfferEntity, options?: { manager?: EntityManager }): Promise<OfferEntity> {
+  async save(
+    entity: OfferEntity,
+    options?: { manager?: EntityManager },
+  ): Promise<OfferEntity> {
     return this.repo(options?.manager).save(entity);
   }
 
@@ -137,7 +148,8 @@ export class OfferRepository {
       qb.andWhere('offers.offered_at <= :to', { to });
     }
 
-    const orderDirection = (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
+    const orderDirection =
+      (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
     const sortBy = query.sort_by || 'created_at';
 
     if (!OFFER_SORTABLE_FIELDS.has(sortBy)) {
@@ -185,11 +197,13 @@ export class OfferRepository {
         : [];
 
       const byId = new Map(rows.map((r) => [r.id, r] as const));
-      const data = ids.map((id) => byId.get(id)).filter((d): d is OfferEntity => Boolean(d));
+      const data = ids
+        .map((id) => byId.get(id))
+        .filter((d): d is OfferEntity => Boolean(d));
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 
@@ -230,7 +244,9 @@ export class OfferRepository {
       : [];
 
     const byId = new Map(rows.map((r) => [r.id, r] as const));
-    const data = ids.map((id) => byId.get(id)).filter((d): d is OfferEntity => Boolean(d));
+    const data = ids
+      .map((id) => byId.get(id))
+      .filter((d): d is OfferEntity => Boolean(d));
 
     return {
       mode: 'offset',

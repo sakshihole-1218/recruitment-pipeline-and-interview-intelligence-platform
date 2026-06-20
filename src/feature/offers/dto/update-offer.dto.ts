@@ -22,7 +22,10 @@ export class UpdateOfferDto {
   @MaxLength(200)
   offered_role_title?: string;
 
-  @ApiPropertyOptional({ example: 2800000, description: 'Annual offered CTC (> 0)' })
+  @ApiPropertyOptional({
+    example: 2800000,
+    description: 'Annual offered CTC (> 0)',
+  })
   @IsOptional()
   @Type(() => Number)
   @Min(0.01)
@@ -37,14 +40,19 @@ export class UpdateOfferDto {
   @ApiPropertyOptional({ example: 'INR', description: 'ISO currency code' })
   @IsOptional()
   @Transform(({ value }) =>
-    value === undefined || value === null ? value : String(value).trim().toUpperCase(),
+    value === undefined || value === null
+      ? value
+      : String(value).trim().toUpperCase(),
   )
   @IsString()
   @MinLength(3)
   @MaxLength(10)
   currency_code?: string;
 
-  @ApiPropertyOptional({ example: 6, description: 'Probation period months (>= 0)' })
+  @ApiPropertyOptional({
+    example: 6,
+    description: 'Probation period months (>= 0)',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -54,7 +62,7 @@ export class UpdateOfferDto {
 
   @ApiPropertyOptional({
     example: '2026-12-01T00:00:00.000Z',
-    description: 'Expected joining date (future date required)'
+    description: 'Expected joining date (future date required)',
   })
   @IsOptional()
   @IsISO8601()

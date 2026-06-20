@@ -69,7 +69,10 @@ export class LivekitProvider {
     return new RoomServiceClient(this.serviceUrl, this.apiKey, this.apiSecret);
   }
 
-  private async withTimeout<T>(operation: Promise<T>, action: string): Promise<T> {
+  private async withTimeout<T>(
+    operation: Promise<T>,
+    action: string,
+  ): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const timeoutPromise = new Promise<never>((_, reject) => {

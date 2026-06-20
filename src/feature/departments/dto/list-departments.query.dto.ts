@@ -30,14 +30,20 @@ export class ListDepartmentsQueryDto extends PaginationQueryDto {
   @IsISO8601()
   cursor?: string;
 
-  @ApiPropertyOptional({ example: 'eng', description: 'Search by name or code' })
+  @ApiPropertyOptional({
+    example: 'eng',
+    description: 'Search by name or code',
+  })
   @IsOptional()
   @Transform(({ value }) => normalizeSearch(value))
   @IsString()
   @MaxLength(100)
   search?: string;
 
-  @ApiPropertyOptional({ example: 'ENG', description: 'Filter by department code' })
+  @ApiPropertyOptional({
+    example: 'ENG',
+    description: 'Filter by department code',
+  })
   @IsOptional()
   @Transform(({ value }) => normalizeSearch(value))
   @IsString()

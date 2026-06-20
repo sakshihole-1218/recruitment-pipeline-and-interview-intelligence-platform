@@ -26,8 +26,7 @@ export class ValidateMandatoryInterviewsHelper {
     applicationId: string;
     jobOpeningId: string;
     manager: EntityManager;
-  }): Promise<{ mandatoryRoundIds: string[] }>
-  {
+  }): Promise<{ mandatoryRoundIds: string[] }> {
     const rounds = await this.getMandatoryRounds({
       jobOpeningId: options.jobOpeningId,
       manager: options.manager,

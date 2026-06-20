@@ -2,7 +2,10 @@ import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { BulkMoveApplicationStageDto } from '../../dto/bulk-move-application-stage.dto';
-import { BulkOperationFailureDto, BulkOperationResultResponseDto } from '../../dto/bulk-operation-result.response.dto';
+import {
+  BulkOperationFailureDto,
+  BulkOperationResultResponseDto,
+} from '../../dto/bulk-operation-result.response.dto';
 import { ApplicationCurrentStage } from '../../enums/application-current-stage.enum';
 import { ApplicationStatus } from '../../enums/application-status.enum';
 import { ApplicationsValidationHelper } from '../../helpers/applications-validation.helper';
@@ -23,7 +26,10 @@ export class BulkMoveApplicationStageUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: BulkMoveApplicationStageDto, actorUserId?: string): Promise<BulkOperationResultResponseDto> {
+  async execute(
+    dto: BulkMoveApplicationStageDto,
+    actorUserId?: string,
+  ): Promise<BulkOperationResultResponseDto> {
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -37,7 +43,9 @@ export class BulkMoveApplicationStageUseCase {
     for (const applicationId of dto.application_ids) {
       try {
         await this.dataSource.transaction(async (manager) => {
-          const app = await this.applicationRepository.findById(applicationId, { manager });
+          const app = await this.applicationRepository.findById(applicationId, {
+            manager,
+          });
           if (!app) {
             throw new BadRequestException({
               message: 'Application not found',
@@ -52,11 +60,14 @@ export class BulkMoveApplicationStageUseCase {
 
           let resumeFromStage: ApplicationCurrentStage | null = null;
           if (fromStage === ApplicationCurrentStage.ON_HOLD) {
-            const latestHold = await this.stageHistoryRepository.findLatestHoldEntry({
-              applicationId: app.id,
-              manager,
-            });
-            resumeFromStage = (latestHold?.from_stage as ApplicationCurrentStage | null) ?? null;
+            const latestHold =
+              await this.stageHistoryRepository.findLatestHoldEntry({
+                applicationId: app.id,
+                manager,
+              });
+            resumeFromStage =
+              (latestHold?.from_stage as ApplicationCurrentStage | null) ??
+              null;
           }
 
           this.validationHelper.ensureStageTransitionAllowed({
@@ -134,10 +145,15 @@ export class BulkMoveApplicationStageUseCase {
     };
   }
 
-  private mapStatusFromStage(stage: ApplicationCurrentStage): ApplicationStatus {
-    if (stage === ApplicationCurrentStage.ON_HOLD) return ApplicationStatus.ON_HOLD;
-    if (stage === ApplicationCurrentStage.REJECTED) return ApplicationStatus.REJECTED;
-    if (stage === ApplicationCurrentStage.WITHDRAWN) return ApplicationStatus.WITHDRAWN;
+  private mapStatusFromStage(
+    stage: ApplicationCurrentStage,
+  ): ApplicationStatus {
+    if (stage === ApplicationCurrentStage.ON_HOLD)
+      return ApplicationStatus.ON_HOLD;
+    if (stage === ApplicationCurrentStage.REJECTED)
+      return ApplicationStatus.REJECTED;
+    if (stage === ApplicationCurrentStage.WITHDRAWN)
+      return ApplicationStatus.WITHDRAWN;
     if (stage === ApplicationCurrentStage.HIRED) return ApplicationStatus.HIRED;
     return ApplicationStatus.ACTIVE;
   }

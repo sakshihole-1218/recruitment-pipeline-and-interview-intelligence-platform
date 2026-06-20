@@ -12,7 +12,9 @@ export class CandidateSkillRepository {
   ) {}
 
   private repo(manager?: EntityManager): Repository<CandidateSkillEntity> {
-    return manager ? manager.getRepository(CandidateSkillEntity) : this.repository;
+    return manager
+      ? manager.getRepository(CandidateSkillEntity)
+      : this.repository;
   }
 
   private baseQuery(
@@ -52,7 +54,9 @@ export class CandidateSkillRepository {
     includeDeleted?: boolean;
     manager?: EntityManager;
   }): Promise<CandidateSkillEntity[]> {
-    const ids = Array.isArray(options.skillIds) ? options.skillIds.filter(Boolean) : [];
+    const ids = Array.isArray(options.skillIds)
+      ? options.skillIds.filter(Boolean)
+      : [];
     if (!ids.length) return [];
 
     const qb = this.repo(options.manager)
@@ -60,7 +64,9 @@ export class CandidateSkillRepository {
       .where('candidate_skills.candidate_id = :candidateId', {
         candidateId: options.candidateId,
       })
-      .andWhere('candidate_skills.skill_id IN (:...skillIds)', { skillIds: ids });
+      .andWhere('candidate_skills.skill_id IN (:...skillIds)', {
+        skillIds: ids,
+      });
 
     if (!(options.includeDeleted ?? false)) {
       qb.andWhere('candidate_skills.deleted_at IS NULL');

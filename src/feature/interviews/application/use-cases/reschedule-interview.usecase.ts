@@ -253,7 +253,8 @@ export class RescheduleInterviewUseCase {
             interview_round_id: loaded.interview_round_id,
             interview_status: loaded.interview_status,
             interview_mode: loaded.interview_mode,
-            scheduled_start_at: loaded.scheduled_start_at?.toISOString?.() ?? null,
+            scheduled_start_at:
+              loaded.scheduled_start_at?.toISOString?.() ?? null,
             scheduled_end_at: loaded.scheduled_end_at?.toISOString?.() ?? null,
             rescheduled_from_interview_id: loaded.rescheduled_from_interview_id,
             reschedule_reason_present: Boolean(dto.reschedule_reason),

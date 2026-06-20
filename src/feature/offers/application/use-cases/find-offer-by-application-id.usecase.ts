@@ -8,7 +8,8 @@ export class FindOfferByApplicationIdUseCase {
   constructor(private readonly offerRepository: OfferRepository) {}
 
   async execute(applicationId: string): Promise<OfferEntity> {
-    const offer = await this.offerRepository.findLatestByApplicationId(applicationId);
+    const offer =
+      await this.offerRepository.findLatestByApplicationId(applicationId);
     if (!offer) {
       throw new NotFoundException({
         message: 'Offer not found for application',

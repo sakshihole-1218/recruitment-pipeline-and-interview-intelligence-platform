@@ -8,7 +8,11 @@ import { DecisionStatus } from '../enums/decision-status.enum';
 export class UpdateApplicationDecisionDto {
   @ApiPropertyOptional({ enum: DecisionStatus })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(DecisionStatus)
   decision_status?: DecisionStatus;
 
@@ -41,7 +45,11 @@ export class UpdateApplicationDecisionDto {
 
   @ApiPropertyOptional({ enum: DecisionSource })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(DecisionSource)
   decision_source?: DecisionSource;
 }

@@ -33,20 +33,34 @@ export class JobOpeningRepository {
     return manager ? manager.getRepository(JobOpeningEntity) : this.repository;
   }
 
-  private baseQuery(alias = 'job_openings', manager?: EntityManager): SelectQueryBuilder<JobOpeningEntity> {
+  private baseQuery(
+    alias = 'job_openings',
+    manager?: EntityManager,
+  ): SelectQueryBuilder<JobOpeningEntity> {
     return this.repo(manager)
       .createQueryBuilder(alias)
-      .leftJoinAndSelect(`${alias}.department`, 'department', 'department.deleted_at IS NULL')
+      .leftJoinAndSelect(
+        `${alias}.department`,
+        'department',
+        'department.deleted_at IS NULL',
+      )
       .leftJoinAndSelect(
         `${alias}.job_opening_skills`,
         'job_opening_skills',
         'job_opening_skills.deleted_at IS NULL',
       )
-      .leftJoinAndSelect('job_opening_skills.skill', 'skills', 'skills.deleted_at IS NULL')
+      .leftJoinAndSelect(
+        'job_opening_skills.skill',
+        'skills',
+        'skills.deleted_at IS NULL',
+      )
       .where(`${alias}.deleted_at IS NULL`);
   }
 
-  async findById(id: string, options?: { manager?: EntityManager }): Promise<JobOpeningEntity | null> {
+  async findById(
+    id: string,
+    options?: { manager?: EntityManager },
+  ): Promise<JobOpeningEntity | null> {
     return this.baseQuery('job_openings', options?.manager)
       .andWhere('job_openings.id = :id', { id })
       .getOne();
@@ -56,7 +70,9 @@ export class JobOpeningRepository {
     code: string,
     options?: { includeDeleted?: boolean; manager?: EntityManager },
   ): Promise<JobOpeningEntity | null> {
-    const normalized = String(code ?? '').trim().toUpperCase();
+    const normalized = String(code ?? '')
+      .trim()
+      .toUpperCase();
     if (!normalized) return null;
 
     const repo = this.repo(options?.manager);
@@ -66,7 +82,10 @@ export class JobOpeningRepository {
     });
   }
 
-  async save(entity: JobOpeningEntity, options?: { manager?: EntityManager }): Promise<JobOpeningEntity> {
+  async save(
+    entity: JobOpeningEntity,
+    options?: { manager?: EntityManager },
+  ): Promise<JobOpeningEntity> {
     return this.repo(options?.manager).save(entity);
   }
 
@@ -83,10 +102,14 @@ export class JobOpeningRepository {
 
     const titleFilter = normalizeSearch(query.title);
     if (titleFilter) {
-      qb.andWhere('job_openings.title ILIKE :title', { title: `%${titleFilter}%` });
+      qb.andWhere('job_openings.title ILIKE :title', {
+        title: `%${titleFilter}%`,
+      });
     }
 
-    const codeFilter = String(query.code ?? '').trim().toUpperCase();
+    const codeFilter = String(query.code ?? '')
+      .trim()
+      .toUpperCase();
     if (codeFilter) {
       qb.andWhere('job_openings.code = :code', { code: codeFilter });
     }
@@ -104,9 +127,12 @@ export class JobOpeningRepository {
     }
 
     if (query.hiring_manager_user_id) {
-      qb.andWhere('job_openings.hiring_manager_user_id = :hiringManagerUserId', {
-        hiringManagerUserId: query.hiring_manager_user_id,
-      });
+      qb.andWhere(
+        'job_openings.hiring_manager_user_id = :hiringManagerUserId',
+        {
+          hiringManagerUserId: query.hiring_manager_user_id,
+        },
+      );
     }
 
     if (query.employment_type) {
@@ -126,7 +152,9 @@ export class JobOpeningRepository {
     }
 
     if (typeof query.is_active === 'boolean') {
-      qb.andWhere('job_openings.is_active = :isActive', { isActive: query.is_active });
+      qb.andWhere('job_openings.is_active = :isActive', {
+        isActive: query.is_active,
+      });
     }
 
     const orderDirection =
@@ -155,7 +183,10 @@ export class JobOpeningRepository {
 
       const idRows = await qb
         .clone()
-        .select(['job_openings.id AS id', 'job_openings.created_at AS created_at'])
+        .select([
+          'job_openings.id AS id',
+          'job_openings.created_at AS created_at',
+        ])
         .distinct(true)
         .take(limit + 1)
         .getRawMany<{ id: string; created_at: Date }>();
@@ -177,7 +208,7 @@ export class JobOpeningRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

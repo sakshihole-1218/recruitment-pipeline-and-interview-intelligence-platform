@@ -70,14 +70,22 @@ export class CandidatesService {
     dto: UpsertCandidateSkillsDto,
     actorUserId?: string,
   ) {
-    return this.upsertSkillsUseCase.execute(candidateId, dto.skills, actorUserId);
+    return this.upsertSkillsUseCase.execute(
+      candidateId,
+      dto.skills,
+      actorUserId,
+    );
   }
 
   async listSkills(candidateId: string) {
     return this.listSkillsUseCase.execute(candidateId);
   }
 
-  async removeSkill(candidateId: string, skillId: string, actorUserId?: string) {
+  async removeSkill(
+    candidateId: string,
+    skillId: string,
+    actorUserId?: string,
+  ) {
     return this.removeSkillUseCase.execute(candidateId, skillId, actorUserId);
   }
 
@@ -87,7 +95,12 @@ export class CandidatesService {
     file: UploadedCandidateFile | undefined,
     actorUserId?: string,
   ) {
-    return this.uploadDocumentUseCase.execute(candidateId, dto, file, actorUserId);
+    return this.uploadDocumentUseCase.execute(
+      candidateId,
+      dto,
+      file,
+      actorUserId,
+    );
   }
 
   async listDocuments(candidateId: string) {
@@ -99,15 +112,26 @@ export class CandidatesService {
     documentId: string,
     actorUserId?: string,
   ) {
-    return this.markLatestResumeUseCase.execute(candidateId, documentId, actorUserId);
+    return this.markLatestResumeUseCase.execute(
+      candidateId,
+      documentId,
+      actorUserId,
+    );
   }
 
   async bulkCreate(dto: BulkCreateCandidatesDto, actorUserId?: string) {
     return this.bulkCreateUseCase.execute(dto.candidates, actorUserId);
   }
 
-  async bulkUpdateStatus(dto: BulkUpdateCandidateStatusDto, actorUserId?: string) {
-    return this.bulkUpdateStatusUseCase.execute(dto.candidate_ids, dto.is_active, actorUserId);
+  async bulkUpdateStatus(
+    dto: BulkUpdateCandidateStatusDto,
+    actorUserId?: string,
+  ) {
+    return this.bulkUpdateStatusUseCase.execute(
+      dto.candidate_ids,
+      dto.is_active,
+      actorUserId,
+    );
   }
 
   async bulkAddSkills(dto: BulkAddSkillsDto, actorUserId?: string) {

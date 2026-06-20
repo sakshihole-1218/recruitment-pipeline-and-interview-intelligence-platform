@@ -56,7 +56,9 @@ export class MarkAiInterviewSessionFailedUseCase {
       if (session.started_at && session.ended_at) {
         session.duration_seconds = Math.max(
           0,
-          Math.floor((session.ended_at.getTime() - session.started_at.getTime()) / 1000),
+          Math.floor(
+            (session.ended_at.getTime() - session.started_at.getTime()) / 1000,
+          ),
         );
       }
 
@@ -65,4 +67,3 @@ export class MarkAiInterviewSessionFailedUseCase {
     });
   }
 }
-

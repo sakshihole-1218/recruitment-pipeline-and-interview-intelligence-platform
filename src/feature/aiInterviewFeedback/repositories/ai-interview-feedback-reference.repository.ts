@@ -28,7 +28,10 @@ export class AiInterviewFeedbackReferenceRepository {
     private readonly transcripts: Repository<AiInterviewTranscriptEntity>,
   ) {}
 
-  private repo<T extends ObjectLiteral>(repo: Repository<T>, manager?: EntityManager): Repository<T> {
+  private repo<T extends ObjectLiteral>(
+    repo: Repository<T>,
+    manager?: EntityManager,
+  ): Repository<T> {
     return manager ? manager.getRepository<T>(repo.target as any) : repo;
   }
 

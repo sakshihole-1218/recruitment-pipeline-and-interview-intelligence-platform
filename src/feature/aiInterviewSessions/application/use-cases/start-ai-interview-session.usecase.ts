@@ -14,7 +14,10 @@ export class StartAiInterviewSessionUseCase {
     private readonly validation: AiInterviewSessionsValidationHelper,
   ) {}
 
-  async execute(id: string, actorUserId?: string): Promise<AiInterviewSessionEntity> {
+  async execute(
+    id: string,
+    actorUserId?: string,
+  ): Promise<AiInterviewSessionEntity> {
     this.validation.ensureActorUserRequired(actorUserId);
 
     return this.dataSource.transaction(async (manager) => {
@@ -42,4 +45,3 @@ export class StartAiInterviewSessionUseCase {
     });
   }
 }
-

@@ -22,14 +22,12 @@ export class MarkLatestCandidateResumeUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(
-    candidateId: string,
-    documentId: string,
-    actorUserId?: string,
-  ) {
+  async execute(candidateId: string, documentId: string, actorUserId?: string) {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
-      const candidate = await this.candidateRepository.findById(candidateId, { manager });
+      const candidate = await this.candidateRepository.findById(candidateId, {
+        manager,
+      });
       if (!candidate) {
         throw new NotFoundException({
           message: 'Candidate not found',
@@ -67,7 +65,9 @@ export class MarkLatestCandidateResumeUseCase {
         doc.updated_by_user_id = actorUserId;
       }
 
-      const saved = await this.candidateDocumentRepository.save(doc, { manager });
+      const saved = await this.candidateDocumentRepository.save(doc, {
+        manager,
+      });
 
       if (actorUserId) {
         await this.activityWriter.log(
@@ -77,7 +77,10 @@ export class MarkLatestCandidateResumeUseCase {
             actionType: ActivityActionType.UPDATE,
             actorUserId,
             oldValues: { changed_fields: ['resume_latest'] },
-            newValues: { changed_fields: ['resume_latest'], latest_document_id: saved.id },
+            newValues: {
+              changed_fields: ['resume_latest'],
+              latest_document_id: saved.id,
+            },
             actionAt: now,
             ipAddress: null,
             userAgent: null,

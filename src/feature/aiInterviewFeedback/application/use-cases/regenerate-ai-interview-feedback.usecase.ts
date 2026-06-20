@@ -64,18 +64,34 @@ export class RegenerateAiInterviewFeedbackUseCase {
         });
       }
 
-      const [application, candidate, questions, transcripts, resumeAnalysis] = await Promise.all([
-        this.referenceRepository.findApplicationById(session.application_id, manager),
-        this.referenceRepository.findCandidateById(session.candidate_id, manager),
-        this.referenceRepository.findQuestionsBySessionId(session.id, manager),
-        this.referenceRepository.findTranscriptsBySessionId(session.id, manager),
-        session.resume_analysis_id
-          ? this.referenceRepository.findResumeAnalysisById(session.resume_analysis_id, manager)
-          : this.referenceRepository.findLatestCompletedResumeAnalysisByCandidateId(
-              session.candidate_id,
-              manager,
-            ),
-      ]);
+      const [application, candidate, questions, transcripts, resumeAnalysis] =
+        await Promise.all([
+          this.referenceRepository.findApplicationById(
+            session.application_id,
+            manager,
+          ),
+          this.referenceRepository.findCandidateById(
+            session.candidate_id,
+            manager,
+          ),
+          this.referenceRepository.findQuestionsBySessionId(
+            session.id,
+            manager,
+          ),
+          this.referenceRepository.findTranscriptsBySessionId(
+            session.id,
+            manager,
+          ),
+          session.resume_analysis_id
+            ? this.referenceRepository.findResumeAnalysisById(
+                session.resume_analysis_id,
+                manager,
+              )
+            : this.referenceRepository.findLatestCompletedResumeAnalysisByCandidateId(
+                session.candidate_id,
+                manager,
+              ),
+        ]);
 
       if (!application) {
         throw new NotFoundException({
@@ -174,7 +190,10 @@ export class RegenerateAiInterviewFeedbackUseCase {
     result: GenerateAiInterviewFeedbackOutput,
     actorUserId: string,
   ): AiInterviewFeedbackEntity {
-    const technicalScore = this.normalizeScore(result.technical_score, 'technical_score');
+    const technicalScore = this.normalizeScore(
+      result.technical_score,
+      'technical_score',
+    );
     const communicationScore = this.normalizeScore(
       result.communication_score,
       'communication_score',
@@ -191,48 +210,70 @@ export class RegenerateAiInterviewFeedbackUseCase {
       result.answer_relevance_score,
       'answer_relevance_score',
     );
-    const confidenceScore = this.normalizeScore(result.confidence_score, 'confidence_score');
-    const overallScore = result.overall_score ?? this.validation.calculateOverallScore([
-      technicalScore,
-      communicationScore,
-      problemSolvingScore,
-      projectUnderstandingScore,
-      answerRelevanceScore,
-      confidenceScore,
-    ]);
+    const confidenceScore = this.normalizeScore(
+      result.confidence_score,
+      'confidence_score',
+    );
+    const overallScore =
+      result.overall_score ??
+      this.validation.calculateOverallScore([
+        technicalScore,
+        communicationScore,
+        problemSolvingScore,
+        projectUnderstandingScore,
+        answerRelevanceScore,
+        confidenceScore,
+      ]);
 
     this.validation.ensureScoreWithinRange(overallScore, 'overall_score');
 
     entity.resume_analysis_id = entity.resume_analysis_id ?? null;
-    entity.technical_score = technicalScore === null ? null : technicalScore.toFixed(2);
+    entity.technical_score =
+      technicalScore === null ? null : technicalScore.toFixed(2);
     entity.communication_score =
       communicationScore === null ? null : communicationScore.toFixed(2);
     entity.problem_solving_score =
       problemSolvingScore === null ? null : problemSolvingScore.toFixed(2);
     entity.project_understanding_score =
-      projectUnderstandingScore === null ? null : projectUnderstandingScore.toFixed(2);
+      projectUnderstandingScore === null
+        ? null
+        : projectUnderstandingScore.toFixed(2);
     entity.answer_relevance_score =
       answerRelevanceScore === null ? null : answerRelevanceScore.toFixed(2);
-    entity.confidence_score = confidenceScore === null ? null : confidenceScore.toFixed(2);
-    entity.overall_score = overallScore === null ? null : overallScore.toFixed(2);
-    entity.technical_summary = this.validation.normalizeText(result.technical_summary);
-    entity.communication_summary = this.validation.normalizeText(result.communication_summary);
-    entity.problem_solving_summary = this.validation.normalizeText(result.problem_solving_summary);
+    entity.confidence_score =
+      confidenceScore === null ? null : confidenceScore.toFixed(2);
+    entity.overall_score =
+      overallScore === null ? null : overallScore.toFixed(2);
+    entity.technical_summary = this.validation.normalizeText(
+      result.technical_summary,
+    );
+    entity.communication_summary = this.validation.normalizeText(
+      result.communication_summary,
+    );
+    entity.problem_solving_summary = this.validation.normalizeText(
+      result.problem_solving_summary,
+    );
     entity.project_understanding_summary = this.validation.normalizeText(
       result.project_understanding_summary,
     );
     entity.strengths = this.validation.normalizeText(result.strengths);
     entity.concerns = this.validation.normalizeText(result.concerns);
-    entity.improvement_areas = this.validation.normalizeText(result.improvement_areas);
+    entity.improvement_areas = this.validation.normalizeText(
+      result.improvement_areas,
+    );
     entity.ai_recommendation =
-      result.ai_recommendation ?? this.validation.toRecommendation(overallScore);
+      result.ai_recommendation ??
+      this.validation.toRecommendation(overallScore);
     entity.raw_ai_payload = result.raw_ai_payload ?? null;
     entity.updated_by_user_id = actorUserId;
 
     return entity;
   }
 
-  private normalizeScore(value: number | null | undefined, fieldName: string): number | null {
+  private normalizeScore(
+    value: number | null | undefined,
+    fieldName: string,
+  ): number | null {
     if (value === null || value === undefined) {
       return null;
     }

@@ -39,13 +39,10 @@ export class DepartmentsValidationHelper {
     excludeId?: string;
     manager?: EntityManager;
   }): Promise<void> {
-    const existing = await this.departmentRepository.findByCode(
-      options.code,
-      {
-        includeDeleted: false,
-        manager: options.manager,
-      },
-    );
+    const existing = await this.departmentRepository.findByCode(options.code, {
+      includeDeleted: false,
+      manager: options.manager,
+    });
 
     if (existing && existing.id !== options.excludeId) {
       throw new ConflictException({

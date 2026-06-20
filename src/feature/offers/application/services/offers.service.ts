@@ -91,7 +91,11 @@ export class OffersService {
     return this.bulkExpireUseCase.execute({ offer_ids: offerIds }, actorUserId);
   }
 
-  async bulkCancel(offerIds: string[], cancelReason: string, actorUserId?: string) {
+  async bulkCancel(
+    offerIds: string[],
+    cancelReason: string,
+    actorUserId?: string,
+  ) {
     return this.bulkCancelUseCase.execute(
       {
         offer_ids: offerIds,

@@ -34,20 +34,29 @@ export class BulkCreateTranscriptEntryItemDto {
   @IsNotEmpty()
   message_text: string;
 
-  @ApiPropertyOptional({ description: 'Sequence number within the session', example: 10 })
+  @ApiPropertyOptional({
+    description: 'Sequence number within the session',
+    example: 10,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   sequence_number?: number;
 
-  @ApiPropertyOptional({ description: 'When the message was spoken', example: '2026-06-06T10:30:00.000Z' })
+  @ApiPropertyOptional({
+    description: 'When the message was spoken',
+    example: '2026-06-06T10:30:00.000Z',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   spoken_at?: Date;
 
-  @ApiPropertyOptional({ description: 'Speech-to-text confidence score for future integrations', example: 0.9821 })
+  @ApiPropertyOptional({
+    description: 'Speech-to-text confidence score for future integrations',
+    example: 0.9821,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 4 })

@@ -16,7 +16,9 @@ import { LivekitIntegrationReferenceRepository } from '../../repositories/liveki
 import { LivekitRoomSessionRepository } from '../../repositories/livekit-room-session.repository';
 
 function buildRoomName(sessionCode: string, sessionId: string): string {
-  const base = sessionCode?.trim() ? sessionCode.trim().toLowerCase() : sessionId;
+  const base = sessionCode?.trim()
+    ? sessionCode.trim().toLowerCase()
+    : sessionId;
   return `ai-interview-${base}`;
 }
 
@@ -49,9 +51,7 @@ export class CreateLiveKitRoomUseCase {
         });
       }
 
-      this.validation.ensureSessionCanCreateRoom(
-        session.session_status as AiInterviewSessionStatus,
-      );
+      this.validation.ensureSessionCanCreateRoom(session.session_status);
 
       const existingRoom = await this.roomRepository.findByAiInterviewSessionId(
         session.id,
@@ -60,7 +60,11 @@ export class CreateLiveKitRoomUseCase {
 
       if (existingRoom) {
         if (existingRoom.room_status !== LivekitRoomStatus.ENDED) {
-          return { roomSession: existingRoom, roomName: existingRoom.room_name, metadata: null };
+          return {
+            roomSession: existingRoom,
+            roomName: existingRoom.room_name,
+            metadata: null,
+          };
         }
 
         throw new ConflictException({
@@ -85,7 +89,9 @@ export class CreateLiveKitRoomUseCase {
 
       session.livekit_room_name = roomName;
       session.updated_by_user_id = actorUserId;
-      await this.referenceRepository.updateAiInterviewSession(session, { manager });
+      await this.referenceRepository.updateAiInterviewSession(session, {
+        manager,
+      });
 
       const roomSession = await this.roomRepository.createRoomSession(
         {

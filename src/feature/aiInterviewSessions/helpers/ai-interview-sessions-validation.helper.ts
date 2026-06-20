@@ -27,7 +27,8 @@ export class AiInterviewSessionsValidationHelper {
 
     if (!allowed.has(status)) {
       throw new ConflictException({
-        message: 'AI interview session can only be created for a scheduled interview',
+        message:
+          'AI interview session can only be created for a scheduled interview',
         code: 'INTERVIEW_NOT_SCHEDULED_FOR_AI_SESSION',
         meta: { interview_status: status },
       });
@@ -68,7 +69,10 @@ export class AiInterviewSessionsValidationHelper {
     from: AiInterviewSessionStatus;
     to: AiInterviewSessionStatus;
   }): void {
-    const allowed: Record<AiInterviewSessionStatus, Set<AiInterviewSessionStatus>> = {
+    const allowed: Record<
+      AiInterviewSessionStatus,
+      Set<AiInterviewSessionStatus>
+    > = {
       [AiInterviewSessionStatus.PENDING]: new Set([
         AiInterviewSessionStatus.READY,
         AiInterviewSessionStatus.CANCELLED,

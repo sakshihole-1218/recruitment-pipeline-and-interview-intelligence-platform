@@ -35,7 +35,8 @@ export class SoftDeleteDepartmentUseCase {
 
       department.deleted_at = now;
       department.deleted_by_user_id = actorUserId ?? null;
-      department.updated_by_user_id = actorUserId ?? department.updated_by_user_id;
+      department.updated_by_user_id =
+        actorUserId ?? department.updated_by_user_id;
 
       await this.departmentRepository.save(department, { manager });
 

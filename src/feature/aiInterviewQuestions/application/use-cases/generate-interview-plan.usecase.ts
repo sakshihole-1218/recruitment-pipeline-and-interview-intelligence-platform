@@ -40,102 +40,121 @@ export class GenerateInterviewPlanUseCase {
     let processingStarted = false;
 
     try {
-      const generationContext = await this.dataSource.transaction(async (manager) => {
-        const session = await this.referenceRepository.findSessionById(
-          dto.ai_interview_session_id,
-          {
+      const generationContext = await this.dataSource.transaction(
+        async (manager) => {
+          const session = await this.referenceRepository.findSessionById(
+            dto.ai_interview_session_id,
+            {
+              manager,
+              lockForUpdate: true,
+            },
+          );
+
+          if (!session) {
+            throw new NotFoundException({
+              message: 'AI interview session not found',
+              code: 'AI_INTERVIEW_SESSION_NOT_FOUND',
+            });
+          }
+
+          this.validation.ensureSessionSupportsQuestionGeneration(
+            session.session_status,
+          );
+          this.validation.ensurePlanGenerationNotCompleted(
+            session.question_generation_status,
+          );
+
+          const existingQuestions = await this.repository.findBySessionId(
+            session.id,
+            {
+              manager,
+            },
+          );
+
+          if (existingQuestions.length > 0) {
+            throw new ConflictException({
+              message: 'Interview questions already exist for this session',
+              code: 'AI_INTERVIEW_QUESTIONS_ALREADY_EXIST',
+            });
+          }
+
+          if (!session.resume_analysis_id) {
+            throw new NotFoundException({
+              message:
+                'Resume analysis is not attached to the AI interview session',
+              code: 'SESSION_RESUME_ANALYSIS_NOT_FOUND',
+            });
+          }
+
+          const [resumeAnalysis, application, candidate] = await Promise.all([
+            this.referenceRepository.findResumeAnalysisById(
+              session.resume_analysis_id,
+              manager,
+            ),
+            this.referenceRepository.findApplicationById(
+              session.application_id,
+              manager,
+            ),
+            this.referenceRepository.findCandidateById(
+              session.candidate_id,
+              manager,
+            ),
+          ]);
+
+          if (!resumeAnalysis) {
+            throw new NotFoundException({
+              message: 'Resume analysis not found',
+              code: 'RESUME_ANALYSIS_NOT_FOUND',
+            });
+          }
+
+          if (!application) {
+            throw new NotFoundException({
+              message: 'Application not found',
+              code: 'APPLICATION_NOT_FOUND',
+            });
+          }
+
+          if (!candidate) {
+            throw new NotFoundException({
+              message: 'Candidate not found',
+              code: 'CANDIDATE_NOT_FOUND',
+            });
+          }
+
+          const jobOpening = await this.referenceRepository.findJobOpeningById(
+            application.job_opening_id,
             manager,
-            lockForUpdate: true,
-          },
-        );
+          );
 
-        if (!session) {
-          throw new NotFoundException({
-            message: 'AI interview session not found',
-            code: 'AI_INTERVIEW_SESSION_NOT_FOUND',
-          });
-        }
+          if (!jobOpening) {
+            throw new NotFoundException({
+              message: 'Job opening not found',
+              code: 'JOB_OPENING_NOT_FOUND',
+            });
+          }
 
-        this.validation.ensureSessionSupportsQuestionGeneration(session.session_status);
-        this.validation.ensurePlanGenerationNotCompleted(
-          session.question_generation_status,
-        );
+          const jobSkills =
+            await this.referenceRepository.listJobSkillsByJobOpeningId(
+              jobOpening.id,
+              manager,
+            );
 
-        const existingQuestions = await this.repository.findBySessionId(session.id, {
-          manager,
-        });
+          session.question_generation_status =
+            QuestionGenerationStatus.PROCESSING;
+          session.updated_by_user_id = actorUserId;
+          await this.referenceRepository.saveSession(session, manager);
 
-        if (existingQuestions.length > 0) {
-          throw new ConflictException({
-            message: 'Interview questions already exist for this session',
-            code: 'AI_INTERVIEW_QUESTIONS_ALREADY_EXIST',
-          });
-        }
-
-        if (!session.resume_analysis_id) {
-          throw new NotFoundException({
-            message: 'Resume analysis is not attached to the AI interview session',
-            code: 'SESSION_RESUME_ANALYSIS_NOT_FOUND',
-          });
-        }
-
-        const [resumeAnalysis, application, candidate] = await Promise.all([
-          this.referenceRepository.findResumeAnalysisById(session.resume_analysis_id, manager),
-          this.referenceRepository.findApplicationById(session.application_id, manager),
-          this.referenceRepository.findCandidateById(session.candidate_id, manager),
-        ]);
-
-        if (!resumeAnalysis) {
-          throw new NotFoundException({
-            message: 'Resume analysis not found',
-            code: 'RESUME_ANALYSIS_NOT_FOUND',
-          });
-        }
-
-        if (!application) {
-          throw new NotFoundException({
-            message: 'Application not found',
-            code: 'APPLICATION_NOT_FOUND',
-          });
-        }
-
-        if (!candidate) {
-          throw new NotFoundException({
-            message: 'Candidate not found',
-            code: 'CANDIDATE_NOT_FOUND',
-          });
-        }
-
-        const jobOpening = await this.referenceRepository.findJobOpeningById(
-          application.job_opening_id,
-          manager,
-        );
-
-        if (!jobOpening) {
-          throw new NotFoundException({
-            message: 'Job opening not found',
-            code: 'JOB_OPENING_NOT_FOUND',
-          });
-        }
-
-        const jobSkills = await this.referenceRepository.listJobSkillsByJobOpeningId(
-          jobOpening.id,
-          manager,
-        );
-
-        session.question_generation_status = QuestionGenerationStatus.PROCESSING;
-        session.updated_by_user_id = actorUserId;
-        await this.referenceRepository.saveSession(session, manager);
-
-        return {
-          session,
-          resumeAnalysis,
-          application,
-          candidate,
-          jobOpening,
-          jobSkills,
-        };
-      });
+          return {
+            session,
+            resumeAnalysis,
+            application,
+            candidate,
+            jobOpening,
+            jobSkills,
+          };
+        },
+      );
 
       processingStarted = true;
 
@@ -143,11 +162,13 @@ export class GenerateInterviewPlanUseCase {
         ai_interview_session_id: generationContext.session.id,
         candidate: {
           id: generationContext.candidate.id,
-          full_name: `${generationContext.candidate.first_name} ${generationContext.candidate.last_name}`.trim(),
+          full_name:
+            `${generationContext.candidate.first_name} ${generationContext.candidate.last_name}`.trim(),
           current_job_title: generationContext.candidate.current_job_title,
           current_company: generationContext.candidate.current_company,
           resume_headline: generationContext.candidate.resume_headline,
-          total_experience_years: generationContext.candidate.total_experience_years,
+          total_experience_years:
+            generationContext.candidate.total_experience_years,
         },
         application: {
           id: generationContext.application.id,
@@ -157,15 +178,19 @@ export class GenerateInterviewPlanUseCase {
           title: generationContext.jobOpening.title,
           requirements: generationContext.jobOpening.requirements,
           responsibilities: generationContext.jobOpening.responsibilities,
-          experience_min_years: generationContext.jobOpening.experience_min_years,
-          experience_max_years: generationContext.jobOpening.experience_max_years,
+          experience_min_years:
+            generationContext.jobOpening.experience_min_years,
+          experience_max_years:
+            generationContext.jobOpening.experience_max_years,
         },
         resume_analysis: {
           id: generationContext.resumeAnalysis.id,
           extracted_text: generationContext.resumeAnalysis.extracted_text,
-          parsed_resume_json: generationContext.resumeAnalysis.parsed_resume_json,
+          parsed_resume_json:
+            generationContext.resumeAnalysis.parsed_resume_json,
           skills_extracted: generationContext.resumeAnalysis.skills_extracted,
-          experience_summary: generationContext.resumeAnalysis.experience_summary,
+          experience_summary:
+            generationContext.resumeAnalysis.experience_summary,
           project_summary: generationContext.resumeAnalysis.project_summary,
           total_experience_years_detected:
             generationContext.resumeAnalysis.total_experience_years_detected,
@@ -222,7 +247,8 @@ export class GenerateInterviewPlanUseCase {
 
             if (!parentQuestion) {
               throw new ConflictException({
-                message: 'Generated follow-up question references an unknown parent',
+                message:
+                  'Generated follow-up question references an unknown parent',
                 code: 'FOLLOW_UP_PARENT_SEQUENCE_INVALID',
                 meta: {
                   parent_sequence_number: question.parent_sequence_number,

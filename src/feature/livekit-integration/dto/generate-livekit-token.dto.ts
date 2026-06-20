@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 import { LivekitParticipantType } from '../enums/livekit-participant-type.enum';
 
@@ -12,7 +18,9 @@ export class GenerateLiveKitTokenDto {
   @IsEnum(LivekitParticipantType)
   participant_type: LivekitParticipantType;
 
-  @ApiPropertyOptional({ description: 'Optional custom identity for reviewer/admin flows' })
+  @ApiPropertyOptional({
+    description: 'Optional custom identity for reviewer/admin flows',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(255)

@@ -65,7 +65,10 @@ export class InterviewsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Bulk schedule interviews (partial success)' })
   @ApiBody({ type: BulkScheduleInterviewsDto })
-  @ApiStandardResponse(BulkScheduleInterviewsResultResponseDto, 'Bulk scheduling processed')
+  @ApiStandardResponse(
+    BulkScheduleInterviewsResultResponseDto,
+    'Bulk scheduling processed',
+  )
   async bulkSchedule(
     @Body() dto: BulkScheduleInterviewsDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -77,7 +80,9 @@ export class InterviewsController {
   @Post('bulk/assign-panel')
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bulk assign interview panel members (partial success)' })
+  @ApiOperation({
+    summary: 'Bulk assign interview panel members (partial success)',
+  })
   @ApiBody({ type: BulkAssignPanelMembersDto })
   @ApiStandardResponse(
     BulkAssignPanelMembersResultResponseDto,
@@ -87,7 +92,10 @@ export class InterviewsController {
     @Body() dto: BulkAssignPanelMembersDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const result = await this.interviewsService.bulkAssignPanelMembers(dto, actor?.sub);
+    const result = await this.interviewsService.bulkAssignPanelMembers(
+      dto,
+      actor?.sub,
+    );
     return ResponseUtil.success('Bulk panel assignment processed', result);
   }
 
@@ -96,7 +104,10 @@ export class InterviewsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Bulk cancel interviews (partial success)' })
   @ApiBody({ type: BulkCancelInterviewsDto })
-  @ApiStandardResponse(BulkCancelInterviewsResultResponseDto, 'Bulk cancellation processed')
+  @ApiStandardResponse(
+    BulkCancelInterviewsResultResponseDto,
+    'Bulk cancellation processed',
+  )
   async bulkCancel(
     @Body() dto: BulkCancelInterviewsDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -115,7 +126,10 @@ export class InterviewsController {
     @Body() dto: ScheduleInterviewDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const interview = await this.interviewsService.scheduleInterview(dto, actor?.sub);
+    const interview = await this.interviewsService.scheduleInterview(
+      dto,
+      actor?.sub,
+    );
 
     return ResponseUtil.success(
       'Interview scheduled successfully',
@@ -129,13 +143,20 @@ export class InterviewsController {
   @ApiOperation({ summary: 'Reschedule interview (creates a new interview)' })
   @ApiParam({ name: 'id', description: 'Interview UUID to reschedule' })
   @ApiBody({ type: RescheduleInterviewDto })
-  @ApiStandardResponse(InterviewResponseDto, 'Interview rescheduled successfully')
+  @ApiStandardResponse(
+    InterviewResponseDto,
+    'Interview rescheduled successfully',
+  )
   async reschedule(
     @Param('id') id: string,
     @Body() dto: RescheduleInterviewDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const interview = await this.interviewsService.rescheduleInterview(id, dto, actor?.sub);
+    const interview = await this.interviewsService.rescheduleInterview(
+      id,
+      dto,
+      actor?.sub,
+    );
 
     return ResponseUtil.success(
       'Interview rescheduled successfully',
@@ -155,7 +176,11 @@ export class InterviewsController {
     @Body() dto: CancelInterviewDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const interview = await this.interviewsService.cancelInterview(id, dto, actor?.sub);
+    const interview = await this.interviewsService.cancelInterview(
+      id,
+      dto,
+      actor?.sub,
+    );
 
     return ResponseUtil.success(
       'Interview cancelled successfully',
@@ -175,7 +200,11 @@ export class InterviewsController {
     @Body() dto: CompleteInterviewDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const interview = await this.interviewsService.completeInterview(id, dto, actor?.sub);
+    const interview = await this.interviewsService.completeInterview(
+      id,
+      dto,
+      actor?.sub,
+    );
 
     return ResponseUtil.success(
       'Interview completed successfully',
@@ -189,13 +218,20 @@ export class InterviewsController {
   @ApiOperation({ summary: 'Replace interview panel members' })
   @ApiParam({ name: 'id', description: 'Interview UUID' })
   @ApiBody({ type: AssignInterviewPanelMembersDto })
-  @ApiStandardResponse(InterviewResponseDto, 'Interview panel updated successfully')
+  @ApiStandardResponse(
+    InterviewResponseDto,
+    'Interview panel updated successfully',
+  )
   async replacePanelMembers(
     @Param('id') id: string,
     @Body() dto: AssignInterviewPanelMembersDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const interview = await this.interviewsService.assignPanelMembers(id, dto, actor?.sub);
+    const interview = await this.interviewsService.assignPanelMembers(
+      id,
+      dto,
+      actor?.sub,
+    );
 
     return ResponseUtil.success(
       'Interview panel updated successfully',
@@ -206,7 +242,10 @@ export class InterviewsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List interviews (offset or cursor pagination)' })
-  @ApiInterviewsPaginatedResponse(InterviewResponseDto, 'Interviews fetched successfully')
+  @ApiInterviewsPaginatedResponse(
+    InterviewResponseDto,
+    'Interviews fetched successfully',
+  )
   async list(
     @Query() query: ListInterviewsQueryDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -236,7 +275,10 @@ export class InterviewsController {
   @ApiOperation({ summary: 'Get interview by id' })
   @ApiParam({ name: 'id', description: 'Interview UUID' })
   @ApiStandardResponse(InterviewResponseDto, 'Interview fetched successfully')
-  async findById(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
+  async findById(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
     const interview = await this.interviewsService.findInterviewById(id, actor);
 
     return ResponseUtil.success(

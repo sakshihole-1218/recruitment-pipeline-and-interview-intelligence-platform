@@ -31,10 +31,16 @@ export class ApplicationResponseDto {
   @ApiPropertyOptional({ example: '82.25', nullable: true })
   fit_score: string | null;
 
-  @ApiPropertyOptional({ description: 'Assigned recruiter user UUID', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Assigned recruiter user UUID',
+    nullable: true,
+  })
   assigned_recruiter_user_id: string | null;
 
-  @ApiPropertyOptional({ description: 'Assigned hiring manager user UUID', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Assigned hiring manager user UUID',
+    nullable: true,
+  })
   assigned_hiring_manager_user_id: string | null;
 
   @ApiProperty({ example: false })

@@ -1,10 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 
 import { AiInterviewSessionStatus } from '../enums/ai-interview-session-status.enum';
 import { QuestionGenerationStatus } from '../enums/question-generation-status.enum';

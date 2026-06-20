@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { UpdateUserDto } from '../../dto/update-user.dto';
@@ -41,10 +45,13 @@ export class UpdateUserUseCase {
       if (dto.email) {
         const normalizedEmail = normalizeEmail(dto.email);
 
-        const emailOwner = await this.userRepository.findByNormalizedEmail(normalizedEmail, {
-          includeDeleted: true,
-          manager,
-        });
+        const emailOwner = await this.userRepository.findByNormalizedEmail(
+          normalizedEmail,
+          {
+            includeDeleted: true,
+            manager,
+          },
+        );
 
         if (emailOwner && emailOwner.id !== user.id) {
           throw new ConflictException({
@@ -75,7 +82,9 @@ export class UpdateUserUseCase {
       }
 
       if (dto.password) {
-        user.password_hash = await PasswordHashingHelper.hashPassword(dto.password);
+        user.password_hash = await PasswordHashingHelper.hashPassword(
+          dto.password,
+        );
         changedFields.push('password');
       }
 
@@ -95,7 +104,8 @@ export class UpdateUserUseCase {
 
       if (actorUserId && changedFields.length) {
         const isStatusChange =
-          changedFields.includes('is_active') && oldIsActive !== updated.is_active;
+          changedFields.includes('is_active') &&
+          oldIsActive !== updated.is_active;
 
         await this.activityWriter.log(
           ActivityLogBuilder.build({

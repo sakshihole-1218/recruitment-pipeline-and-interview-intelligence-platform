@@ -39,7 +39,11 @@ import { DecisionsMapper } from '../helpers/decisions.mapper';
 
 @ApiTags('Decisions')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+@Roles(
+  SystemRoleCode.ADMIN,
+  SystemRoleCode.RECRUITER,
+  SystemRoleCode.HIRING_MANAGER,
+)
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @Controller('decisions')
@@ -89,7 +93,11 @@ export class DecisionsController {
   }
 
   @Get('application/:applicationId')
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get decision by application id' })
   @ApiParam({ name: 'applicationId', description: 'Application UUID' })
@@ -98,9 +106,8 @@ export class DecisionsController {
     'Decision fetched successfully',
   )
   async findByApplicationId(@Param('applicationId') applicationId: string) {
-    const decision = await this.decisionsService.findByApplicationId(
-      applicationId,
-    );
+    const decision =
+      await this.decisionsService.findByApplicationId(applicationId);
     return ResponseUtil.success(
       'Decision fetched successfully',
       DecisionsMapper.toDecisionResponse(decision),
@@ -108,7 +115,11 @@ export class DecisionsController {
   }
 
   @Get(':id')
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get decision by id' })
   @ApiParam({ name: 'id', description: 'Decision UUID' })
@@ -125,7 +136,11 @@ export class DecisionsController {
   }
 
   @Get()
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER, SystemRoleCode.HIRING_MANAGER)
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List decisions (offset or cursor pagination)' })
   @ApiDecisionsPaginatedResponse(

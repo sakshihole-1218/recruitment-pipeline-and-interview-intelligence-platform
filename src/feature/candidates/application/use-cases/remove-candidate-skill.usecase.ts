@@ -18,10 +18,16 @@ export class RemoveCandidateSkillUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(candidateId: string, skillId: string, actorUserId?: string): Promise<void> {
+  async execute(
+    candidateId: string,
+    skillId: string,
+    actorUserId?: string,
+  ): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
       const now = new Date();
-      const candidate = await this.candidateRepository.findById(candidateId, { manager });
+      const candidate = await this.candidateRepository.findById(candidateId, {
+        manager,
+      });
       if (!candidate) {
         throw new NotFoundException({
           message: 'Candidate not found',
@@ -29,12 +35,13 @@ export class RemoveCandidateSkillUseCase {
         });
       }
 
-      const current = await this.candidateSkillRepository.findByCandidateAndSkill({
-        candidateId,
-        skillId,
-        includeDeleted: false,
-        manager,
-      });
+      const current =
+        await this.candidateSkillRepository.findByCandidateAndSkill({
+          candidateId,
+          skillId,
+          includeDeleted: false,
+          manager,
+        });
 
       if (!current) {
         throw new NotFoundException({
@@ -47,7 +54,10 @@ export class RemoveCandidateSkillUseCase {
         .getRepository(CandidateSkillEntity)
         .createQueryBuilder()
         .update(CandidateSkillEntity)
-        .set({ deleted_at: () => 'CURRENT_TIMESTAMP', updated_at: () => 'CURRENT_TIMESTAMP' })
+        .set({
+          deleted_at: () => 'CURRENT_TIMESTAMP',
+          updated_at: () => 'CURRENT_TIMESTAMP',
+        })
         .where('id = :id', { id: current.id })
         .andWhere('deleted_at IS NULL')
         .execute();
@@ -60,7 +70,10 @@ export class RemoveCandidateSkillUseCase {
             actionType: ActivityActionType.UPDATE,
             actorUserId,
             oldValues: { changed_fields: ['skills'] },
-            newValues: { changed_fields: ['skills'], removed_skill_id: skillId },
+            newValues: {
+              changed_fields: ['skills'],
+              removed_skill_id: skillId,
+            },
             actionAt: now,
             ipAddress: null,
             userAgent: null,

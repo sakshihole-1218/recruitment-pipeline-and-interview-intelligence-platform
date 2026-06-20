@@ -10,10 +10,9 @@ import {
 import { BaseResponseDto } from '../../../common/dto/base-response.dto';
 import { PaginatedResponseDto } from '../../../common/dto/paginated-response.dto';
 
-export function ApiInterviewProctoringEventsPaginatedResponse<TModel extends Type<unknown>>(
-  model: TModel,
-  description = 'Records fetched successfully',
-) {
+export function ApiInterviewProctoringEventsPaginatedResponse<
+  TModel extends Type<unknown>,
+>(model: TModel, description = 'Records fetched successfully') {
   return applyDecorators(
     ApiExtraModels(BaseResponseDto, PaginatedResponseDto, model),
     ApiOkResponse({

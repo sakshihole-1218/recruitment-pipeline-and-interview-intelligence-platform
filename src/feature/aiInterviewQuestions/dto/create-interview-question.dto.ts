@@ -43,7 +43,9 @@ export class CreateInterviewQuestionDto {
   @Min(1)
   sequence_number: number;
 
-  @ApiPropertyOptional({ description: 'Parent question UUID for follow-up questions' })
+  @ApiPropertyOptional({
+    description: 'Parent question UUID for follow-up questions',
+  })
   @IsOptional()
   @IsUUID()
   parent_question_id?: string;

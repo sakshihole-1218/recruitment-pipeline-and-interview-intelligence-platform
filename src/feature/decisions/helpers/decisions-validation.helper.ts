@@ -102,7 +102,10 @@ export class DecisionsValidationHelper {
         return;
 
       case DecisionSource.HYBRID:
-        if (!options.hasHumanInterviewFeedback && !options.hasAiInterviewFeedback) {
+        if (
+          !options.hasHumanInterviewFeedback &&
+          !options.hasAiInterviewFeedback
+        ) {
           throw new BadRequestException({
             message:
               'HYBRID decisions require human interview feedback or completed AI interview feedback',
@@ -112,8 +115,7 @@ export class DecisionsValidationHelper {
 
         if (!options.hasAiInterviewFeedback) {
           throw new BadRequestException({
-            message:
-              'HYBRID decisions require completed AI interview feedback',
+            message: 'HYBRID decisions require completed AI interview feedback',
             code: 'DECISION_HYBRID_AI_FEEDBACK_REQUIRED',
           });
         }

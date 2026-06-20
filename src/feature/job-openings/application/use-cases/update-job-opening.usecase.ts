@@ -41,15 +41,21 @@ export class UpdateJobOpeningUseCase {
         });
       }
 
-      const nextExperienceMin = dto.experience_min_years ?? opening.experience_min_years;
-      const nextExperienceMax = dto.experience_max_years ?? opening.experience_max_years;
+      const nextExperienceMin =
+        dto.experience_min_years ?? opening.experience_min_years;
+      const nextExperienceMax =
+        dto.experience_max_years ?? opening.experience_max_years;
       this.validationHelper.validateExperienceRange({
         min: nextExperienceMin,
         max: nextExperienceMax,
       });
 
-      const nextMinSalary = dto.min_salary ?? (opening.min_salary !== null ? Number(opening.min_salary) : null);
-      const nextMaxSalary = dto.max_salary ?? (opening.max_salary !== null ? Number(opening.max_salary) : null);
+      const nextMinSalary =
+        dto.min_salary ??
+        (opening.min_salary !== null ? Number(opening.min_salary) : null);
+      const nextMaxSalary =
+        dto.max_salary ??
+        (opening.max_salary !== null ? Number(opening.max_salary) : null);
       this.validationHelper.validateSalaryRange({
         min: nextMinSalary,
         max: nextMaxSalary,
@@ -74,7 +80,10 @@ export class UpdateJobOpeningUseCase {
       }
 
       if (dto.department_id !== undefined) {
-        const ok = await this.referenceRepository.departmentExists(dto.department_id, manager);
+        const ok = await this.referenceRepository.departmentExists(
+          dto.department_id,
+          manager,
+        );
         if (!ok) {
           throw new BadRequestException({
             message: 'Department not found',
@@ -85,7 +94,10 @@ export class UpdateJobOpeningUseCase {
       }
 
       if (dto.hiring_manager_user_id !== undefined) {
-        const ok = await this.referenceRepository.userExists(dto.hiring_manager_user_id, manager);
+        const ok = await this.referenceRepository.userExists(
+          dto.hiring_manager_user_id,
+          manager,
+        );
         if (!ok) {
           throw new BadRequestException({
             message: 'Hiring manager user not found',
@@ -96,7 +108,10 @@ export class UpdateJobOpeningUseCase {
       }
 
       if (dto.recruiter_user_id !== undefined) {
-        const ok = await this.referenceRepository.userExists(dto.recruiter_user_id, manager);
+        const ok = await this.referenceRepository.userExists(
+          dto.recruiter_user_id,
+          manager,
+        );
         if (!ok) {
           throw new BadRequestException({
             message: 'Recruiter user not found',
@@ -170,7 +185,9 @@ export class UpdateJobOpeningUseCase {
 
       await this.jobOpeningRepository.save(opening, { manager });
 
-      const updated = await this.jobOpeningRepository.findById(opening.id, { manager });
+      const updated = await this.jobOpeningRepository.findById(opening.id, {
+        manager,
+      });
       if (!updated) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',

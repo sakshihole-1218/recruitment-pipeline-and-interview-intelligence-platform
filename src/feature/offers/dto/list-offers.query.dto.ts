@@ -1,12 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsEnum,
-  IsIn,
-  IsISO8601,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsEnum, IsIn, IsISO8601, IsOptional, IsUUID } from 'class-validator';
 
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 import { OfferStatus } from '../enums/offer-status.enum';
@@ -36,7 +30,11 @@ export class ListOffersQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: OfferStatus })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(OfferStatus)
   offer_status?: OfferStatus;
 

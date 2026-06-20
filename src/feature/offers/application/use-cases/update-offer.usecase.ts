@@ -24,7 +24,11 @@ export class UpdateOfferUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(id: string, dto: UpdateOfferDto, actorUserId?: string): Promise<OfferEntity> {
+  async execute(
+    id: string,
+    dto: UpdateOfferDto,
+    actorUserId?: string,
+  ): Promise<OfferEntity> {
     this.validationHelper.ensureActorUserRequired(actorUserId);
 
     const changedFields = Object.keys(dto).filter(
@@ -67,7 +71,9 @@ export class UpdateOfferUseCase {
             code: 'INVALID_OFFERED_CTC',
           });
         }
-        offer.offered_ctc = this.validationHelper.toMoneyFixed2(dto.offered_ctc);
+        offer.offered_ctc = this.validationHelper.toMoneyFixed2(
+          dto.offered_ctc,
+        );
       }
 
       if (dto.joining_bonus !== undefined) {
@@ -80,7 +86,9 @@ export class UpdateOfferUseCase {
               code: 'INVALID_JOINING_BONUS',
             });
           }
-          offer.joining_bonus = this.validationHelper.toMoneyFixed2(dto.joining_bonus);
+          offer.joining_bonus = this.validationHelper.toMoneyFixed2(
+            dto.joining_bonus,
+          );
         }
       }
 
@@ -116,7 +124,7 @@ export class UpdateOfferUseCase {
           entityType: ActivityEntityType.OFFER,
           entityId: loaded.id,
           actionType: ActivityActionType.UPDATE,
-          actorUserId: actorUserId!,
+          actorUserId: actorUserId,
           oldValues: { changed_fields: changedFields },
           newValues: { changed_fields: changedFields },
           actionAt: now,

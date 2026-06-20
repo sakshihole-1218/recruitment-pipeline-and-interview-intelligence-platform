@@ -6,7 +6,9 @@ export class CreateResumeAiAnalysisDto {
   @IsUUID()
   candidate_document_id: string;
 
-  @ApiPropertyOptional({ description: 'Optional application UUID for context/linking' })
+  @ApiPropertyOptional({
+    description: 'Optional application UUID for context/linking',
+  })
   @IsOptional()
   @IsUUID()
   application_id?: string;

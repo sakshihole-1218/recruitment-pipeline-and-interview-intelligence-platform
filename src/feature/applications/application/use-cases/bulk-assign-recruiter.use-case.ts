@@ -2,7 +2,10 @@ import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { BulkAssignRecruiterDto } from '../../dto/bulk-assign-recruiter.dto';
-import { BulkOperationFailureDto, BulkOperationResultResponseDto } from '../../dto/bulk-operation-result.response.dto';
+import {
+  BulkOperationFailureDto,
+  BulkOperationResultResponseDto,
+} from '../../dto/bulk-operation-result.response.dto';
 import { ApplicationRepository } from '../../repositories/application.repository';
 import { ApplicationReferenceRepository } from '../../repositories/application-reference.repository';
 import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
@@ -19,7 +22,10 @@ export class BulkAssignRecruiterUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: BulkAssignRecruiterDto, actorUserId?: string): Promise<BulkOperationResultResponseDto> {
+  async execute(
+    dto: BulkAssignRecruiterDto,
+    actorUserId?: string,
+  ): Promise<BulkOperationResultResponseDto> {
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -44,7 +50,9 @@ export class BulkAssignRecruiterUseCase {
     for (const applicationId of dto.application_ids) {
       try {
         await this.dataSource.transaction(async (manager) => {
-          const app = await this.applicationRepository.findById(applicationId, { manager });
+          const app = await this.applicationRepository.findById(applicationId, {
+            manager,
+          });
           if (!app) {
             throw new BadRequestException({
               message: 'Application not found',

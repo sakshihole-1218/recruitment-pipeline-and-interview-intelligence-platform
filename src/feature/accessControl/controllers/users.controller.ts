@@ -51,7 +51,10 @@ export class UsersController {
   @ApiOperation({ summary: 'Create user' })
   @ApiBody({ type: CreateUserDto })
   @ApiStandardResponse(UserResponseDto, 'User created successfully')
-  async create(@Body() dto: CreateUserDto, @CurrentUser() actor: AuthJwtPayload) {
+  async create(
+    @Body() dto: CreateUserDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
     const user = await this.usersService.create(dto, actor.sub);
     return ResponseUtil.success(
       'User created successfully',

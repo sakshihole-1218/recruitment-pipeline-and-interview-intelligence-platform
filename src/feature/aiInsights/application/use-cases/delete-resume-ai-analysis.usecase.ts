@@ -23,9 +23,12 @@ export class DeleteResumeAiAnalysisUseCase {
     const actorId = options.actorUserId;
 
     await this.dataSource.transaction(async (manager) => {
-      const existing = await this.resumeAiAnalysisRepository.findById(options.id, {
-        manager,
-      });
+      const existing = await this.resumeAiAnalysisRepository.findById(
+        options.id,
+        {
+          manager,
+        },
+      );
 
       if (!existing) {
         throw new NotFoundException({
@@ -34,10 +37,13 @@ export class DeleteResumeAiAnalysisUseCase {
         });
       }
 
-      await this.resumeAiAnalysisRepository.softDeleteResumeAnalysis(options.id, {
-        actorUserId: actorId,
-        manager,
-      });
+      await this.resumeAiAnalysisRepository.softDeleteResumeAnalysis(
+        options.id,
+        {
+          actorUserId: actorId,
+          manager,
+        },
+      );
 
       await this.activityWriter.log(
         ActivityLogBuilder.build({

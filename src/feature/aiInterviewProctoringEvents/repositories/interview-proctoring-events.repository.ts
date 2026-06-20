@@ -29,8 +29,12 @@ export class InterviewProctoringEventsRepository {
     private readonly repository: Repository<InterviewProctoringEventEntity>,
   ) {}
 
-  private repo(manager?: EntityManager): Repository<InterviewProctoringEventEntity> {
-    return manager ? manager.getRepository(InterviewProctoringEventEntity) : this.repository;
+  private repo(
+    manager?: EntityManager,
+  ): Repository<InterviewProctoringEventEntity> {
+    return manager
+      ? manager.getRepository(InterviewProctoringEventEntity)
+      : this.repository;
   }
 
   private baseQuery(
@@ -66,8 +70,10 @@ export class InterviewProctoringEventsRepository {
     id: string,
     options?: { manager?: EntityManager; lockForUpdate?: boolean },
   ): Promise<InterviewProctoringEventEntity | null> {
-    const qb = this.baseQuery('interview_proctoring_events', options?.manager)
-      .andWhere('interview_proctoring_events.id = :id', { id });
+    const qb = this.baseQuery(
+      'interview_proctoring_events',
+      options?.manager,
+    ).andWhere('interview_proctoring_events.id = :id', { id });
 
     if (options?.lockForUpdate) {
       qb.setLock('pessimistic_write');
@@ -81,9 +87,12 @@ export class InterviewProctoringEventsRepository {
     options?: { manager?: EntityManager },
   ): Promise<InterviewProctoringEventEntity[]> {
     return this.baseQuery('interview_proctoring_events', options?.manager)
-      .andWhere('interview_proctoring_events.ai_interview_session_id = :sessionId', {
-        sessionId,
-      })
+      .andWhere(
+        'interview_proctoring_events.ai_interview_session_id = :sessionId',
+        {
+          sessionId,
+        },
+      )
       .orderBy('interview_proctoring_events.occurred_at', 'DESC')
       .addOrderBy('interview_proctoring_events.id', 'ASC')
       .getMany();
@@ -127,9 +136,12 @@ export class InterviewProctoringEventsRepository {
     options?: { manager?: EntityManager },
   ): Promise<InterviewProctoringEventEntity[]> {
     return this.baseQuery('interview_proctoring_events', options?.manager)
-      .andWhere('interview_proctoring_events.ai_interview_session_id = :sessionId', {
-        sessionId,
-      })
+      .andWhere(
+        'interview_proctoring_events.ai_interview_session_id = :sessionId',
+        {
+          sessionId,
+        },
+      )
       .orderBy('interview_proctoring_events.occurred_at', 'ASC')
       .addOrderBy('interview_proctoring_events.id', 'ASC')
       .getMany();
@@ -148,9 +160,12 @@ export class InterviewProctoringEventsRepository {
     }
 
     if (query.application_id) {
-      qb.andWhere('interview_proctoring_events.application_id = :applicationId', {
-        applicationId: query.application_id,
-      });
+      qb.andWhere(
+        'interview_proctoring_events.application_id = :applicationId',
+        {
+          applicationId: query.application_id,
+        },
+      );
     }
 
     if (query.candidate_id) {
@@ -203,7 +218,8 @@ export class InterviewProctoringEventsRepository {
       });
     }
 
-    const orderDirection = (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
+    const orderDirection =
+      (query.sort_order?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
     const sortBy = query.sort_by || 'occurred_at';
 
     const allowedSort = [
@@ -215,7 +231,7 @@ export class InterviewProctoringEventsRepository {
       'is_resolved',
     ] as const;
 
-    if (!allowedSort.includes(sortBy as (typeof allowedSort)[number])) {
+    if (!allowedSort.includes(sortBy)) {
       throw new BadRequestException({
         message: 'Invalid sort_by field',
         code: 'INVALID_SORT_BY',
@@ -244,7 +260,8 @@ export class InterviewProctoringEventsRepository {
     if (query.cursor) {
       if ((query.sort_by || 'occurred_at') !== 'occurred_at') {
         throw new BadRequestException({
-          message: 'Cursor pagination is only supported with sort_by=occurred_at',
+          message:
+            'Cursor pagination is only supported with sort_by=occurred_at',
           code: 'CURSOR_SORT_BY_REQUIRED',
         });
       }
@@ -267,11 +284,14 @@ export class InterviewProctoringEventsRepository {
         });
       }
 
-      const rows = await qb.clone().take(limit + 1).getMany();
+      const rows = await qb
+        .clone()
+        .take(limit + 1)
+        .getMany();
       const hasMore = rows.length > limit;
       const data = hasMore ? rows.slice(0, limit) : rows;
       const nextCursor = hasMore
-        ? data[data.length - 1]?.occurred_at?.toISOString() ?? null
+        ? (data[data.length - 1]?.occurred_at?.toISOString() ?? null)
         : null;
 
       return {

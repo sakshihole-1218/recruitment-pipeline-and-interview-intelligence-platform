@@ -34,7 +34,9 @@ export class AiInterviewSessionQueryDto extends PaginationQueryDto {
   @IsISO8601()
   cursor?: string;
 
-  @ApiPropertyOptional({ description: 'Search by session_code / room / reason' })
+  @ApiPropertyOptional({
+    description: 'Search by session_code / room / reason',
+  })
   @IsOptional()
   @IsString()
   search?: string;

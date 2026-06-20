@@ -32,11 +32,17 @@ export class ActivityLogRepository {
     return manager ? manager.getRepository(ActivityLogEntity) : this.repository;
   }
 
-  private baseQuery(alias = 'activity_logs', manager?: EntityManager): SelectQueryBuilder<ActivityLogEntity> {
+  private baseQuery(
+    alias = 'activity_logs',
+    manager?: EntityManager,
+  ): SelectQueryBuilder<ActivityLogEntity> {
     return this.repo(manager).createQueryBuilder(alias);
   }
 
-  async findById(id: string, options?: { manager?: EntityManager }): Promise<ActivityLogEntity | null> {
+  async findById(
+    id: string,
+    options?: { manager?: EntityManager },
+  ): Promise<ActivityLogEntity | null> {
     return this.baseQuery('activity_logs', options?.manager)
       .andWhere('activity_logs.id = :id', { id })
       .getOne();
@@ -63,7 +69,9 @@ export class ActivityLogRepository {
     }
 
     if (query.entity_id) {
-      qb.andWhere('activity_logs.entity_id = :entityId', { entityId: query.entity_id });
+      qb.andWhere('activity_logs.entity_id = :entityId', {
+        entityId: query.entity_id,
+      });
     }
 
     if (query.action_type) {
@@ -116,7 +124,7 @@ export class ActivityLogRepository {
       const data = hasMore ? rows.slice(0, limit) : rows;
       const nextCursor = hasMore
         ? data[data.length - 1]?.created_at
-          ? new Date(data[data.length - 1]!.created_at).toISOString()
+          ? new Date(data[data.length - 1].created_at).toISOString()
           : null
         : null;
 

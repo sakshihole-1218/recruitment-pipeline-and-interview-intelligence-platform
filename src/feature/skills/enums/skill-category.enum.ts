@@ -5,6 +5,6 @@ export enum SkillCategory {
   DEVOPS = 'DEVOPS',
   CLOUD = 'CLOUD',
   TECHNICAL = 'TECHNICAL',
-  TOOL= 'TOOL',
+  TOOL = 'TOOL',
   OTHER = 'OTHER',
 }

@@ -1,7 +1,9 @@
 import { AiInterviewFeedbackResponseDto } from '../dto/ai-interview-feedback.response.dto';
 import { AiInterviewFeedbackEntity } from '../entities/ai-interview-feedback.entity';
 
-function toNullableNumber(value: string | number | null | undefined): number | null {
+function toNullableNumber(
+  value: string | number | null | undefined,
+): number | null {
   if (value === null || value === undefined) {
     return null;
   }
@@ -11,7 +13,9 @@ function toNullableNumber(value: string | number | null | undefined): number | n
 }
 
 export class AiInterviewFeedbackMapper {
-  static toResponse(entity: AiInterviewFeedbackEntity): AiInterviewFeedbackResponseDto {
+  static toResponse(
+    entity: AiInterviewFeedbackEntity,
+  ): AiInterviewFeedbackResponseDto {
     return {
       id: entity.id,
       ai_interview_session_id: entity.ai_interview_session_id,
@@ -21,7 +25,9 @@ export class AiInterviewFeedbackMapper {
       technical_score: toNullableNumber(entity.technical_score),
       communication_score: toNullableNumber(entity.communication_score),
       problem_solving_score: toNullableNumber(entity.problem_solving_score),
-      project_understanding_score: toNullableNumber(entity.project_understanding_score),
+      project_understanding_score: toNullableNumber(
+        entity.project_understanding_score,
+      ),
       answer_relevance_score: toNullableNumber(entity.answer_relevance_score),
       confidence_score: toNullableNumber(entity.confidence_score),
       overall_score: toNullableNumber(entity.overall_score),

@@ -56,13 +56,21 @@ export class ListApplicationsQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: ApplicationCurrentStage })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(ApplicationCurrentStage)
   current_stage?: ApplicationCurrentStage;
 
   @ApiPropertyOptional({ enum: ApplicationStatus })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(ApplicationStatus)
   application_status?: ApplicationStatus;
 
@@ -88,7 +96,8 @@ export class ListApplicationsQueryDto extends PaginationQueryDto {
   is_priority?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Filter applications applied at or after this timestamp (ISO8601)',
+    description:
+      'Filter applications applied at or after this timestamp (ISO8601)',
     example: '2026-01-01T00:00:00.000Z',
   })
   @IsOptional()
@@ -96,7 +105,8 @@ export class ListApplicationsQueryDto extends PaginationQueryDto {
   applied_from?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter applications applied at or before this timestamp (ISO8601)',
+    description:
+      'Filter applications applied at or before this timestamp (ISO8601)',
     example: '2026-01-31T23:59:59.000Z',
   })
   @IsOptional()

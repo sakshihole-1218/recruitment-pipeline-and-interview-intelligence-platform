@@ -16,12 +16,20 @@ import { AiInterviewQuestionEntity } from '../../aiInterviewQuestions/entities/a
 import { TranscriptSpeakerType } from '../enums/transcript-speaker-type.enum';
 
 @Entity({ name: 'ai_interview_transcripts' })
-@Index('idx_ai_interview_transcripts_session_id_active', ['ai_interview_session_id'], {
-  where: '"deleted_at" IS NULL',
-})
-@Index('idx_ai_interview_transcripts_question_id_active', ['ai_interview_question_id'], {
-  where: '"deleted_at" IS NULL',
-})
+@Index(
+  'idx_ai_interview_transcripts_session_id_active',
+  ['ai_interview_session_id'],
+  {
+    where: '"deleted_at" IS NULL',
+  },
+)
+@Index(
+  'idx_ai_interview_transcripts_question_id_active',
+  ['ai_interview_question_id'],
+  {
+    where: '"deleted_at" IS NULL',
+  },
+)
 @Index('idx_ai_interview_transcripts_speaker_type_active', ['speaker_type'], {
   where: '"deleted_at" IS NULL',
 })
@@ -86,7 +94,10 @@ export class AiInterviewTranscriptEntity {
   @JoinColumn({ name: 'ai_interview_session_id' })
   ai_interview_session?: AiInterviewSessionEntity;
 
-  @ManyToOne(() => AiInterviewQuestionEntity, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => AiInterviewQuestionEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'ai_interview_question_id' })
   ai_interview_question?: AiInterviewQuestionEntity | null;
 }

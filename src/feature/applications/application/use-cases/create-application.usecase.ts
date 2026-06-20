@@ -29,7 +29,10 @@ export class CreateApplicationUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: CreateApplicationDto, actorUserId?: string): Promise<ApplicationEntity> {
+  async execute(
+    dto: CreateApplicationDto,
+    actorUserId?: string,
+  ): Promise<ApplicationEntity> {
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -103,7 +106,10 @@ export class CreateApplicationUseCase {
         manager,
       });
 
-      const seq = await this.applicationRepository.getNextApplicationNumberSequence(manager);
+      const seq =
+        await this.applicationRepository.getNextApplicationNumberSequence(
+          manager,
+        );
       const year = new Date().getUTCFullYear();
       const applicationNumber = `APP-${year}-${String(seq).padStart(6, '0')}`;
 
@@ -120,7 +126,8 @@ export class CreateApplicationUseCase {
           screening_score: null,
           fit_score: null,
           assigned_recruiter_user_id: dto.assigned_recruiter_user_id ?? null,
-          assigned_hiring_manager_user_id: dto.assigned_hiring_manager_user_id ?? null,
+          assigned_hiring_manager_user_id:
+            dto.assigned_hiring_manager_user_id ?? null,
           is_priority: dto.is_priority ?? false,
           rejection_reason: null,
           withdrawal_reason: null,
@@ -145,7 +152,9 @@ export class CreateApplicationUseCase {
         { manager },
       );
 
-      const loaded = await this.applicationRepository.findById(created.id, { manager });
+      const loaded = await this.applicationRepository.findById(created.id, {
+        manager,
+      });
       if (!loaded) {
         throw new ConflictException({
           message: 'We could not complete the request. Please try again',
@@ -168,7 +177,8 @@ export class CreateApplicationUseCase {
             application_status: loaded.application_status,
             is_priority: loaded.is_priority,
             assigned_recruiter_user_id: loaded.assigned_recruiter_user_id,
-            assigned_hiring_manager_user_id: loaded.assigned_hiring_manager_user_id,
+            assigned_hiring_manager_user_id:
+              loaded.assigned_hiring_manager_user_id,
             applied_at: loaded.applied_at?.toISOString?.() ?? null,
           },
           actionAt: now,

@@ -99,7 +99,10 @@ export class CandidateEntity {
   @Column({ type: 'uuid', nullable: true })
   deleted_by_user_id: string | null;
 
-  @OneToMany(() => CandidateSkillEntity, (skill: CandidateSkillEntity) => skill.candidate)
+  @OneToMany(
+    () => CandidateSkillEntity,
+    (skill: CandidateSkillEntity) => skill.candidate,
+  )
   skills: CandidateSkillEntity[];
 
   @OneToMany(

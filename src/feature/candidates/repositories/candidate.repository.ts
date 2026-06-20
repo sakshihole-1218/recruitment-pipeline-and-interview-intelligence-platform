@@ -63,7 +63,9 @@ export class CandidateRepository {
     email: string,
     options?: { includeDeleted?: boolean; manager?: EntityManager },
   ): Promise<CandidateEntity | null> {
-    const normalized = String(email ?? '').trim().toLowerCase();
+    const normalized = String(email ?? '')
+      .trim()
+      .toLowerCase();
     if (!normalized) return null;
 
     const qb = this.repo(options?.manager)
@@ -127,7 +129,9 @@ export class CandidateRepository {
       });
     }
 
-    const email = String(query.email ?? '').trim().toLowerCase();
+    const email = String(query.email ?? '')
+      .trim()
+      .toLowerCase();
     if (email) {
       qb.andWhere('candidates.email ILIKE :email', { email: `%${email}%` });
     }
@@ -226,7 +230,7 @@ export class CandidateRepository {
 
       const nextCursor = hasMore
         ? pageRows[pageRows.length - 1]?.created_at
-          ? new Date(pageRows[pageRows.length - 1]!.created_at).toISOString()
+          ? new Date(pageRows[pageRows.length - 1].created_at).toISOString()
           : null
         : null;
 

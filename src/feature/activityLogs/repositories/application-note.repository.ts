@@ -34,7 +34,9 @@ export class ApplicationNoteRepository {
   ) {}
 
   private repo(manager?: EntityManager): Repository<ApplicationNoteEntity> {
-    return manager ? manager.getRepository(ApplicationNoteEntity) : this.repository;
+    return manager
+      ? manager.getRepository(ApplicationNoteEntity)
+      : this.repository;
   }
 
   private baseQuery(
@@ -46,13 +48,19 @@ export class ApplicationNoteRepository {
       .where(`${alias}.deleted_at IS NULL`);
   }
 
-  async findById(id: string, options?: { manager?: EntityManager }): Promise<ApplicationNoteEntity | null> {
+  async findById(
+    id: string,
+    options?: { manager?: EntityManager },
+  ): Promise<ApplicationNoteEntity | null> {
     return this.baseQuery('application_notes', options?.manager)
       .andWhere('application_notes.id = :id', { id })
       .getOne();
   }
 
-  async save(entity: ApplicationNoteEntity, options?: { manager?: EntityManager }): Promise<ApplicationNoteEntity> {
+  async save(
+    entity: ApplicationNoteEntity,
+    options?: { manager?: EntityManager },
+  ): Promise<ApplicationNoteEntity> {
     return this.repo(options?.manager).save(entity);
   }
 
@@ -70,10 +78,12 @@ export class ApplicationNoteRepository {
     actorUserId?: string;
     includeAllPrivate?: boolean;
   }): Promise<ApplicationNoteListResult> {
-    const qb = this.baseQuery('application_notes')
-      .andWhere('application_notes.application_id = :applicationId', {
+    const qb = this.baseQuery('application_notes').andWhere(
+      'application_notes.application_id = :applicationId',
+      {
         applicationId: options.applicationId,
-      });
+      },
+    );
 
     if (options.query.user_id) {
       qb.andWhere('application_notes.user_id = :userId', {
@@ -95,7 +105,9 @@ export class ApplicationNoteRepository {
           qb.andWhere('1 = 0');
         } else {
           qb.andWhere('application_notes.is_private = true');
-          qb.andWhere('application_notes.user_id = :actorUserId', { actorUserId });
+          qb.andWhere('application_notes.user_id = :actorUserId', {
+            actorUserId,
+          });
         }
       } else {
         qb.andWhere('application_notes.is_private = :isPrivate', {
@@ -135,9 +147,13 @@ export class ApplicationNoteRepository {
       }
 
       if (orderDirection === 'DESC') {
-        qb.andWhere('application_notes.created_at < :cursorDate', { cursorDate });
+        qb.andWhere('application_notes.created_at < :cursorDate', {
+          cursorDate,
+        });
       } else {
-        qb.andWhere('application_notes.created_at > :cursorDate', { cursorDate });
+        qb.andWhere('application_notes.created_at > :cursorDate', {
+          cursorDate,
+        });
       }
 
       const rows = await qb.take(limit + 1).getMany();
@@ -145,7 +161,7 @@ export class ApplicationNoteRepository {
       const data = hasMore ? rows.slice(0, limit) : rows;
       const nextCursor = hasMore
         ? data[data.length - 1]?.created_at
-          ? new Date(data[data.length - 1]!.created_at).toISOString()
+          ? new Date(data[data.length - 1].created_at).toISOString()
           : null
         : null;
 

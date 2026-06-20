@@ -11,7 +11,10 @@ export class MarkQuestionAskedUseCase {
     private readonly validation: AiInterviewQuestionsValidationHelper,
   ) {}
 
-  async execute(id: string, actorUserId?: string): Promise<AiInterviewQuestionEntity> {
+  async execute(
+    id: string,
+    actorUserId?: string,
+  ): Promise<AiInterviewQuestionEntity> {
     this.validation.ensureActorUserRequired(actorUserId);
 
     const question = await this.repository.findById(id);

@@ -58,9 +58,14 @@ export class AiInterviewSessionsController {
   @Post()
   @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create AI interview session for a scheduled interview' })
+  @ApiOperation({
+    summary: 'Create AI interview session for a scheduled interview',
+  })
   @ApiBody({ type: CreateAiInterviewSessionDto })
-  @ApiStandardResponse(AiInterviewSessionResponseDto, 'AI interview session created successfully')
+  @ApiStandardResponse(
+    AiInterviewSessionResponseDto,
+    'AI interview session created successfully',
+  )
   async create(
     @Body() dto: CreateAiInterviewSessionDto,
     @CurrentUser() actor: AuthJwtPayload,
@@ -76,7 +81,10 @@ export class AiInterviewSessionsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Start AI interview session' })
   @ApiParam({ name: 'id', description: 'AI interview session UUID' })
-  @ApiStandardResponse(AiInterviewSessionResponseDto, 'AI interview session started successfully')
+  @ApiStandardResponse(
+    AiInterviewSessionResponseDto,
+    'AI interview session started successfully',
+  )
   async start(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     const session = await this.service.start(id, actor?.sub);
     return ResponseUtil.success(
@@ -89,7 +97,10 @@ export class AiInterviewSessionsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'End AI interview session' })
   @ApiParam({ name: 'id', description: 'AI interview session UUID' })
-  @ApiStandardResponse(AiInterviewSessionResponseDto, 'AI interview session ended successfully')
+  @ApiStandardResponse(
+    AiInterviewSessionResponseDto,
+    'AI interview session ended successfully',
+  )
   async end(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
     const session = await this.service.end(id, actor?.sub);
     return ResponseUtil.success(
@@ -112,7 +123,11 @@ export class AiInterviewSessionsController {
     @Body() dto: CancelAiInterviewSessionDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const session = await this.service.cancel(id, dto?.failure_reason, actor?.sub);
+    const session = await this.service.cancel(
+      id,
+      dto?.failure_reason,
+      actor?.sub,
+    );
     return ResponseUtil.success(
       'AI interview session cancelled successfully',
       AiInterviewSessionsMapper.toResponse(session),
@@ -124,7 +139,10 @@ export class AiInterviewSessionsController {
   @ApiOperation({ summary: 'Mark AI interview session as failed' })
   @ApiParam({ name: 'id', description: 'AI interview session UUID' })
   @ApiBody({ type: MarkAiInterviewSessionFailedDto })
-  @ApiStandardResponse(AiInterviewSessionResponseDto, 'AI interview session marked as failed')
+  @ApiStandardResponse(
+    AiInterviewSessionResponseDto,
+    'AI interview session marked as failed',
+  )
   async markFailed(
     @Param('id') id: string,
     @Body() dto: MarkAiInterviewSessionFailedDto,
@@ -144,7 +162,9 @@ export class AiInterviewSessionsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List AI interview sessions (offset or cursor pagination)' })
+  @ApiOperation({
+    summary: 'List AI interview sessions (offset or cursor pagination)',
+  })
   @ApiAiInterviewSessionsPaginatedResponse(
     AiInterviewSessionResponseDto,
     'AI interview sessions fetched successfully',
@@ -153,12 +173,15 @@ export class AiInterviewSessionsController {
     const result = await this.service.list(query);
 
     if (result.mode === 'cursor') {
-      return ResponseUtil.success('AI interview sessions fetched successfully', {
-        data: result.data.map(AiInterviewSessionsMapper.toResponse),
-        limit: result.limit,
-        next_cursor: result.next_cursor,
-        has_more: result.has_more,
-      });
+      return ResponseUtil.success(
+        'AI interview sessions fetched successfully',
+        {
+          data: result.data.map(AiInterviewSessionsMapper.toResponse),
+          limit: result.limit,
+          next_cursor: result.next_cursor,
+          has_more: result.has_more,
+        },
+      );
     }
 
     return ResponseUtil.paginated(
@@ -190,7 +213,10 @@ export class AiInterviewSessionsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get AI interview session by id' })
   @ApiParam({ name: 'id', description: 'AI interview session UUID' })
-  @ApiStandardResponse(AiInterviewSessionResponseDto, 'AI interview session fetched successfully')
+  @ApiStandardResponse(
+    AiInterviewSessionResponseDto,
+    'AI interview session fetched successfully',
+  )
   async getById(@Param('id') id: string) {
     const session = await this.service.getById(id);
     return ResponseUtil.success(
@@ -204,7 +230,10 @@ export class AiInterviewSessionsController {
   @ApiOperation({ summary: 'Update AI interview session (controlled)' })
   @ApiParam({ name: 'id', description: 'AI interview session UUID' })
   @ApiBody({ type: UpdateAiInterviewSessionDto })
-  @ApiStandardResponse(AiInterviewSessionResponseDto, 'AI interview session updated successfully')
+  @ApiStandardResponse(
+    AiInterviewSessionResponseDto,
+    'AI interview session updated successfully',
+  )
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateAiInterviewSessionDto,
@@ -231,7 +260,8 @@ export class AiInterviewSessionsController {
     @CurrentUser() actor: AuthJwtPayload,
   ) {
     await this.service.softDelete(id, actor?.sub);
-    return ResponseUtil.success('AI interview session deleted successfully', { id });
+    return ResponseUtil.success('AI interview session deleted successfully', {
+      id,
+    });
   }
 }
-

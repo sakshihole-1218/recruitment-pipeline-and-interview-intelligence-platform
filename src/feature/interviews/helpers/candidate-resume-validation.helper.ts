@@ -5,16 +5,20 @@ import { CandidateDocumentRepository } from '../../candidates/repositories/candi
 
 @Injectable()
 export class CandidateResumeValidationHelper {
-  constructor(private readonly candidateDocumentRepository: CandidateDocumentRepository) {}
+  constructor(
+    private readonly candidateDocumentRepository: CandidateDocumentRepository,
+  ) {}
 
   async ensureLatestResumeExists(options: {
     candidateId: string;
     manager: EntityManager;
   }): Promise<void> {
-    const hasResume = await this.candidateDocumentRepository.existsLatestResume({
-      candidateId: options.candidateId,
-      manager: options.manager,
-    });
+    const hasResume = await this.candidateDocumentRepository.existsLatestResume(
+      {
+        candidateId: options.candidateId,
+        manager: options.manager,
+      },
+    );
 
     if (!hasResume) {
       throw new ConflictException({

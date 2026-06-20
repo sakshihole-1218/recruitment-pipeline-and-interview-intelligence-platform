@@ -1,12 +1,13 @@
 export function normalizeEmail(email: unknown): string {
-  return String(email ?? '').trim().toLowerCase();
+  return String(email ?? '')
+    .trim()
+    .toLowerCase();
 }
 
 export function normalizeSearch(search: unknown): string | undefined {
   const normalized = String(search ?? '').trim();
   return normalized.length > 0 ? normalized : undefined;
 }
-
 
 export function normalizePhoneE164(phone: unknown): string | null {
   const raw = String(phone ?? '').trim();

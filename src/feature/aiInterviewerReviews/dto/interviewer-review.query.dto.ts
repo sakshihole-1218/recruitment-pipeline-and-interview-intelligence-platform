@@ -1,12 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsEnum,
-  IsISO8601,
-  IsIn,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsEnum, IsISO8601, IsIn, IsOptional, IsUUID } from 'class-validator';
 
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
@@ -84,7 +78,8 @@ export class InterviewerReviewQueryDto extends PaginationQueryDto {
   })
   @IsOptional()
   @IsIn(INTERVIEWER_REVIEW_SORT_FIELDS)
-  override sort_by?: (typeof INTERVIEWER_REVIEW_SORT_FIELDS)[number] = 'created_at';
+  override sort_by?: (typeof INTERVIEWER_REVIEW_SORT_FIELDS)[number] =
+    'created_at';
 
   @ApiPropertyOptional({
     example: 'desc',

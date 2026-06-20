@@ -25,7 +25,8 @@ export class BulkScheduleInterviewsResultResponseDto {
 
   @ApiProperty({
     type: [String],
-    description: 'Successful application IDs (same identifiers as the input array)',
+    description:
+      'Successful application IDs (same identifiers as the input array)',
   })
   successful_ids: string[];
 
@@ -42,7 +43,8 @@ export class BulkAssignPanelMembersResultResponseDto {
 
   @ApiProperty({
     type: [String],
-    description: 'Successful interview IDs (same identifiers as the input array)',
+    description:
+      'Successful interview IDs (same identifiers as the input array)',
   })
   successful_ids: string[];
 
@@ -59,7 +61,8 @@ export class BulkCancelInterviewsResultResponseDto {
 
   @ApiProperty({
     type: [String],
-    description: 'Successful interview IDs (same identifiers as the input array)',
+    description:
+      'Successful interview IDs (same identifiers as the input array)',
   })
   successful_ids: string[];
 

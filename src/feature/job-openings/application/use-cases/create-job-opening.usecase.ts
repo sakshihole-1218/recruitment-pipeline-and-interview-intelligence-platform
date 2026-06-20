@@ -28,7 +28,10 @@ export class CreateJobOpeningUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: CreateJobOpeningDto, actorUserId?: string): Promise<JobOpeningEntity> {
+  async execute(
+    dto: CreateJobOpeningDto,
+    actorUserId?: string,
+  ): Promise<JobOpeningEntity> {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
       const code = this.validationHelper.normalizeCode(dto.code);

@@ -10,7 +10,6 @@ import {
 } from 'typeorm';
 import { UserRoleEntity } from './user-role.entity';
 
-
 @Entity({ name: 'users' })
 @Index('uq_users_email', ['email'], { unique: true })
 export class UserEntity {

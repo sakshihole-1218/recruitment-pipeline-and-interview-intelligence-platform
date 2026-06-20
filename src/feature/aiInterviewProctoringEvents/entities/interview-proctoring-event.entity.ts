@@ -18,12 +18,20 @@ import { ProctoringEventType } from '../enums/proctoring-event-type.enum';
 import { ProctoringSeverity } from '../enums/proctoring-severity.enum';
 
 @Entity({ name: 'interview_proctoring_events' })
-@Index('idx_interview_proctoring_events_session_active', ['ai_interview_session_id'], {
-  where: '"deleted_at" IS NULL',
-})
-@Index('idx_interview_proctoring_events_application_active', ['application_id'], {
-  where: '"deleted_at" IS NULL',
-})
+@Index(
+  'idx_interview_proctoring_events_session_active',
+  ['ai_interview_session_id'],
+  {
+    where: '"deleted_at" IS NULL',
+  },
+)
+@Index(
+  'idx_interview_proctoring_events_application_active',
+  ['application_id'],
+  {
+    where: '"deleted_at" IS NULL',
+  },
+)
 @Index('idx_interview_proctoring_events_candidate_active', ['candidate_id'], {
   where: '"deleted_at" IS NULL',
 })

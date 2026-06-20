@@ -34,7 +34,10 @@ export class ListSkillsQueryDto extends PaginationQueryDto {
   @IsISO8601()
   cursor?: string;
 
-  @ApiPropertyOptional({ example: 'Type', description: 'Filter by name (partial match)' })
+  @ApiPropertyOptional({
+    example: 'Type',
+    description: 'Filter by name (partial match)',
+  })
   @IsOptional()
   @Transform(({ value }) => normalizeSearch(value))
   @IsString()
@@ -42,9 +45,16 @@ export class ListSkillsQueryDto extends PaginationQueryDto {
   @MaxLength(150)
   name?: string;
 
-  @ApiPropertyOptional({ example: 'TYPESCRIPT', description: 'Filter by exact code' })
+  @ApiPropertyOptional({
+    example: 'TYPESCRIPT',
+    description: 'Filter by exact code',
+  })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsString()
   @MinLength(1)
   @MaxLength(50)
@@ -52,7 +62,11 @@ export class ListSkillsQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: SkillCategory, example: SkillCategory.LANGUAGE })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(SkillCategory)
   category?: SkillCategory;
 

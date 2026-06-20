@@ -53,7 +53,10 @@ export class InterviewFeedbackController {
   @ApiOperation({ summary: 'Submit interview feedback (panel members only)' })
   @ApiParam({ name: 'interviewId', description: 'Interview UUID' })
   @ApiBody({ type: SubmitInterviewFeedbackDto })
-  @ApiStandardResponse(InterviewFeedbackResponseDto, 'Feedback submitted successfully')
+  @ApiStandardResponse(
+    InterviewFeedbackResponseDto,
+    'Feedback submitted successfully',
+  )
   async submit(
     @Param('interviewId') interviewId: string,
     @Body() dto: SubmitInterviewFeedbackDto,
@@ -73,7 +76,9 @@ export class InterviewFeedbackController {
 
   @Get(':interviewId/feedback')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List feedback by interview (offset or cursor pagination)' })
+  @ApiOperation({
+    summary: 'List feedback by interview (offset or cursor pagination)',
+  })
   @ApiParam({ name: 'interviewId', description: 'Interview UUID' })
   @ApiInterviewFeedbackPaginatedResponse(
     InterviewFeedbackResponseDto,
@@ -110,7 +115,9 @@ export class InterviewFeedbackController {
 
   @Get('feedback/by-application/:applicationId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List feedback by application (offset or cursor pagination)' })
+  @ApiOperation({
+    summary: 'List feedback by application (offset or cursor pagination)',
+  })
   @ApiParam({ name: 'applicationId', description: 'Application UUID' })
   @ApiInterviewFeedbackPaginatedResponse(
     InterviewFeedbackResponseDto,

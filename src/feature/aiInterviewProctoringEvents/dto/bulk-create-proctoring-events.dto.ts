@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsUUID, ValidateNested } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 
 import { CreateProctoringEventItemDto } from './create-proctoring-event-item.dto';
 

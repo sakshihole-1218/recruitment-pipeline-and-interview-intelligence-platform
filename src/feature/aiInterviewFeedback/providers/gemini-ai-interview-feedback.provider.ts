@@ -30,9 +30,7 @@ type GeminiInterviewFeedbackResponse = {
 };
 
 @Injectable()
-export class GeminiAiInterviewFeedbackProvider
-  implements AiInterviewFeedbackProvider
-{
+export class GeminiAiInterviewFeedbackProvider implements AiInterviewFeedbackProvider {
   private readonly logger = new Logger(GeminiAiInterviewFeedbackProvider.name);
 
   constructor(private readonly geminiClient: GeminiClient) {}
@@ -47,9 +45,14 @@ export class GeminiAiInterviewFeedbackProvider
       });
 
       const parsed =
-        GeminiJsonHelper.parseJson<GeminiInterviewFeedbackResponse>(responseText);
+        GeminiJsonHelper.parseJson<GeminiInterviewFeedbackResponse>(
+          responseText,
+        );
 
-      const technicalScore = this.toScore(parsed.technical_score, 'technical_score');
+      const technicalScore = this.toScore(
+        parsed.technical_score,
+        'technical_score',
+      );
       const communicationScore = this.toScore(
         parsed.communication_score,
         'communication_score',
@@ -66,7 +69,10 @@ export class GeminiAiInterviewFeedbackProvider
         parsed.answer_relevance_score,
         'answer_relevance_score',
       );
-      const confidenceScore = this.toScore(parsed.confidence_score, 'confidence_score');
+      const confidenceScore = this.toScore(
+        parsed.confidence_score,
+        'confidence_score',
+      );
       const overallScore =
         this.toNullableScore(parsed.overall_score) ??
         this.average([
@@ -87,8 +93,12 @@ export class GeminiAiInterviewFeedbackProvider
         confidence_score: confidenceScore,
         overall_score: overallScore,
         technical_summary: this.toNullableText(parsed.technical_summary),
-        communication_summary: this.toNullableText(parsed.communication_summary),
-        problem_solving_summary: this.toNullableText(parsed.problem_solving_summary),
+        communication_summary: this.toNullableText(
+          parsed.communication_summary,
+        ),
+        problem_solving_summary: this.toNullableText(
+          parsed.problem_solving_summary,
+        ),
         project_understanding_summary: this.toNullableText(
           parsed.project_understanding_summary,
         ),
@@ -123,7 +133,9 @@ export class GeminiAiInterviewFeedbackProvider
     return numeric;
   }
 
-  private toNullableScore(value: number | string | null | undefined): number | null {
+  private toNullableScore(
+    value: number | string | null | undefined,
+  ): number | null {
     if (value === null || value === undefined || value === '') {
       return null;
     }
@@ -138,7 +150,9 @@ export class GeminiAiInterviewFeedbackProvider
 
   private average(values: number[]): number {
     return Number(
-      (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(2),
+      (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(
+        2,
+      ),
     );
   }
 
@@ -151,7 +165,9 @@ export class GeminiAiInterviewFeedbackProvider
     value: string | null | undefined,
     overallScore: number,
   ): AiInterviewRecommendation {
-    const normalized = String(value || '').trim().toUpperCase();
+    const normalized = String(value || '')
+      .trim()
+      .toUpperCase();
 
     if (
       Object.values(AiInterviewRecommendation).includes(

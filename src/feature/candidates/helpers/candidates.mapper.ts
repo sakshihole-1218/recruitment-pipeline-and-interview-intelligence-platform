@@ -35,7 +35,9 @@ export class CandidatesMapper {
     };
   }
 
-  static toSkillResponse(entity: CandidateSkillEntity): CandidateSkillResponseDto {
+  static toSkillResponse(
+    entity: CandidateSkillEntity,
+  ): CandidateSkillResponseDto {
     return {
       id: entity.id,
       candidate_id: entity.candidate_id,
@@ -50,7 +52,9 @@ export class CandidatesMapper {
     };
   }
 
-  static toDocumentResponse(entity: CandidateDocumentEntity): CandidateDocumentResponseDto {
+  static toDocumentResponse(
+    entity: CandidateDocumentEntity,
+  ): CandidateDocumentResponseDto {
     return {
       id: entity.id,
       candidate_id: entity.candidate_id,

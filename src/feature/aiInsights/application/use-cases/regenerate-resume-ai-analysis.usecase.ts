@@ -50,7 +50,9 @@ export class RegenerateResumeAiAnalysisUseCase {
 
       const oldValues = {
         analysis_status: existing.analysis_status,
-        analyzed_at: existing.analyzed_at ? existing.analyzed_at.toISOString() : null,
+        analyzed_at: existing.analyzed_at
+          ? existing.analyzed_at.toISOString()
+          : null,
         ai_fit_score: existing.ai_fit_score,
       };
 
@@ -58,7 +60,8 @@ export class RegenerateResumeAiAnalysisUseCase {
         typeof options.dto.extracted_text === 'string' &&
         options.dto.extracted_text !== existing.extracted_text;
 
-      const extractedText = options.dto.extracted_text ?? existing.extracted_text;
+      const extractedText =
+        options.dto.extracted_text ?? existing.extracted_text;
 
       existing.analysis_status = ResumeAiAnalysisStatus.PROCESSING;
       existing.updated_by_user_id = actorId;
@@ -104,9 +107,12 @@ export class RegenerateResumeAiAnalysisUseCase {
 
       await this.resumeAiAnalysisRepository.save(existing, { manager });
 
-      const loaded = await this.resumeAiAnalysisRepository.findById(existing.id, {
-        manager,
-      });
+      const loaded = await this.resumeAiAnalysisRepository.findById(
+        existing.id,
+        {
+          manager,
+        },
+      );
 
       const result = loaded ?? existing;
 
@@ -120,7 +126,9 @@ export class RegenerateResumeAiAnalysisUseCase {
           newValues: {
             candidate_document_id: result.candidate_document_id,
             analysis_status: result.analysis_status,
-            analyzed_at: result.analyzed_at ? result.analyzed_at.toISOString() : null,
+            analyzed_at: result.analyzed_at
+              ? result.analyzed_at.toISOString()
+              : null,
             ai_fit_score: result.ai_fit_score,
             extracted_text_changed: extractedTextChanged,
             skills_extracted_count: Array.isArray(result.skills_extracted)

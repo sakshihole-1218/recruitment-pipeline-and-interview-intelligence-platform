@@ -50,7 +50,7 @@ export class SoftDeleteOfferUseCase {
           entityType: ActivityEntityType.OFFER,
           entityId: offer.id,
           actionType: ActivityActionType.DELETE,
-          actorUserId: actorUserId!,
+          actorUserId: actorUserId,
           oldValues: { deleted_at: null },
           newValues: { deleted_at: now.toISOString() },
           actionAt: now,

@@ -15,14 +15,19 @@ export class ActivityLogsReferenceRepository {
   ) {}
 
   private appRepo(manager?: EntityManager): Repository<ApplicationEntity> {
-    return manager ? manager.getRepository(ApplicationEntity) : this.applications;
+    return manager
+      ? manager.getRepository(ApplicationEntity)
+      : this.applications;
   }
 
   private userRepo(manager?: EntityManager): Repository<UserEntity> {
     return manager ? manager.getRepository(UserEntity) : this.users;
   }
 
-  async ensureApplicationExists(applicationId: string, options?: { manager?: EntityManager }) {
+  async ensureApplicationExists(
+    applicationId: string,
+    options?: { manager?: EntityManager },
+  ) {
     const found = await this.appRepo(options?.manager).findOne({
       where: { id: applicationId },
       withDeleted: false,
@@ -36,7 +41,10 @@ export class ActivityLogsReferenceRepository {
     }
   }
 
-  async ensureUserExists(userId: string, options?: { manager?: EntityManager }) {
+  async ensureUserExists(
+    userId: string,
+    options?: { manager?: EntityManager },
+  ) {
     const found = await this.userRepo(options?.manager).findOne({
       where: { id: userId },
       withDeleted: false,

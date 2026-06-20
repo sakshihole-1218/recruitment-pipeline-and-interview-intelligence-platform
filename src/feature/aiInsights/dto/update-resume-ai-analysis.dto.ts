@@ -56,7 +56,9 @@ export class UpdateResumeAiAnalysisDto {
   @IsString()
   certification_summary?: string;
 
-  @ApiPropertyOptional({ description: 'Total experience years detected (numeric)' })
+  @ApiPropertyOptional({
+    description: 'Total experience years detected (numeric)',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
@@ -73,7 +75,11 @@ export class UpdateResumeAiAnalysisDto {
 
   @ApiPropertyOptional({ enum: ResumeAiAnalysisStatus })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(ResumeAiAnalysisStatus)
   analysis_status?: ResumeAiAnalysisStatus;
 

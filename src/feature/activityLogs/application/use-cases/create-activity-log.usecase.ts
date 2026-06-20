@@ -12,6 +12,8 @@ export class CreateActivityLogUseCase {
     payload: Partial<ActivityLogEntity>,
     options?: { manager?: EntityManager },
   ): Promise<ActivityLogEntity> {
-    return this.repository.createAndSave(payload, { manager: options?.manager });
+    return this.repository.createAndSave(payload, {
+      manager: options?.manager,
+    });
   }
 }

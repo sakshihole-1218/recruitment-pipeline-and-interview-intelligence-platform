@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { type VideoGrant } from 'livekit-server-sdk';
 
@@ -42,9 +39,7 @@ export class GenerateLiveKitTokenUseCase {
         });
       }
 
-      this.validation.ensureSessionCanCreateRoom(
-        session.session_status as AiInterviewSessionStatus,
-      );
+      this.validation.ensureSessionCanCreateRoom(session.session_status);
 
       const roomSession = await this.roomRepository.findByAiInterviewSessionId(
         session.id,
@@ -128,7 +123,8 @@ export class GenerateLiveKitTokenUseCase {
       };
 
       roomSession.metadata = metadata;
-      roomSession.updated_by_user_id = actorUserId ?? roomSession.updated_by_user_id;
+      roomSession.updated_by_user_id =
+        actorUserId ?? roomSession.updated_by_user_id;
       await this.roomRepository.updateRoomSession(roomSession, { manager });
 
       return {

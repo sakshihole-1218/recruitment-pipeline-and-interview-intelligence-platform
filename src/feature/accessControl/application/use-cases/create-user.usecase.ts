@@ -32,10 +32,13 @@ export class CreateUserUseCase {
 
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
-      const existing = await this.userRepository.findByNormalizedEmail(normalizedEmail, {
-        includeDeleted: true,
-        manager,
-      });
+      const existing = await this.userRepository.findByNormalizedEmail(
+        normalizedEmail,
+        {
+          includeDeleted: true,
+          manager,
+        },
+      );
 
       if (existing) {
         throw new ConflictException({

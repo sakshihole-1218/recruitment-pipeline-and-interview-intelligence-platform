@@ -51,9 +51,7 @@ export class BulkCreateTranscriptEntriesUseCase {
           });
         }
 
-        this.validation.ensureSessionAllowsBulkCreate(
-          session.session_status as AiInterviewSessionStatus,
-        );
+        this.validation.ensureSessionAllowsBulkCreate(session.session_status);
 
         const questionIds = Array.from(
           new Set(
@@ -63,11 +61,16 @@ export class BulkCreateTranscriptEntriesUseCase {
           ),
         );
 
-        const questions = await this.referenceRepository.findQuestionsByIds(questionIds, {
-          manager,
-          lockForUpdate: true,
-        });
-        const questionsById = new Map(questions.map((question) => [question.id, question]));
+        const questions = await this.referenceRepository.findQuestionsByIds(
+          questionIds,
+          {
+            manager,
+            lockForUpdate: true,
+          },
+        );
+        const questionsById = new Map(
+          questions.map((question) => [question.id, question]),
+        );
 
         for (const questionId of questionIds) {
           const question = questionsById.get(questionId);
@@ -82,9 +85,12 @@ export class BulkCreateTranscriptEntriesUseCase {
           this.validation.ensureQuestionBelongsToSession(question, session.id);
         }
 
-        let nextSequenceNumber = await this.repository.getNextSequenceNumber(session.id, {
-          manager,
-        });
+        let nextSequenceNumber = await this.repository.getNextSequenceNumber(
+          session.id,
+          {
+            manager,
+          },
+        );
 
         const seenSequenceNumbers = new Set<number>();
         const payloads: Partial<AiInterviewTranscriptEntity>[] = [];
@@ -94,7 +100,8 @@ export class BulkCreateTranscriptEntriesUseCase {
 
           if (seenSequenceNumbers.has(sequenceNumber)) {
             throw new ConflictException({
-              message: 'Duplicate sequence number provided in bulk transcript payload',
+              message:
+                'Duplicate sequence number provided in bulk transcript payload',
               code: 'TRANSCRIPT_BULK_DUPLICATE_SEQUENCE_NUMBER',
               meta: { sequence_number: sequenceNumber },
             });
@@ -125,7 +132,10 @@ export class BulkCreateTranscriptEntriesUseCase {
           });
         }
 
-        const createdEntries = await this.repository.createManyEntries(payloads, { manager });
+        const createdEntries = await this.repository.createManyEntries(
+          payloads,
+          { manager },
+        );
 
         await this.syncQuestionStates({
           entries: dto.entries,
@@ -134,12 +144,15 @@ export class BulkCreateTranscriptEntriesUseCase {
           manager,
         });
 
-        return createdEntries.sort((left, right) => left.sequence_number - right.sequence_number);
+        return createdEntries.sort(
+          (left, right) => left.sequence_number - right.sequence_number,
+        );
       });
     } catch (error: any) {
       if (String(error?.code) === '23505') {
         throw new ConflictException({
-          message: 'Sequence number already exists in this AI interview session',
+          message:
+            'Sequence number already exists in this AI interview session',
           code: 'TRANSCRIPT_SEQUENCE_NUMBER_CONFLICT',
         });
       }
@@ -168,7 +181,9 @@ export class BulkCreateTranscriptEntriesUseCase {
         continue;
       }
 
-      const question = options.questionsById.get(entry.ai_interview_question_id);
+      const question = options.questionsById.get(
+        entry.ai_interview_question_id,
+      );
       if (!question) {
         continue;
       }
@@ -185,13 +200,19 @@ export class BulkCreateTranscriptEntriesUseCase {
       const effectiveTimestamp = entry.spoken_at ?? new Date();
 
       if (entry.speaker_type === TranscriptSpeakerType.AI_INTERVIEWER) {
-        if (!current.askedAt || effectiveTimestamp.getTime() < current.askedAt.getTime()) {
+        if (
+          !current.askedAt ||
+          effectiveTimestamp.getTime() < current.askedAt.getTime()
+        ) {
           current.askedAt = effectiveTimestamp;
         }
       }
 
       if (entry.speaker_type === TranscriptSpeakerType.CANDIDATE) {
-        if (!current.answeredAt || effectiveTimestamp.getTime() < current.answeredAt.getTime()) {
+        if (
+          !current.answeredAt ||
+          effectiveTimestamp.getTime() < current.answeredAt.getTime()
+        ) {
           current.answeredAt = effectiveTimestamp;
         }
         current.shouldMarkAnswered = true;
@@ -200,7 +221,12 @@ export class BulkCreateTranscriptEntriesUseCase {
       updates.set(question.id, current);
     }
 
-    for (const { question, askedAt, answeredAt, shouldMarkAnswered } of updates.values()) {
+    for (const {
+      question,
+      askedAt,
+      answeredAt,
+      shouldMarkAnswered,
+    } of updates.values()) {
       let changed = false;
 
       if (askedAt && !question.asked_at) {

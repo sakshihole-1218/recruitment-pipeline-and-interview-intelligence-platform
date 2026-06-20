@@ -2,7 +2,9 @@ import { AiInterviewTranscriptResponseDto } from '../dto/ai-interview-transcript
 import { AiInterviewTranscriptEntity } from '../entities/ai-interview-transcript.entity';
 
 export class AiInterviewTranscriptsMapper {
-  static toResponse(entity: AiInterviewTranscriptEntity): AiInterviewTranscriptResponseDto {
+  static toResponse(
+    entity: AiInterviewTranscriptEntity,
+  ): AiInterviewTranscriptResponseDto {
     return {
       id: entity.id,
       ai_interview_session_id: entity.ai_interview_session_id,

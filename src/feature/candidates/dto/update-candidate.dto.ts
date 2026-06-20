@@ -53,14 +53,24 @@ export class UpdateCandidateDto {
   @MaxLength(30)
   phone?: string | null;
 
-  @ApiPropertyOptional({ example: '1998-05-10', description: 'ISO date (YYYY-MM-DD)' })
+  @ApiPropertyOptional({
+    example: '1998-05-10',
+    description: 'ISO date (YYYY-MM-DD)',
+  })
   @IsOptional()
   @IsDateString()
   date_of_birth?: string;
 
-  @ApiPropertyOptional({ enum: CandidateGender, example: CandidateGender.FEMALE })
+  @ApiPropertyOptional({
+    enum: CandidateGender,
+    example: CandidateGender.FEMALE,
+  })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(CandidateGender)
   gender?: CandidateGender;
 
@@ -149,9 +159,16 @@ export class UpdateCandidateDto {
   @MaxLength(250)
   resume_headline?: string;
 
-  @ApiPropertyOptional({ enum: CandidateSourceType, example: CandidateSourceType.LINKEDIN })
+  @ApiPropertyOptional({
+    enum: CandidateSourceType,
+    example: CandidateSourceType.LINKEDIN,
+  })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(CandidateSourceType)
   source_type?: CandidateSourceType;
 

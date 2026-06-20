@@ -7,7 +7,10 @@ import { SkillEntity } from '../../skills/entities/skill.entity';
 
 @Injectable()
 export class JobOpeningReferenceRepository {
-  async departmentExists(departmentId: string, manager: EntityManager): Promise<boolean> {
+  async departmentExists(
+    departmentId: string,
+    manager: EntityManager,
+  ): Promise<boolean> {
     const repo = manager.getRepository(DepartmentEntity);
     const department = await repo
       .createQueryBuilder('departments')
@@ -31,7 +34,10 @@ export class JobOpeningReferenceRepository {
     return Boolean(user);
   }
 
-  async findSkillsByIds(skillIds: string[], manager: EntityManager): Promise<SkillEntity[]> {
+  async findSkillsByIds(
+    skillIds: string[],
+    manager: EntityManager,
+  ): Promise<SkillEntity[]> {
     if (!skillIds.length) {
       return [];
     }

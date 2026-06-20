@@ -4,7 +4,9 @@ import { ApplicationResponseDto } from '../dto/application.response.dto';
 import { ApplicationStageHistoryResponseDto } from '../dto/application-stage-history.response.dto';
 
 export class ApplicationsMapper {
-  static toApplicationResponse(entity: ApplicationEntity): ApplicationResponseDto {
+  static toApplicationResponse(
+    entity: ApplicationEntity,
+  ): ApplicationResponseDto {
     return {
       id: entity.id,
       application_number: entity.application_number,

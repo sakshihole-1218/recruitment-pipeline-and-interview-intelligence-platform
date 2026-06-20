@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { CreateInterviewQuestionDto } from '../../dto/create-interview-question.dto';
@@ -25,7 +22,10 @@ export class CreateInterviewQuestionUseCase {
     actorUserId?: string,
   ): Promise<AiInterviewQuestionEntity> {
     this.validation.ensureActorUserRequired(actorUserId);
-    this.validation.ensureFollowUpConsistency(dto.question_type, dto.parent_question_id);
+    this.validation.ensureFollowUpConsistency(
+      dto.question_type,
+      dto.parent_question_id,
+    );
 
     return this.dataSource.transaction(async (manager) => {
       const session = await this.referenceRepository.findSessionById(
@@ -40,9 +40,12 @@ export class CreateInterviewQuestionUseCase {
         });
       }
 
-      const existingQuestions = await this.repository.findBySessionId(dto.ai_interview_session_id, {
-        manager,
-      });
+      const existingQuestions = await this.repository.findBySessionId(
+        dto.ai_interview_session_id,
+        {
+          manager,
+        },
+      );
 
       this.validation.ensureSequenceNumberAvailable(
         dto.sequence_number,
@@ -51,9 +54,12 @@ export class CreateInterviewQuestionUseCase {
 
       let parentQuestionId: string | null = null;
       if (dto.parent_question_id) {
-        const parentQuestion = await this.repository.findById(dto.parent_question_id, {
-          manager,
-        });
+        const parentQuestion = await this.repository.findById(
+          dto.parent_question_id,
+          {
+            manager,
+          },
+        );
 
         if (!parentQuestion) {
           throw new NotFoundException({

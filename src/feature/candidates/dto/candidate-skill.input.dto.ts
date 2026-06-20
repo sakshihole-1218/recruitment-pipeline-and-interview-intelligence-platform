@@ -28,7 +28,11 @@ export class CandidateSkillInputDto {
     example: CandidateSkillProficiencyLevel.INTERMEDIATE,
   })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(CandidateSkillProficiencyLevel)
   proficiency_level?: CandidateSkillProficiencyLevel;
 

@@ -5,7 +5,9 @@ import { InterviewProctoringEventsRepository } from '../../repositories/intervie
 
 @Injectable()
 export class ListProctoringEventsUseCase {
-  constructor(private readonly repository: InterviewProctoringEventsRepository) {}
+  constructor(
+    private readonly repository: InterviewProctoringEventsRepository,
+  ) {}
 
   execute(query: InterviewProctoringEventQueryDto) {
     return this.repository.findAllWithFilters(query);

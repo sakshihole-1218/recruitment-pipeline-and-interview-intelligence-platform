@@ -63,7 +63,11 @@ export class ApplicationsService {
     return this.holdUseCase.execute(id, dto, actorUserId);
   }
 
-  async withdraw(id: string, dto: WithdrawApplicationDto, actorUserId?: string) {
+  async withdraw(
+    id: string,
+    dto: WithdrawApplicationDto,
+    actorUserId?: string,
+  ) {
     return this.withdrawUseCase.execute(id, dto, actorUserId);
   }
 
@@ -83,7 +87,10 @@ export class ApplicationsService {
     return this.bulkAssignRecruiterUseCase.execute(dto, actorUserId);
   }
 
-  async bulkAssignHiringManager(dto: BulkAssignHiringManagerDto, actorUserId?: string) {
+  async bulkAssignHiringManager(
+    dto: BulkAssignHiringManagerDto,
+    actorUserId?: string,
+  ) {
     return this.bulkAssignHiringManagerUseCase.execute(dto, actorUserId);
   }
 

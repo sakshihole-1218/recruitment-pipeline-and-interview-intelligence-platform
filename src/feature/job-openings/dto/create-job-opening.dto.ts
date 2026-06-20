@@ -29,8 +29,15 @@ export class CreateJobOpeningDto {
   @MaxLength(200)
   title: string;
 
-  @ApiProperty({ example: 'BE-2026-001', description: 'Unique job opening code' })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @ApiProperty({
+    example: 'BE-2026-001',
+    description: 'Unique job opening code',
+  })
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsString()
   @MinLength(2)
   @MaxLength(50)
@@ -49,12 +56,20 @@ export class CreateJobOpeningDto {
   recruiter_user_id: string;
 
   @ApiProperty({ enum: EmploymentType, example: EmploymentType.FULL_TIME })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(EmploymentType)
   employment_type: EmploymentType;
 
   @ApiProperty({ enum: WorkMode, example: WorkMode.HYBRID })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(WorkMode)
   work_mode: WorkMode;
 
@@ -74,13 +89,19 @@ export class CreateJobOpeningDto {
   @Max(60)
   experience_max_years?: number;
 
-  @ApiPropertyOptional({ example: 1500000, description: 'Minimum annual salary' })
+  @ApiPropertyOptional({
+    example: 1500000,
+    description: 'Minimum annual salary',
+  })
   @IsOptional()
   @Type(() => Number)
   @Min(0)
   min_salary?: number;
 
-  @ApiPropertyOptional({ example: 2800000, description: 'Maximum annual salary' })
+  @ApiPropertyOptional({
+    example: 2800000,
+    description: 'Maximum annual salary',
+  })
   @IsOptional()
   @Type(() => Number)
   @Min(0)
@@ -88,7 +109,11 @@ export class CreateJobOpeningDto {
 
   @ApiPropertyOptional({ example: 'INR', description: 'ISO currency code' })
   @IsOptional()
-  @Transform(({ value }) => (value === undefined || value === null ? value : String(value).trim().toUpperCase()))
+  @Transform(({ value }) =>
+    value === undefined || value === null
+      ? value
+      : String(value).trim().toUpperCase(),
+  )
   @IsString()
   @MinLength(3)
   @MaxLength(10)
@@ -128,7 +153,11 @@ export class CreateJobOpeningDto {
     description: 'Defaults to DRAFT when omitted',
   })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(JobOpeningStatus)
   status?: JobOpeningStatus;
 

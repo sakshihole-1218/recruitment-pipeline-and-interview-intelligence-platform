@@ -53,15 +53,24 @@ export class InterviewsService {
     private readonly listFeedbackByApplicationUseCase: ListInterviewFeedbackByApplicationUseCase,
   ) {}
 
-  async createInterviewRound(dto: CreateInterviewRoundDto, actorUserId?: string) {
+  async createInterviewRound(
+    dto: CreateInterviewRoundDto,
+    actorUserId?: string,
+  ) {
     return this.createInterviewRoundUseCase.execute(dto, actorUserId);
   }
 
-  async updateInterviewRound(id: string, dto: UpdateInterviewRoundDto, actorUserId?: string) {
+  async updateInterviewRound(
+    id: string,
+    dto: UpdateInterviewRoundDto,
+    actorUserId?: string,
+  ) {
     return this.updateInterviewRoundUseCase.execute(id, dto, actorUserId);
   }
 
-  async getInterviewRoundsByJobOpening(query: GetInterviewRoundsByJobOpeningQueryDto) {
+  async getInterviewRoundsByJobOpening(
+    query: GetInterviewRoundsByJobOpeningQueryDto,
+  ) {
     return this.listRoundsByJobOpeningUseCase.execute(query.job_opening_id);
   }
 
@@ -69,19 +78,35 @@ export class InterviewsService {
     return this.scheduleInterviewUseCase.execute(dto, actorUserId);
   }
 
-  async rescheduleInterview(id: string, dto: RescheduleInterviewDto, actorUserId: string) {
+  async rescheduleInterview(
+    id: string,
+    dto: RescheduleInterviewDto,
+    actorUserId: string,
+  ) {
     return this.rescheduleInterviewUseCase.execute(id, dto, actorUserId);
   }
 
-  async cancelInterview(id: string, dto: CancelInterviewDto, actorUserId: string) {
+  async cancelInterview(
+    id: string,
+    dto: CancelInterviewDto,
+    actorUserId: string,
+  ) {
     return this.cancelInterviewUseCase.execute(id, dto, actorUserId);
   }
 
-  async completeInterview(id: string, dto: CompleteInterviewDto, actorUserId: string) {
+  async completeInterview(
+    id: string,
+    dto: CompleteInterviewDto,
+    actorUserId: string,
+  ) {
     return this.completeInterviewUseCase.execute(id, dto, actorUserId);
   }
 
-  async assignPanelMembers(id: string, dto: AssignInterviewPanelMembersDto, actorUserId: string) {
+  async assignPanelMembers(
+    id: string,
+    dto: AssignInterviewPanelMembersDto,
+    actorUserId: string,
+  ) {
     return this.replacePanelMembersUseCase.execute(id, dto, actorUserId);
   }
 
@@ -89,7 +114,10 @@ export class InterviewsService {
     return this.bulkScheduleInterviewsUseCase.execute(dto, actorUserId);
   }
 
-  async bulkAssignPanelMembers(dto: BulkAssignPanelMembersDto, actorUserId: string) {
+  async bulkAssignPanelMembers(
+    dto: BulkAssignPanelMembersDto,
+    actorUserId: string,
+  ) {
     return this.bulkAssignPanelMembersUseCase.execute(dto, actorUserId);
   }
 
@@ -105,7 +133,11 @@ export class InterviewsService {
     return this.listInterviewsUseCase.execute(query, actor);
   }
 
-  async submitFeedback(interviewId: string, dto: SubmitInterviewFeedbackDto, actorUserId: string) {
+  async submitFeedback(
+    interviewId: string,
+    dto: SubmitInterviewFeedbackDto,
+    actorUserId: string,
+  ) {
     return this.submitFeedbackUseCase.execute(interviewId, dto, actorUserId);
   }
 
@@ -114,7 +146,11 @@ export class InterviewsService {
     query: ListInterviewFeedbackQueryDto,
     actor?: AuthJwtPayload,
   ) {
-    return this.listFeedbackByInterviewUseCase.execute(interviewId, query, actor);
+    return this.listFeedbackByInterviewUseCase.execute(
+      interviewId,
+      query,
+      actor,
+    );
   }
 
   async listFeedbackByApplication(
@@ -122,6 +158,10 @@ export class InterviewsService {
     query: ListInterviewFeedbackQueryDto,
     actor?: AuthJwtPayload,
   ) {
-    return this.listFeedbackByApplicationUseCase.execute(applicationId, query, actor);
+    return this.listFeedbackByApplicationUseCase.execute(
+      applicationId,
+      query,
+      actor,
+    );
   }
 }

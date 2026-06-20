@@ -15,7 +15,11 @@ export class RemoveRoleFromUserUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(userId: string, roleId: string, actorUserId: string): Promise<void> {
+  async execute(
+    userId: string,
+    roleId: string,
+    actorUserId: string,
+  ): Promise<void> {
     return this.dataSource.transaction(async (manager) => {
       const now = new Date();
       const assignment = await this.userRoleRepository.findActiveByUserAndRole(

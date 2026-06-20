@@ -54,7 +54,10 @@ export class ApplicationNotesManagementController {
   @ApiOperation({ summary: 'Get application note by id' })
   @ApiParam({ name: 'id', description: 'Note UUID' })
   @ApiStandardResponse(ApplicationNoteResponseDto, 'Note fetched successfully')
-  async findById(@Param('id') id: string, @CurrentUser() actor: AuthJwtPayload) {
+  async findById(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
     const note = await this.notesService.findById(id, actor);
     return ResponseUtil.success(
       'Note fetched successfully',
@@ -92,7 +95,10 @@ export class ApplicationNotesManagementController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete application note' })
   @ApiParam({ name: 'id', description: 'Note UUID' })
-  @ApiStandardResponse(SoftDeleteApplicationNoteResponseDto, 'Note deleted successfully')
+  @ApiStandardResponse(
+    SoftDeleteApplicationNoteResponseDto,
+    'Note deleted successfully',
+  )
   async softDelete(
     @Param('id') id: string,
     @CurrentUser() actor: AuthJwtPayload,

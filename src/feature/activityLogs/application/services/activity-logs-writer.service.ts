@@ -8,7 +8,10 @@ import { CreateActivityLogUseCase } from '../use-cases/create-activity-log.useca
 export class ActivityLogsWriterService {
   constructor(private readonly createUseCase: CreateActivityLogUseCase) {}
 
-  async log(payload: Partial<ActivityLogEntity>, options?: { manager?: EntityManager }) {
+  async log(
+    payload: Partial<ActivityLogEntity>,
+    options?: { manager?: EntityManager },
+  ) {
     return this.createUseCase.execute(payload, { manager: options?.manager });
   }
 }

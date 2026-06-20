@@ -10,9 +10,10 @@ export class GetLatestResumeAiAnalysisByCandidateUseCase {
   ) {}
 
   async execute(candidateId: string): Promise<ResumeAiAnalysisEntity> {
-    const row = await this.resumeAiAnalysisRepository.findLatestByCandidateId(
-      candidateId,
-    );
+    const row =
+      await this.resumeAiAnalysisRepository.findLatestByCandidateId(
+        candidateId,
+      );
 
     if (!row) {
       throw new NotFoundException({

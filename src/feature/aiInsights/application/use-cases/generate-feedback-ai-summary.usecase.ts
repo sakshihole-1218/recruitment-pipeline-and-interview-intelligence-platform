@@ -65,7 +65,6 @@ export class GenerateFeedbackAiSummaryUseCase {
 
       const now = new Date();
 
-      
       const created = await this.feedbackAiSummaryRepository.createAndSave(
         {
           application_id: dto.application_id,
@@ -103,11 +102,13 @@ export class GenerateFeedbackAiSummaryUseCase {
         created.technical_summary = result.technical_summary ?? null;
         created.communication_summary = result.communication_summary ?? null;
         created.overall_score =
-          result.overall_score !== null && Number.isFinite(Number(result.overall_score))
+          result.overall_score !== null &&
+          Number.isFinite(Number(result.overall_score))
             ? Number(result.overall_score).toFixed(2)
             : null;
         created.technical_score =
-          result.technical_score !== null && Number.isFinite(Number(result.technical_score))
+          result.technical_score !== null &&
+          Number.isFinite(Number(result.technical_score))
             ? Number(result.technical_score).toFixed(2)
             : null;
         created.communication_score =
@@ -134,16 +135,21 @@ export class GenerateFeedbackAiSummaryUseCase {
       } catch (err) {
         created.generation_status = AiFeedbackSummaryStatus.FAILED;
         created.failure_reason =
-          err instanceof Error ? err.message : 'Feedback summary generation failed';
+          err instanceof Error
+            ? err.message
+            : 'Feedback summary generation failed';
         created.generated_at = null;
         created.updated_by_user_id = actorId;
       }
 
       await this.feedbackAiSummaryRepository.save(created, { manager });
 
-      const loaded = await this.feedbackAiSummaryRepository.findById(created.id, {
-        manager,
-      });
+      const loaded = await this.feedbackAiSummaryRepository.findById(
+        created.id,
+        {
+          manager,
+        },
+      );
 
       const resultEntity = loaded ?? created;
 

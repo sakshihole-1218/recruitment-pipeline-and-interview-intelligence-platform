@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsEnum, IsIn, IsISO8601, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsIn,
+  IsISO8601,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 import { NoteType } from '../enums/note-type.enum';
@@ -29,7 +36,11 @@ export class ListApplicationNotesQueryDto extends PaginationQueryDto {
 
   @ApiPropertyOptional({ enum: NoteType })
   @IsOptional()
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(NoteType)
   note_type?: NoteType;
 
@@ -51,5 +62,6 @@ export class ListApplicationNotesQueryDto extends PaginationQueryDto {
   })
   @IsOptional()
   @IsIn(APPLICATION_NOTE_SORT_FIELDS)
-  override sort_by?: (typeof APPLICATION_NOTE_SORT_FIELDS)[number] = 'created_at';
+  override sort_by?: (typeof APPLICATION_NOTE_SORT_FIELDS)[number] =
+    'created_at';
 }

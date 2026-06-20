@@ -76,7 +76,9 @@ export class UpdateApplicationDecisionUseCase {
     }
 
     return this.dataSource.transaction(async (manager) => {
-      const actor = await this.userRepository.findById(actorUserId, { manager });
+      const actor = await this.userRepository.findById(actorUserId, {
+        manager,
+      });
       if (!actor) {
         throw new NotFoundException({
           message: 'User not found',
@@ -180,13 +182,17 @@ export class UpdateApplicationDecisionUseCase {
 
       if (!aiFeedback && aiSession) {
         const sessionFeedback =
-          await this.aiInterviewFeedbackRepository.findBySessionId(aiSession.id, {
-            manager,
-          });
+          await this.aiInterviewFeedbackRepository.findBySessionId(
+            aiSession.id,
+            {
+              manager,
+            },
+          );
 
         if (
           sessionFeedback &&
-          sessionFeedback.feedback_status === AiInterviewFeedbackStatus.COMPLETED
+          sessionFeedback.feedback_status ===
+            AiInterviewFeedbackStatus.COMPLETED
         ) {
           this.ensureAiFeedbackBelongsToApplication(
             sessionFeedback,
@@ -319,7 +325,10 @@ export class UpdateApplicationDecisionUseCase {
         }
       }
 
-      if (!isStatusChange && (isReasonUpdate || isNotesUpdate || isSourceUpdate)) {
+      if (
+        !isStatusChange &&
+        (isReasonUpdate || isNotesUpdate || isSourceUpdate)
+      ) {
         if (nextStatus === DecisionStatus.HIRED) {
           throw new ConflictException({
             message: 'Decision details cannot be updated for HIRED decisions',
@@ -327,12 +336,14 @@ export class UpdateApplicationDecisionUseCase {
           });
         }
 
-        await this.workflowValidationHelper.ensureOfferStateAllowsDecisionUpdate({
-          applicationId: application.id,
-          nextDecisionStatus: nextStatus,
-          manager,
-          offerRepository: this.offerRepository,
-        });
+        await this.workflowValidationHelper.ensureOfferStateAllowsDecisionUpdate(
+          {
+            applicationId: application.id,
+            nextDecisionStatus: nextStatus,
+            manager,
+            offerRepository: this.offerRepository,
+          },
+        );
       }
 
       const stageChangeEvents: Array<{ fromStage: string; toStage: string }> =
@@ -387,18 +398,19 @@ export class UpdateApplicationDecisionUseCase {
           interviewerReviews,
         );
       decision.proctoring_risk_snapshot =
-        this.decisionSnapshotHelper.buildProctoringRiskSnapshot(proctoringEvents);
+        this.decisionSnapshotHelper.buildProctoringRiskSnapshot(
+          proctoringEvents,
+        );
       decision.decision_at = now;
       decision.updated_by_user_id = actor.id;
 
       await this.decisionRepository.save(decision, { manager });
 
-      const mapped = DecisionsApplicationStageHelper.mapDecisionToApplicationState(
-        {
+      const mapped =
+        DecisionsApplicationStageHelper.mapDecisionToApplicationState({
           decision_status: decision.decision_status,
           decision_reason: decision.decision_reason,
-        },
-      );
+        });
       const fromStage = application.current_stage;
       const toStage = mapped.current_stage;
 
@@ -455,10 +467,14 @@ export class UpdateApplicationDecisionUseCase {
       }
 
       const changedFields = [] as string[];
-      if (dto.decision_status !== undefined) changedFields.push('decision_status');
-      if (dto.decision_reason !== undefined) changedFields.push('decision_reason');
-      if (dto.decision_notes !== undefined) changedFields.push('decision_notes');
-      if (dto.decision_source !== undefined) changedFields.push('decision_source');
+      if (dto.decision_status !== undefined)
+        changedFields.push('decision_status');
+      if (dto.decision_reason !== undefined)
+        changedFields.push('decision_reason');
+      if (dto.decision_notes !== undefined)
+        changedFields.push('decision_notes');
+      if (dto.decision_source !== undefined)
+        changedFields.push('decision_source');
 
       await this.activityWriter.log(
         ActivityLogBuilder.build({
@@ -485,8 +501,7 @@ export class UpdateApplicationDecisionUseCase {
   ): void {
     if (session.application_id !== applicationId) {
       throw new BadRequestException({
-        message:
-          'AI interview session does not belong to the same application',
+        message: 'AI interview session does not belong to the same application',
         code: 'AI_INTERVIEW_SESSION_APPLICATION_MISMATCH',
       });
     }

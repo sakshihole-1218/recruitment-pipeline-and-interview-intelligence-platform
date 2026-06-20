@@ -38,7 +38,9 @@ export class CreateApplicationNoteUseCase {
       actorRoles: options.actor?.roles,
     });
 
-    await this.referenceRepository.ensureApplicationExists(options.applicationId);
+    await this.referenceRepository.ensureApplicationExists(
+      options.applicationId,
+    );
     await this.referenceRepository.ensureUserExists(actorUserId);
 
     const noteText = String(options.dto.note_text ?? '').trim();
@@ -52,9 +54,12 @@ export class CreateApplicationNoteUseCase {
     const now = new Date();
 
     return this.dataSource.transaction(async (manager) => {
-      await this.referenceRepository.ensureApplicationExists(options.applicationId, {
-        manager,
-      });
+      await this.referenceRepository.ensureApplicationExists(
+        options.applicationId,
+        {
+          manager,
+        },
+      );
       await this.referenceRepository.ensureUserExists(actorUserId, { manager });
 
       const note = await this.notesRepository.createAndSave(

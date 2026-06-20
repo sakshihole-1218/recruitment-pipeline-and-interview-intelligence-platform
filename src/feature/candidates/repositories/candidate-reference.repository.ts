@@ -9,7 +9,10 @@ export class CandidateReferenceRepository {
     return manager.getRepository(SkillEntity);
   }
 
-  async findSkillsByIds(skillIds: string[], manager: EntityManager): Promise<SkillEntity[]> {
+  async findSkillsByIds(
+    skillIds: string[],
+    manager: EntityManager,
+  ): Promise<SkillEntity[]> {
     if (!skillIds.length) return [];
 
     return this.skillRepo(manager).find({

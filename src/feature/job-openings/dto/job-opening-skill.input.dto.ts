@@ -17,8 +17,15 @@ export class JobOpeningSkillInputDto {
   @IsUUID()
   skill_id: string;
 
-  @ApiProperty({ enum: SkillProficiencyLevel, example: SkillProficiencyLevel.INTERMEDIATE })
-  @Transform(({ value }) => String(value ?? '').trim().toUpperCase())
+  @ApiProperty({
+    enum: SkillProficiencyLevel,
+    example: SkillProficiencyLevel.INTERMEDIATE,
+  })
+  @Transform(({ value }) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase(),
+  )
   @IsEnum(SkillProficiencyLevel)
   proficiency_level: SkillProficiencyLevel;
 
@@ -32,7 +39,10 @@ export class JobOpeningSkillInputDto {
   @IsBoolean()
   is_mandatory?: boolean;
 
-  @ApiPropertyOptional({ example: 2, description: 'Years of experience required for this skill' })
+  @ApiPropertyOptional({
+    example: 2,
+    description: 'Years of experience required for this skill',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

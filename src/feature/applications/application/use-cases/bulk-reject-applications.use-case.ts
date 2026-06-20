@@ -2,7 +2,10 @@ import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { BulkRejectApplicationsDto } from '../../dto/bulk-reject-applications.dto';
-import { BulkOperationFailureDto, BulkOperationResultResponseDto } from '../../dto/bulk-operation-result.response.dto';
+import {
+  BulkOperationFailureDto,
+  BulkOperationResultResponseDto,
+} from '../../dto/bulk-operation-result.response.dto';
 import { ApplicationCurrentStage } from '../../enums/application-current-stage.enum';
 import { ApplicationStatus } from '../../enums/application-status.enum';
 import { ApplicationsValidationHelper } from '../../helpers/applications-validation.helper';
@@ -23,7 +26,10 @@ export class BulkRejectApplicationsUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(dto: BulkRejectApplicationsDto, actorUserId?: string): Promise<BulkOperationResultResponseDto> {
+  async execute(
+    dto: BulkRejectApplicationsDto,
+    actorUserId?: string,
+  ): Promise<BulkOperationResultResponseDto> {
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -37,7 +43,9 @@ export class BulkRejectApplicationsUseCase {
     for (const applicationId of dto.application_ids) {
       try {
         await this.dataSource.transaction(async (manager) => {
-          const app = await this.applicationRepository.findById(applicationId, { manager });
+          const app = await this.applicationRepository.findById(applicationId, {
+            manager,
+          });
           if (!app) {
             throw new BadRequestException({
               message: 'Application not found',
@@ -48,7 +56,10 @@ export class BulkRejectApplicationsUseCase {
           const fromStage = app.current_stage;
           const fromStatus = app.application_status;
 
-          if (fromStage === ApplicationCurrentStage.HIRED || fromStage === ApplicationCurrentStage.WITHDRAWN) {
+          if (
+            fromStage === ApplicationCurrentStage.HIRED ||
+            fromStage === ApplicationCurrentStage.WITHDRAWN
+          ) {
             throw new BadRequestException({
               message: 'Application cannot be rejected from the current stage',
               code: 'APPLICATION_REJECT_NOT_ALLOWED',
