@@ -36,6 +36,9 @@ import { AiInterviewRecommendation } from '../enums/ai-interview-recommendation.
 @Index('idx_ai_interview_feedback_status_active', ['feedback_status'], {
   where: '"deleted_at" IS NULL',
 })
+@Index('idx_ai_interview_feedback_recommendation_active', ['recommendation'], {
+  where: '"deleted_at" IS NULL',
+})
 @Index('idx_ai_interview_feedback_generated_at_active', ['generated_at'], {
   where: '"deleted_at" IS NULL',
 })
@@ -65,16 +68,19 @@ export class AiInterviewFeedbackEntity {
   problem_solving_score: string | null;
 
   @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
-  project_understanding_score: string | null;
-
-  @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
-  answer_relevance_score: string | null;
-
-  @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
-  confidence_score: string | null;
+  experience_relevance_score: string | null;
 
   @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
   overall_score: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  strengths_summary: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  weaknesses_summary: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  detailed_feedback: string | null;
 
   @Column({ type: 'text', nullable: true })
   technical_summary: string | null;
@@ -86,19 +92,10 @@ export class AiInterviewFeedbackEntity {
   problem_solving_summary: string | null;
 
   @Column({ type: 'text', nullable: true })
-  project_understanding_summary: string | null;
-
-  @Column({ type: 'text', nullable: true })
-  strengths: string | null;
-
-  @Column({ type: 'text', nullable: true })
-  concerns: string | null;
-
-  @Column({ type: 'text', nullable: true })
-  improvement_areas: string | null;
+  experience_relevance_summary: string | null;
 
   @Column({ type: 'varchar', length: 30, nullable: true })
-  ai_recommendation: AiInterviewRecommendation | null;
+  recommendation: AiInterviewRecommendation | null;
 
   @Column({ type: 'varchar', length: 20 })
   feedback_status: AiInterviewFeedbackStatus;
@@ -110,7 +107,7 @@ export class AiInterviewFeedbackEntity {
   failure_reason: string | null;
 
   @Column({ type: 'jsonb', nullable: true })
-  raw_ai_payload: Record<string, unknown> | null;
+  evaluation_metadata: Record<string, unknown> | null;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   created_at: Date;

@@ -7,14 +7,13 @@ import {
 import { DataSource } from 'typeorm';
 
 import { FeedbackGenerationStatus } from '../../../aiInterviewSessions/enums/feedback-generation-status.enum';
-import { GenerateAiInterviewFeedbackDto } from '../../dto/generate-ai-interview-feedback.dto';
 import { AiInterviewFeedbackEntity } from '../../entities/ai-interview-feedback.entity';
 import { AiInterviewFeedbackStatus } from '../../enums/ai-interview-feedback-status.enum';
 import { AiInterviewFeedbackValidationHelper } from '../../helpers/ai-interview-feedback-validation.helper';
 import {
   AI_INTERVIEW_FEEDBACK_PROVIDER,
-  AiInterviewFeedbackProvider,
   GenerateAiInterviewFeedbackOutput,
+  InterviewEvaluationProvider,
 } from '../../providers/ai-interview-feedback-provider';
 import { AiInterviewFeedbackReferenceRepository } from '../../repositories/ai-interview-feedback-reference.repository';
 import { AiInterviewFeedbackRepository } from '../../repositories/ai-interview-feedback.repository';
@@ -27,21 +26,21 @@ export class GenerateAiInterviewFeedbackUseCase {
     private readonly referenceRepository: AiInterviewFeedbackReferenceRepository,
     private readonly validation: AiInterviewFeedbackValidationHelper,
     @Inject(AI_INTERVIEW_FEEDBACK_PROVIDER)
-    private readonly provider: AiInterviewFeedbackProvider,
+    private readonly provider: InterviewEvaluationProvider,
   ) {}
 
   async execute(
-    dto: GenerateAiInterviewFeedbackDto,
+    sessionId: string,
     actorUserId?: string,
   ): Promise<AiInterviewFeedbackEntity> {
     this.validation.ensureActorUserRequired(actorUserId);
     const actorId = actorUserId;
 
     return this.dataSource.transaction(async (manager) => {
-      const session = await this.referenceRepository.findSessionById(
-        dto.ai_interview_session_id,
-        { manager, lockForUpdate: true },
-      );
+      const session = await this.referenceRepository.findSessionById(sessionId, {
+        manager,
+        lockForUpdate: true,
+      });
 
       if (!session) {
         throw new NotFoundException({
@@ -58,24 +57,15 @@ export class GenerateAiInterviewFeedbackUseCase {
       });
       this.validation.ensureNoDuplicateActiveFeedback(existing);
 
-      const [application, candidate, questions, transcripts, resumeAnalysis] =
+      const [application, candidate, allQuestions, transcripts, resumeAnalysis] =
         await Promise.all([
           this.referenceRepository.findApplicationById(
             session.application_id,
             manager,
           ),
-          this.referenceRepository.findCandidateById(
-            session.candidate_id,
-            manager,
-          ),
-          this.referenceRepository.findQuestionsBySessionId(
-            session.id,
-            manager,
-          ),
-          this.referenceRepository.findTranscriptsBySessionId(
-            session.id,
-            manager,
-          ),
+          this.referenceRepository.findCandidateById(session.candidate_id, manager),
+          this.referenceRepository.findQuestionsBySessionId(session.id, manager),
+          this.referenceRepository.findTranscriptsBySessionId(session.id, manager),
           session.resume_analysis_id
             ? this.referenceRepository.findResumeAnalysisById(
                 session.resume_analysis_id,
@@ -103,6 +93,10 @@ export class GenerateAiInterviewFeedbackUseCase {
 
       this.validation.ensureTranscriptExists(transcripts);
       this.validation.ensureCandidateTranscriptExists(transcripts);
+      this.validation.ensureMinimumCandidateTranscriptLength(transcripts);
+
+      const questions = allQuestions.filter((question) => !question.is_follow_up);
+      const followUps = allQuestions.filter((question) => question.is_follow_up);
 
       await this.referenceRepository.updateSessionFeedbackGenerationStatus({
         session,
@@ -120,22 +114,20 @@ export class GenerateAiInterviewFeedbackUseCase {
           technical_score: null,
           communication_score: null,
           problem_solving_score: null,
-          project_understanding_score: null,
-          answer_relevance_score: null,
-          confidence_score: null,
+          experience_relevance_score: null,
           overall_score: null,
+          strengths_summary: null,
+          weaknesses_summary: null,
+          detailed_feedback: null,
           technical_summary: null,
           communication_summary: null,
           problem_solving_summary: null,
-          project_understanding_summary: null,
-          strengths: null,
-          concerns: null,
-          improvement_areas: null,
-          ai_recommendation: null,
+          experience_relevance_summary: null,
+          recommendation: null,
           feedback_status: AiInterviewFeedbackStatus.PROCESSING,
           generated_at: null,
           failure_reason: null,
-          raw_ai_payload: null,
+          evaluation_metadata: null,
           created_by_user_id: actorId,
           updated_by_user_id: actorId,
           deleted_at: null,
@@ -161,6 +153,7 @@ export class GenerateAiInterviewFeedbackUseCase {
           },
           resume_analysis: resumeAnalysis,
           questions,
+          follow_ups: followUps,
           transcripts,
         });
 
@@ -223,17 +216,9 @@ export class GenerateAiInterviewFeedbackUseCase {
       result.problem_solving_score,
       'problem_solving_score',
     );
-    const projectUnderstandingScore = this.normalizeScore(
-      result.project_understanding_score,
-      'project_understanding_score',
-    );
-    const answerRelevanceScore = this.normalizeScore(
-      result.answer_relevance_score,
-      'answer_relevance_score',
-    );
-    const confidenceScore = this.normalizeScore(
-      result.confidence_score,
-      'confidence_score',
+    const experienceRelevanceScore = this.normalizeScore(
+      result.experience_relevance_score,
+      'experience_relevance_score',
     );
     const overallScore =
       result.overall_score ??
@@ -241,12 +226,13 @@ export class GenerateAiInterviewFeedbackUseCase {
         technicalScore,
         communicationScore,
         problemSolvingScore,
-        projectUnderstandingScore,
-        answerRelevanceScore,
-        confidenceScore,
+        experienceRelevanceScore,
       ]);
 
-    this.validation.ensureScoreWithinRange(overallScore, 'overall_score');
+    this.validation.ensureOverallScoreWithinRange(
+      overallScore,
+      'overall_score',
+    );
 
     entity.technical_score =
       technicalScore === null ? null : technicalScore.toFixed(2);
@@ -254,16 +240,21 @@ export class GenerateAiInterviewFeedbackUseCase {
       communicationScore === null ? null : communicationScore.toFixed(2);
     entity.problem_solving_score =
       problemSolvingScore === null ? null : problemSolvingScore.toFixed(2);
-    entity.project_understanding_score =
-      projectUnderstandingScore === null
+    entity.experience_relevance_score =
+      experienceRelevanceScore === null
         ? null
-        : projectUnderstandingScore.toFixed(2);
-    entity.answer_relevance_score =
-      answerRelevanceScore === null ? null : answerRelevanceScore.toFixed(2);
-    entity.confidence_score =
-      confidenceScore === null ? null : confidenceScore.toFixed(2);
+        : experienceRelevanceScore.toFixed(2);
     entity.overall_score =
       overallScore === null ? null : overallScore.toFixed(2);
+    entity.strengths_summary = this.validation.normalizeText(
+      result.strengths_summary,
+    );
+    entity.weaknesses_summary = this.validation.normalizeText(
+      result.weaknesses_summary,
+    );
+    entity.detailed_feedback = this.validation.normalizeText(
+      result.detailed_feedback,
+    );
     entity.technical_summary = this.validation.normalizeText(
       result.technical_summary,
     );
@@ -273,18 +264,12 @@ export class GenerateAiInterviewFeedbackUseCase {
     entity.problem_solving_summary = this.validation.normalizeText(
       result.problem_solving_summary,
     );
-    entity.project_understanding_summary = this.validation.normalizeText(
-      result.project_understanding_summary,
+    entity.experience_relevance_summary = this.validation.normalizeText(
+      result.experience_relevance_summary,
     );
-    entity.strengths = this.validation.normalizeText(result.strengths);
-    entity.concerns = this.validation.normalizeText(result.concerns);
-    entity.improvement_areas = this.validation.normalizeText(
-      result.improvement_areas,
-    );
-    entity.ai_recommendation =
-      result.ai_recommendation ??
-      this.validation.toRecommendation(overallScore);
-    entity.raw_ai_payload = result.raw_ai_payload ?? null;
+    entity.recommendation =
+      result.recommendation ?? this.validation.toRecommendation(overallScore);
+    entity.evaluation_metadata = result.evaluation_metadata ?? null;
     entity.updated_by_user_id = actorUserId;
 
     return entity;

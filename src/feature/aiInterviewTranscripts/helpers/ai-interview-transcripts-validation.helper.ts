@@ -9,6 +9,23 @@ import { AiInterviewQuestionEntity } from '../../aiInterviewQuestions/entities/a
 
 @Injectable()
 export class AiInterviewTranscriptsValidationHelper {
+  private static readonly ALLOWED_AUDIO_MIME_TYPES = new Set([
+    'audio/webm',
+    'audio/wav',
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/mp4',
+    'audio/x-m4a',
+  ]);
+
+  private static readonly ALLOWED_AUDIO_EXTENSIONS = new Set([
+    '.webm',
+    '.wav',
+    '.mp3',
+    '.mp4',
+    '.m4a',
+  ]);
+
   ensureActorUserRequired(actorUserId?: string): asserts actorUserId is string {
     if (!actorUserId) {
       throw new BadRequestException({
@@ -71,13 +88,34 @@ export class AiInterviewTranscriptsValidationHelper {
 
   ensureAudioFileType(file: Express.Multer.File): void {
     const mimeType = String(file.mimetype ?? '').toLowerCase();
+    const fileName = String(file.originalname ?? '').toLowerCase();
+    const hasAllowedMime =
+      AiInterviewTranscriptsValidationHelper.ALLOWED_AUDIO_MIME_TYPES.has(
+        mimeType,
+      );
+    const hasAllowedExtension = Array.from(
+      AiInterviewTranscriptsValidationHelper.ALLOWED_AUDIO_EXTENSIONS,
+    ).some((extension) => fileName.endsWith(extension));
 
-    if (!mimeType.startsWith('audio/')) {
+    if (!hasAllowedMime && !hasAllowedExtension) {
       throw new BadRequestException({
         message:
-          'Only audio uploads are supported for AI interview transcription',
+          'Only webm, wav, mp3, mp4, and m4a audio uploads are supported for AI interview transcription',
         code: 'AI_INTERVIEW_AUDIO_FILE_INVALID_TYPE',
-        meta: { mime_type: file.mimetype },
+        meta: { mime_type: file.mimetype, original_name: file.originalname },
+      });
+    }
+  }
+
+  ensureAudioFileSize(file: Express.Multer.File, maxBytes: number): void {
+    if (file.size > maxBytes) {
+      throw new BadRequestException({
+        message: `Audio file exceeds the maximum allowed size of ${maxBytes} bytes`,
+        code: 'AI_INTERVIEW_AUDIO_FILE_TOO_LARGE',
+        meta: {
+          size_bytes: file.size,
+          max_size_bytes: maxBytes,
+        },
       });
     }
   }

@@ -97,6 +97,25 @@ export class AiInterviewTranscriptRepository {
       .getMany();
   }
 
+  async findCandidateEntriesByQuestionId(
+    questionId: string,
+    options?: { manager?: EntityManager },
+  ): Promise<AiInterviewTranscriptEntity[]> {
+    return this.baseQuery('ai_interview_transcripts', options?.manager)
+      .andWhere(
+        'ai_interview_transcripts.ai_interview_question_id = :questionId',
+        {
+          questionId,
+        },
+      )
+      .andWhere('ai_interview_transcripts.speaker_type = :speakerType', {
+        speakerType: 'CANDIDATE',
+      })
+      .orderBy('ai_interview_transcripts.sequence_number', 'ASC')
+      .addOrderBy('ai_interview_transcripts.created_at', 'ASC')
+      .getMany();
+  }
+
   async findAllWithFilters(
     query: TranscriptQueryDto,
   ): Promise<AiInterviewTranscriptListResult> {

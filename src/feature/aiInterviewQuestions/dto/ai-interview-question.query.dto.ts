@@ -13,6 +13,8 @@ import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
 import { DifficultyLevel } from '../enums/difficulty-level.enum';
 import { GeneratedFrom } from '../enums/generated-from.enum';
+import { QuestionSource } from '../enums/question-source.enum';
+import { QuestionStatus } from '../enums/question-status.enum';
 import { QuestionType } from '../enums/question-type.enum';
 
 const AI_INTERVIEW_QUESTION_SORT_FIELDS = [
@@ -92,6 +94,16 @@ export class AiInterviewQuestionQueryDto extends PaginationQueryDto {
   @IsOptional()
   @Transform(({ value }) => toOptionalBoolean(value))
   is_answered?: boolean;
+
+  @ApiPropertyOptional({ enum: QuestionSource })
+  @IsOptional()
+  @IsEnum(QuestionSource)
+  question_source?: QuestionSource;
+
+  @ApiPropertyOptional({ enum: QuestionStatus })
+  @IsOptional()
+  @IsEnum(QuestionStatus)
+  question_status?: QuestionStatus;
 
   @ApiPropertyOptional({
     example: 'created_at',

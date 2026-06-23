@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
 import { AiInterviewFeedbackQueryDto } from '../../dto/ai-interview-feedback.query.dto';
-import { GenerateAiInterviewFeedbackDto } from '../../dto/generate-ai-interview-feedback.dto';
-import { RegenerateAiInterviewFeedbackDto } from '../../dto/regenerate-ai-interview-feedback.dto';
 import { UpdateAiInterviewFeedbackDto } from '../../dto/update-ai-interview-feedback.dto';
 import { DeleteAiInterviewFeedbackUseCase } from '../use-cases/delete-ai-interview-feedback.usecase';
 import { GenerateAiInterviewFeedbackUseCase } from '../use-cases/generate-ai-interview-feedback.usecase';
@@ -24,12 +22,12 @@ export class AiInterviewFeedbackService {
     private readonly deleteUseCase: DeleteAiInterviewFeedbackUseCase,
   ) {}
 
-  generate(dto: GenerateAiInterviewFeedbackDto, actorUserId?: string) {
-    return this.generateUseCase.execute(dto, actorUserId);
+  generate(sessionId: string, actorUserId?: string) {
+    return this.generateUseCase.execute(sessionId, actorUserId);
   }
 
-  regenerate(dto: RegenerateAiInterviewFeedbackDto, actorUserId?: string) {
-    return this.regenerateUseCase.execute(dto, actorUserId);
+  regenerate(sessionId: string, actorUserId?: string) {
+    return this.regenerateUseCase.execute(sessionId, actorUserId);
   }
 
   getById(id: string) {

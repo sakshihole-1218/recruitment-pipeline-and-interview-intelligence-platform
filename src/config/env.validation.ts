@@ -32,7 +32,13 @@ export const envValidationSchema = Joi.object({
     then: Joi.string().trim().required(),
     otherwise: Joi.string().trim().optional().allow(''),
   }),
-  STT_PROVIDER: Joi.string().valid('mock').default('mock'),
+  STT_PROVIDER: Joi.string().valid('mock', 'groq').default('mock'),
+  GROQ_API_KEY: Joi.when('STT_PROVIDER', {
+    is: 'groq',
+    then: Joi.string().trim().required(),
+    otherwise: Joi.string().trim().optional().allow(''),
+  }),
+  GROQ_STT_MODEL: Joi.string().trim().default('whisper-large-v3-turbo'),
 
   LIVEKIT_API_KEY: Joi.string().required(),
   LIVEKIT_API_SECRET: Joi.string().required(),

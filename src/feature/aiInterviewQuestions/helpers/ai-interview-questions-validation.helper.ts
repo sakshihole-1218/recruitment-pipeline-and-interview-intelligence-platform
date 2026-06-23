@@ -8,6 +8,8 @@ import { AiInterviewSessionStatus } from '../../aiInterviewSessions/enums/ai-int
 import { QuestionGenerationStatus } from '../../aiInterviewSessions/enums/question-generation-status.enum';
 
 import { AiInterviewQuestionEntity } from '../entities/ai-interview-question.entity';
+import { QuestionSource } from '../enums/question-source.enum';
+import { QuestionStatus } from '../enums/question-status.enum';
 import { QuestionType } from '../enums/question-type.enum';
 
 @Injectable()
@@ -51,15 +53,20 @@ export class AiInterviewQuestionsValidationHelper {
   ensureFollowUpConsistency(
     questionType: QuestionType,
     parentQuestionId?: string | null,
+    questionSource?: QuestionSource,
   ): void {
-    if (questionType === QuestionType.FOLLOW_UP && !parentQuestionId) {
+    const isFollowUp =
+      questionType === QuestionType.FOLLOW_UP ||
+      questionSource === QuestionSource.FOLLOW_UP;
+
+    if (isFollowUp && !parentQuestionId) {
       throw new BadRequestException({
         message: 'Follow-up questions require parent_question_id',
         code: 'FOLLOW_UP_PARENT_REQUIRED',
       });
     }
 
-    if (questionType !== QuestionType.FOLLOW_UP && parentQuestionId) {
+    if (!isFollowUp && parentQuestionId) {
       throw new BadRequestException({
         message: 'Only FOLLOW_UP questions can reference parent_question_id',
         code: 'FOLLOW_UP_PARENT_INVALID_FOR_QUESTION_TYPE',
@@ -102,5 +109,92 @@ export class AiInterviewQuestionsValidationHelper {
         code: 'QUESTION_INVALID_ANSWERED_AT',
       });
     }
+  }
+
+  ensureQuestionStatusConsistency(
+    status: QuestionStatus,
+    askedAt: Date | null,
+    answeredAt: Date | null,
+  ): void {
+    if (status === QuestionStatus.PENDING && (askedAt || answeredAt)) {
+      throw new BadRequestException({
+        message: 'Pending questions cannot have asked_at or answered_at set',
+        code: 'QUESTION_STATUS_PENDING_INVALID_TIMESTAMPS',
+      });
+    }
+
+    if (status === QuestionStatus.ASKED && !askedAt) {
+      throw new BadRequestException({
+        message: 'Asked questions require asked_at',
+        code: 'QUESTION_STATUS_ASKED_TIMESTAMP_REQUIRED',
+      });
+    }
+
+    if (status === QuestionStatus.ANSWERED && (!askedAt || !answeredAt)) {
+      throw new BadRequestException({
+        message: 'Answered questions require asked_at and answered_at',
+        code: 'QUESTION_STATUS_ANSWERED_TIMESTAMPS_REQUIRED',
+      });
+    }
+  }
+
+  ensureTranscriptHasContent(candidateAnswer: string): void {
+    const normalized = candidateAnswer.trim();
+    if (!normalized) {
+      throw new BadRequestException({
+        message: 'Candidate answer transcript is empty',
+        code: 'AI_INTERVIEW_TRANSCRIPT_EMPTY',
+      });
+    }
+
+    const wordCount = normalized.split(/\s+/).filter(Boolean).length;
+    if (wordCount < 4 || normalized.length < 20) {
+      throw new BadRequestException({
+        message:
+          'Candidate answer transcript is too short for follow-up generation',
+        code: 'AI_INTERVIEW_TRANSCRIPT_TOO_SHORT',
+      });
+    }
+  }
+
+  ensureFollowUpLimitNotReached(count: number): void {
+    if (count >= 2) {
+      throw new ConflictException({
+        message:
+          'Maximum follow-up question limit reached for this main question',
+        code: 'AI_INTERVIEW_FOLLOW_UP_LIMIT_REACHED',
+      });
+    }
+  }
+
+  ensureNoDuplicateFollowUp(
+    generatedQuestion: string,
+    existingQuestions: string[],
+  ): void {
+    const normalized = this.normalizeQuestionText(generatedQuestion);
+    if (!normalized) {
+      throw new BadRequestException({
+        message: 'Generated follow-up question is empty',
+        code: 'AI_INTERVIEW_FOLLOW_UP_EMPTY',
+      });
+    }
+
+    const isDuplicate = existingQuestions.some(
+      (question) => this.normalizeQuestionText(question) === normalized,
+    );
+
+    if (isDuplicate) {
+      throw new ConflictException({
+        message: 'Generated follow-up question duplicates an existing question',
+        code: 'AI_INTERVIEW_DUPLICATE_FOLLOW_UP',
+      });
+    }
+  }
+
+  private normalizeQuestionText(value: string): string {
+    return String(value || '')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLowerCase();
   }
 }

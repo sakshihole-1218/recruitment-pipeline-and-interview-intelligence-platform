@@ -10738,6 +10738,32 @@
               "example": false,
               "type": "boolean"
             }
+          },
+          {
+            "name": "question_source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SYSTEM",
+                "FOLLOW_UP"
+              ]
+            }
+          },
+          {
+            "name": "question_status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "ASKED",
+                "ANSWERED",
+                "SKIPPED"
+              ]
+            }
           }
         ],
         "responses": {
@@ -10880,6 +10906,62 @@
           }
         ],
         "summary": "Generate mocked interview plan questions for an AI interview session",
+        "tags": [
+          "AI Interview Questions"
+        ]
+      }
+    },
+    "/api/ai-interview-questions/{questionId}/generate-follow-up": {
+      "post": {
+        "operationId": "AiInterviewQuestionsController_generateFollowUp",
+        "parameters": [
+          {
+            "name": "questionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI interview follow-up question generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AiInterviewQuestionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Generate and store a Gemini follow-up question for a question",
         "tags": [
           "AI Interview Questions"
         ]
@@ -11866,20 +11948,86 @@
         ]
       }
     },
-    "/api/ai-interview-feedback/generate": {
+    "/api/speech-to-text/test": {
       "post": {
-        "operationId": "AiInterviewFeedbackController_generate",
+        "operationId": "SpeechToTextController_test",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/GenerateAiInterviewFeedbackDto"
+                "type": "object",
+                "required": [
+                  "audio"
+                ],
+                "properties": {
+                  "audio": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
               }
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Speech-to-text provider test completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SpeechToTextTestResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Internal endpoint to verify the configured STT provider",
+        "tags": [
+          "Speech To Text"
+        ]
+      }
+    },
+    "/api/ai-interview-feedback/generate/{sessionId}": {
+      "post": {
+        "operationId": "AiInterviewFeedbackController_generate",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "AI interview feedback generated successfully",
@@ -11917,26 +12065,26 @@
             "JWT-auth": []
           }
         ],
-        "summary": "Generate AI interview feedback from AI interview transcript",
+        "summary": "Generate AI interview evaluation for a completed session",
         "tags": [
           "AI Interview Feedback"
         ]
       }
     },
-    "/api/ai-interview-feedback/regenerate": {
+    "/api/ai-interview-feedback/regenerate/{sessionId}": {
       "post": {
         "operationId": "AiInterviewFeedbackController_regenerate",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegenerateAiInterviewFeedbackDto"
-              }
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "AI interview session UUID",
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "AI interview feedback regenerated successfully",
@@ -12018,7 +12166,7 @@
                 "generated_at",
                 "overall_score",
                 "feedback_status",
-                "ai_recommendation"
+                "recommendation"
               ]
             }
           },
@@ -12050,7 +12198,7 @@
             "name": "search",
             "required": false,
             "in": "query",
-            "description": "Search across summaries, concerns and failure reason",
+            "description": "Search across summaries, detailed feedback, strengths, weaknesses and failure reason",
             "schema": {
               "type": "string"
             }
@@ -12106,7 +12254,7 @@
             }
           },
           {
-            "name": "ai_recommendation",
+            "name": "recommendation",
             "required": false,
             "in": "query",
             "schema": {
@@ -18800,6 +18948,13 @@
           "is_follow_up": {
             "type": "boolean"
           },
+          "question_source": {
+            "type": "string",
+            "enum": [
+              "SYSTEM",
+              "FOLLOW_UP"
+            ]
+          },
           "generated_from": {
             "type": "string",
             "enum": [
@@ -18808,6 +18963,15 @@
               "EXPERIENCE",
               "PROJECT",
               "FOLLOW_UP_ENGINE"
+            ]
+          },
+          "question_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ASKED",
+              "ANSWERED",
+              "SKIPPED"
             ]
           },
           "expected_answer_keywords": {
@@ -18821,6 +18985,10 @@
             "items": {
               "type": "string"
             }
+          },
+          "follow_up_reasoning": {
+            "type": "object",
+            "nullable": true
           },
           "asked_at": {
             "type": "object",
@@ -18868,8 +19036,11 @@
           "difficulty_level",
           "sequence_number",
           "is_follow_up",
+          "question_source",
           "generated_from",
+          "question_status",
           "expected_answer_keywords",
+          "follow_up_reasoning",
           "asked_at",
           "answered_at",
           "is_answered",
@@ -18936,6 +19107,24 @@
               "FOLLOW_UP_ENGINE"
             ]
           },
+          "question_source": {
+            "type": "string",
+            "enum": [
+              "SYSTEM",
+              "FOLLOW_UP"
+            ],
+            "default": "SYSTEM"
+          },
+          "question_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ASKED",
+              "ANSWERED",
+              "SKIPPED"
+            ],
+            "default": "PENDING"
+          },
           "expected_answer_keywords": {
             "description": "Expected answer keywords stored as jsonb array",
             "example": [
@@ -18989,6 +19178,15 @@
           "is_answered": {
             "type": "boolean",
             "example": true
+          },
+          "question_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ASKED",
+              "ANSWERED",
+              "SKIPPED"
+            ]
           },
           "expected_answer_keywords": {
             "description": "Expected answer keywords stored as jsonb array",
@@ -19246,6 +19444,29 @@
           "id"
         ]
       },
+      "SpeechToTextTestResponseDto": {
+        "type": "object",
+        "properties": {
+          "transcript": {
+            "type": "string",
+            "example": "Thanks for the opportunity. My approach would be to optimize the API first."
+          },
+          "provider": {
+            "type": "string",
+            "example": "groq"
+          },
+          "model": {
+            "type": "object",
+            "example": "whisper-large-v3-turbo",
+            "nullable": true
+          }
+        },
+        "required": [
+          "transcript",
+          "provider",
+          "model"
+        ]
+      },
       "AiInterviewFeedbackResponseDto": {
         "type": "object",
         "properties": {
@@ -19277,19 +19498,23 @@
             "type": "object",
             "nullable": true
           },
-          "project_understanding_score": {
-            "type": "object",
-            "nullable": true
-          },
-          "answer_relevance_score": {
-            "type": "object",
-            "nullable": true
-          },
-          "confidence_score": {
+          "experience_relevance_score": {
             "type": "object",
             "nullable": true
           },
           "overall_score": {
+            "type": "object",
+            "nullable": true
+          },
+          "strengths_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "weaknesses_summary": {
+            "type": "object",
+            "nullable": true
+          },
+          "detailed_feedback": {
             "type": "object",
             "nullable": true
           },
@@ -19305,23 +19530,11 @@
             "type": "object",
             "nullable": true
           },
-          "project_understanding_summary": {
+          "experience_relevance_summary": {
             "type": "object",
             "nullable": true
           },
-          "strengths": {
-            "type": "object",
-            "nullable": true
-          },
-          "concerns": {
-            "type": "object",
-            "nullable": true
-          },
-          "improvement_areas": {
-            "type": "object",
-            "nullable": true
-          },
-          "ai_recommendation": {
+          "recommendation": {
             "type": "string",
             "enum": [
               "STRONGLY_REJECT",
@@ -19349,7 +19562,7 @@
             "type": "object",
             "nullable": true
           },
-          "raw_ai_payload": {
+          "evaluation_metadata": {
             "type": "object",
             "nullable": true
           },
@@ -19387,22 +19600,20 @@
           "technical_score",
           "communication_score",
           "problem_solving_score",
-          "project_understanding_score",
-          "answer_relevance_score",
-          "confidence_score",
+          "experience_relevance_score",
           "overall_score",
+          "strengths_summary",
+          "weaknesses_summary",
+          "detailed_feedback",
           "technical_summary",
           "communication_summary",
           "problem_solving_summary",
-          "project_understanding_summary",
-          "strengths",
-          "concerns",
-          "improvement_areas",
-          "ai_recommendation",
+          "experience_relevance_summary",
+          "recommendation",
           "feedback_status",
           "generated_at",
           "failure_reason",
-          "raw_ai_payload",
+          "evaluation_metadata",
           "created_at",
           "updated_at",
           "deleted_at",
@@ -19411,67 +19622,42 @@
           "deleted_by_user_id"
         ]
       },
-      "GenerateAiInterviewFeedbackDto": {
-        "type": "object",
-        "properties": {
-          "ai_interview_session_id": {
-            "type": "string",
-            "description": "AI interview session UUID"
-          }
-        },
-        "required": [
-          "ai_interview_session_id"
-        ]
-      },
-      "RegenerateAiInterviewFeedbackDto": {
-        "type": "object",
-        "properties": {
-          "ai_interview_session_id": {
-            "type": "string",
-            "description": "AI interview session UUID"
-          }
-        },
-        "required": [
-          "ai_interview_session_id"
-        ]
-      },
       "UpdateAiInterviewFeedbackDto": {
         "type": "object",
         "properties": {
           "technical_score": {
             "type": "number",
             "minimum": 0,
-            "maximum": 100
+            "maximum": 10
           },
           "communication_score": {
             "type": "number",
             "minimum": 0,
-            "maximum": 100
+            "maximum": 10
           },
           "problem_solving_score": {
             "type": "number",
             "minimum": 0,
-            "maximum": 100
+            "maximum": 10
           },
-          "project_understanding_score": {
+          "experience_relevance_score": {
             "type": "number",
             "minimum": 0,
-            "maximum": 100
-          },
-          "answer_relevance_score": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100
-          },
-          "confidence_score": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 100
+            "maximum": 10
           },
           "overall_score": {
             "type": "number",
             "minimum": 0,
             "maximum": 100
+          },
+          "strengths_summary": {
+            "type": "string"
+          },
+          "weaknesses_summary": {
+            "type": "string"
+          },
+          "detailed_feedback": {
+            "type": "string"
           },
           "technical_summary": {
             "type": "string"
@@ -19482,19 +19668,10 @@
           "problem_solving_summary": {
             "type": "string"
           },
-          "project_understanding_summary": {
+          "experience_relevance_summary": {
             "type": "string"
           },
-          "strengths": {
-            "type": "string"
-          },
-          "concerns": {
-            "type": "string"
-          },
-          "improvement_areas": {
-            "type": "string"
-          },
-          "ai_recommendation": {
+          "recommendation": {
             "type": "string",
             "enum": [
               "STRONGLY_REJECT",
@@ -19519,7 +19696,7 @@
           "failure_reason": {
             "type": "string"
           },
-          "raw_ai_payload": {
+          "evaluation_metadata": {
             "type": "object"
           }
         }

@@ -7,6 +7,7 @@ import { DataSource, EntityManager } from 'typeorm';
 
 import { AiInterviewSessionStatus } from '../../../aiInterviewSessions/enums/ai-interview-session-status.enum';
 import { AiInterviewQuestionEntity } from '../../../aiInterviewQuestions/entities/ai-interview-question.entity';
+import { QuestionStatus } from '../../../aiInterviewQuestions/enums/question-status.enum';
 
 import { CreateTranscriptEntryDto } from '../../dto/create-transcript-entry.dto';
 import { AiInterviewTranscriptEntity } from '../../entities/ai-interview-transcript.entity';
@@ -140,6 +141,7 @@ export class CreateTranscriptEntryUseCase {
     if (options.speakerType === TranscriptSpeakerType.AI_INTERVIEWER) {
       options.question.asked_at =
         options.question.asked_at ?? effectiveTimestamp;
+      options.question.question_status = QuestionStatus.ASKED;
       options.question.updated_by_user_id = options.actorUserId;
       await this.referenceRepository.saveQuestion(
         options.question,
@@ -154,6 +156,7 @@ export class CreateTranscriptEntryUseCase {
       options.question.answered_at =
         options.question.answered_at ?? effectiveTimestamp;
       options.question.is_answered = true;
+      options.question.question_status = QuestionStatus.ANSWERED;
       options.question.updated_by_user_id = options.actorUserId;
       await this.referenceRepository.saveQuestion(
         options.question,

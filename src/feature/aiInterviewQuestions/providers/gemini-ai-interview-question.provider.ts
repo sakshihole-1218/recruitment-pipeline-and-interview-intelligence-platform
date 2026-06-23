@@ -9,11 +9,14 @@ import { GeminiAiInterviewQuestionPromptHelper } from '../helpers/gemini-ai-inte
 
 import {
   AiInterviewQuestionProvider,
+  GenerateFollowUpQuestionInput,
   GenerateInterviewPlanInput,
+  GeneratedFollowUpQuestion,
   GeneratedInterviewPlanQuestion,
 } from './ai-interview-question-provider';
 
 type GeminiInterviewQuestionResponse = Partial<GeneratedInterviewPlanQuestion>;
+type GeminiFollowUpQuestionResponse = Partial<GeneratedFollowUpQuestion>;
 
 @Injectable()
 export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionProvider {
@@ -73,6 +76,28 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
       }));
     } catch (error) {
       this.logger.warn('Gemini interview plan generation failed');
+      throw error;
+    }
+  }
+
+  async generateFollowUpQuestion(
+    input: GenerateFollowUpQuestionInput,
+  ): Promise<GeneratedFollowUpQuestion> {
+    try {
+      const responseText = await this.geminiClient.generateText({
+        prompt:
+          GeminiAiInterviewQuestionPromptHelper.buildFollowUpPrompt(input),
+        responseMimeType: 'application/json',
+      });
+
+      const parsed =
+        GeminiJsonHelper.parseJson<GeminiFollowUpQuestionResponse>(
+          responseText,
+        );
+
+      return this.normalizeFollowUpQuestion(parsed);
+    } catch (error) {
+      this.logger.warn('Gemini follow-up question generation failed');
       throw error;
     }
   }
@@ -146,5 +171,28 @@ export class GeminiAiInterviewQuestionProvider implements AiInterviewQuestionPro
     return Array.from(
       new Set(value.map((entry) => String(entry || '').trim()).filter(Boolean)),
     ).slice(0, 8);
+  }
+
+  private normalizeFollowUpQuestion(
+    value: GeminiFollowUpQuestionResponse,
+  ): GeneratedFollowUpQuestion {
+    const followUpQuestion = String(value.followUpQuestion || '').trim();
+    const reasoning = String(value.reasoning || '').trim();
+    const category = String(value.category || '').trim() || 'Technical Depth';
+
+    if (!followUpQuestion) {
+      throw new Error('Gemini returned a follow-up without followUpQuestion');
+    }
+
+    if (!reasoning) {
+      throw new Error('Gemini returned a follow-up without reasoning');
+    }
+
+    return {
+      followUpQuestion,
+      difficulty: this.toDifficultyLevel(value.difficulty),
+      category,
+      reasoning,
+    };
   }
 }

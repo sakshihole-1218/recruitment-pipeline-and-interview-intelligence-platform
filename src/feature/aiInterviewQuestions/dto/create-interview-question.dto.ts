@@ -13,6 +13,8 @@ import {
 
 import { DifficultyLevel } from '../enums/difficulty-level.enum';
 import { GeneratedFrom } from '../enums/generated-from.enum';
+import { QuestionSource } from '../enums/question-source.enum';
+import { QuestionStatus } from '../enums/question-status.enum';
 import { QuestionType } from '../enums/question-type.enum';
 
 export class CreateInterviewQuestionDto {
@@ -53,6 +55,19 @@ export class CreateInterviewQuestionDto {
   @ApiProperty({ enum: GeneratedFrom })
   @IsEnum(GeneratedFrom)
   generated_from: GeneratedFrom;
+
+  @ApiPropertyOptional({ enum: QuestionSource, default: QuestionSource.SYSTEM })
+  @IsOptional()
+  @IsEnum(QuestionSource)
+  question_source?: QuestionSource;
+
+  @ApiPropertyOptional({
+    enum: QuestionStatus,
+    default: QuestionStatus.PENDING,
+  })
+  @IsOptional()
+  @IsEnum(QuestionStatus)
+  question_status?: QuestionStatus;
 
   @ApiPropertyOptional({
     type: [String],

@@ -119,6 +119,55 @@ export class AiInterviewQuestionRepository {
       .getMany();
   }
 
+  async getNextSequenceNumber(
+    sessionId: string,
+    options?: { manager?: EntityManager },
+  ): Promise<number> {
+    const raw = await this.baseQuery('ai_interview_questions', options?.manager)
+      .select(
+        'COALESCE(MAX(ai_interview_questions.sequence_number), 0)',
+        'max_sequence',
+      )
+      .andWhere('ai_interview_questions.ai_interview_session_id = :sessionId', {
+        sessionId,
+      })
+      .getRawOne<{ max_sequence: string }>();
+
+    return Number(raw?.max_sequence || 0) + 1;
+  }
+
+  async shiftSequenceNumbersForInsert(
+    sessionId: string,
+    fromSequenceNumber: number,
+    options?: { manager?: EntityManager },
+  ): Promise<void> {
+    const repo = this.repo(options?.manager);
+
+    await repo
+      .createQueryBuilder()
+      .update(AiInterviewQuestionEntity)
+      .set({
+        sequence_number: () => '"sequence_number" + 1000',
+      })
+      .where('ai_interview_session_id = :sessionId', { sessionId })
+      .andWhere('deleted_at IS NULL')
+      .andWhere('sequence_number >= :fromSequenceNumber', {
+        fromSequenceNumber,
+      })
+      .execute();
+
+    await repo
+      .createQueryBuilder()
+      .update(AiInterviewQuestionEntity)
+      .set({
+        sequence_number: () => '"sequence_number" - 999',
+      })
+      .where('ai_interview_session_id = :sessionId', { sessionId })
+      .andWhere('deleted_at IS NULL')
+      .andWhere('sequence_number >= 1000')
+      .execute();
+  }
+
   async updateQuestion(
     entity: AiInterviewQuestionEntity,
     options?: { manager?: EntityManager },
@@ -182,6 +231,18 @@ export class AiInterviewQuestionRepository {
     if (query.generated_from) {
       qb.andWhere('ai_interview_questions.generated_from = :generatedFrom', {
         generatedFrom: query.generated_from,
+      });
+    }
+
+    if (query.question_source) {
+      qb.andWhere('ai_interview_questions.question_source = :questionSource', {
+        questionSource: query.question_source,
+      });
+    }
+
+    if (query.question_status) {
+      qb.andWhere('ai_interview_questions.question_status = :questionStatus', {
+        questionStatus: query.question_status,
       });
     }
 

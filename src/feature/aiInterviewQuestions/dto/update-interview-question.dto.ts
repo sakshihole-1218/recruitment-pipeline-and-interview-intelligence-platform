@@ -3,11 +3,14 @@ import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsISO8601,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
+
+import { QuestionStatus } from '../enums/question-status.enum';
 
 export class UpdateInterviewQuestionDto {
   @ApiPropertyOptional({ description: 'Updated question text' })
@@ -30,6 +33,11 @@ export class UpdateInterviewQuestionDto {
   @IsOptional()
   @IsBoolean()
   is_answered?: boolean;
+
+  @ApiPropertyOptional({ enum: QuestionStatus })
+  @IsOptional()
+  @IsEnum(QuestionStatus)
+  question_status?: QuestionStatus;
 
   @ApiPropertyOptional({
     type: [String],

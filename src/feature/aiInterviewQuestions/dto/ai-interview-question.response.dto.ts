@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { DifficultyLevel } from '../enums/difficulty-level.enum';
 import { GeneratedFrom } from '../enums/generated-from.enum';
+import { QuestionSource } from '../enums/question-source.enum';
+import { QuestionStatus } from '../enums/question-status.enum';
 import { QuestionType } from '../enums/question-type.enum';
 
 export class AiInterviewQuestionResponseDto {
@@ -32,8 +34,14 @@ export class AiInterviewQuestionResponseDto {
   @ApiProperty()
   is_follow_up: boolean;
 
+  @ApiProperty({ enum: QuestionSource })
+  question_source: QuestionSource;
+
   @ApiProperty({ enum: GeneratedFrom })
   generated_from: GeneratedFrom;
+
+  @ApiProperty({ enum: QuestionStatus })
+  question_status: QuestionStatus;
 
   @ApiProperty({
     type: [String],
@@ -41,6 +49,9 @@ export class AiInterviewQuestionResponseDto {
     example: ['dependency injection', 'providers', 'module imports'],
   })
   expected_answer_keywords: string[] | null;
+
+  @ApiProperty({ nullable: true })
+  follow_up_reasoning: string | null;
 
   @ApiProperty({ nullable: true })
   asked_at: Date | null;

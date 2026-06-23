@@ -22,8 +22,8 @@ import { AiInterviewFeedbackController } from './controllers/ai-interview-feedba
 import { AiInterviewFeedbackEntity } from './entities/ai-interview-feedback.entity';
 import { AiInterviewFeedbackValidationHelper } from './helpers/ai-interview-feedback-validation.helper';
 import { AI_INTERVIEW_FEEDBACK_PROVIDER } from './providers/ai-interview-feedback-provider';
-import { GeminiAiInterviewFeedbackProvider } from './providers/gemini-ai-interview-feedback.provider';
-import { MockAiInterviewFeedbackProvider } from './providers/mock-ai-interview-feedback.provider';
+import { GeminiInterviewEvaluationProvider } from './providers/gemini-ai-interview-feedback.provider';
+import { MockInterviewEvaluationProvider } from './providers/mock-ai-interview-feedback.provider';
 import { AiInterviewFeedbackReferenceRepository } from './repositories/ai-interview-feedback-reference.repository';
 import { AiInterviewFeedbackRepository } from './repositories/ai-interview-feedback.repository';
 
@@ -49,13 +49,13 @@ import { AiInterviewFeedbackRepository } from './repositories/ai-interview-feedb
       provide: AI_INTERVIEW_FEEDBACK_PROVIDER,
       inject: [
         ConfigService,
-        MockAiInterviewFeedbackProvider,
-        GeminiAiInterviewFeedbackProvider,
+        MockInterviewEvaluationProvider,
+        GeminiInterviewEvaluationProvider,
       ],
       useFactory: (
         configService: ConfigService,
-        mockProvider: MockAiInterviewFeedbackProvider,
-        geminiProvider: GeminiAiInterviewFeedbackProvider,
+        mockProvider: MockInterviewEvaluationProvider,
+        geminiProvider: GeminiInterviewEvaluationProvider,
       ) => {
         return configService.get<string>('AI_PROVIDER', 'mock') === 'gemini'
           ? geminiProvider
@@ -63,8 +63,8 @@ import { AiInterviewFeedbackRepository } from './repositories/ai-interview-feedb
       },
     },
     GeminiClient,
-    MockAiInterviewFeedbackProvider,
-    GeminiAiInterviewFeedbackProvider,
+    MockInterviewEvaluationProvider,
+    GeminiInterviewEvaluationProvider,
     GenerateAiInterviewFeedbackUseCase,
     RegenerateAiInterviewFeedbackUseCase,
     GetAiInterviewFeedbackByIdUseCase,
