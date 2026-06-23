@@ -23,6 +23,7 @@ export type GenerateAiInterviewFeedbackInput = {
   };
   resume_analysis: ResumeAiAnalysisEntity | null;
   questions: AiInterviewQuestionEntity[];
+  follow_ups: AiInterviewQuestionEntity[];
   transcripts: AiInterviewTranscriptEntity[];
 };
 
@@ -30,22 +31,20 @@ export type GenerateAiInterviewFeedbackOutput = {
   technical_score?: number | null;
   communication_score?: number | null;
   problem_solving_score?: number | null;
-  project_understanding_score?: number | null;
-  answer_relevance_score?: number | null;
-  confidence_score?: number | null;
+  experience_relevance_score?: number | null;
   overall_score?: number | null;
+  strengths_summary?: string | null;
+  weaknesses_summary?: string | null;
+  detailed_feedback?: string | null;
   technical_summary?: string | null;
   communication_summary?: string | null;
   problem_solving_summary?: string | null;
-  project_understanding_summary?: string | null;
-  strengths?: string | null;
-  concerns?: string | null;
-  improvement_areas?: string | null;
-  ai_recommendation?: AiInterviewRecommendation | null;
-  raw_ai_payload?: Record<string, unknown> | null;
+  experience_relevance_summary?: string | null;
+  recommendation?: AiInterviewRecommendation | null;
+  evaluation_metadata?: Record<string, unknown> | null;
 };
 
-export interface AiInterviewFeedbackProvider {
+export interface InterviewEvaluationProvider {
   generateFeedback(
     input: GenerateAiInterviewFeedbackInput,
   ): Promise<GenerateAiInterviewFeedbackOutput>;

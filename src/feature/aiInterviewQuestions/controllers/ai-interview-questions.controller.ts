@@ -106,6 +106,29 @@ export class AiInterviewQuestionsController {
     );
   }
 
+  @Post(':questionId/generate-follow-up')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Generate and store a Gemini follow-up question for a question',
+  })
+  @ApiStandardResponse(
+    AiInterviewQuestionResponseDto,
+    'AI interview follow-up question generated successfully',
+  )
+  async generateFollowUp(
+    @Param('questionId') questionId: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const question = await this.service.generateFollowUp(
+      questionId,
+      actor?.sub,
+    );
+    return ResponseUtil.success(
+      'AI interview follow-up question generated successfully',
+      AiInterviewQuestionsMapper.toResponse(question),
+    );
+  }
+
   @Patch(':id/mark-asked')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark interview question as asked' })

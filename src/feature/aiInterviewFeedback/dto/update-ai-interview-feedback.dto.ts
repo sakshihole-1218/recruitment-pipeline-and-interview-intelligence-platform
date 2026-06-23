@@ -16,53 +16,37 @@ import { AiInterviewFeedbackStatus } from '../enums/ai-interview-feedback-status
 import { AiInterviewRecommendation } from '../enums/ai-interview-recommendation.enum';
 
 export class UpdateAiInterviewFeedbackDto {
-  @ApiPropertyOptional({ minimum: 0, maximum: 100 })
+  @ApiPropertyOptional({ minimum: 0, maximum: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
-  @Max(100)
+  @Max(10)
   technical_score?: number;
 
-  @ApiPropertyOptional({ minimum: 0, maximum: 100 })
+  @ApiPropertyOptional({ minimum: 0, maximum: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
-  @Max(100)
+  @Max(10)
   communication_score?: number;
 
-  @ApiPropertyOptional({ minimum: 0, maximum: 100 })
+  @ApiPropertyOptional({ minimum: 0, maximum: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
-  @Max(100)
+  @Max(10)
   problem_solving_score?: number;
 
-  @ApiPropertyOptional({ minimum: 0, maximum: 100 })
+  @ApiPropertyOptional({ minimum: 0, maximum: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
-  @Max(100)
-  project_understanding_score?: number;
-
-  @ApiPropertyOptional({ minimum: 0, maximum: 100 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Max(100)
-  answer_relevance_score?: number;
-
-  @ApiPropertyOptional({ minimum: 0, maximum: 100 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Max(100)
-  confidence_score?: number;
+  @Max(10)
+  experience_relevance_score?: number;
 
   @ApiPropertyOptional({ minimum: 0, maximum: 100 })
   @IsOptional()
@@ -71,6 +55,24 @@ export class UpdateAiInterviewFeedbackDto {
   @Min(0)
   @Max(100)
   overall_score?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  strengths_summary?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  weaknesses_summary?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  detailed_feedback?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -94,30 +96,12 @@ export class UpdateAiInterviewFeedbackDto {
   @IsOptional()
   @IsString()
   @MinLength(1)
-  project_understanding_summary?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  strengths?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  concerns?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  improvement_areas?: string;
+  experience_relevance_summary?: string;
 
   @ApiPropertyOptional({ enum: AiInterviewRecommendation })
   @IsOptional()
   @IsEnum(AiInterviewRecommendation)
-  ai_recommendation?: AiInterviewRecommendation;
+  recommendation?: AiInterviewRecommendation;
 
   @ApiPropertyOptional({ enum: AiInterviewFeedbackStatus })
   @IsOptional()
@@ -138,5 +122,5 @@ export class UpdateAiInterviewFeedbackDto {
   @ApiPropertyOptional({ type: Object })
   @IsOptional()
   @IsObject()
-  raw_ai_payload?: Record<string, unknown>;
+  evaluation_metadata?: Record<string, unknown>;
 }

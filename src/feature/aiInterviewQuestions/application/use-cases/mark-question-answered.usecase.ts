@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { AiInterviewQuestionEntity } from '../../entities/ai-interview-question.entity';
+import { QuestionStatus } from '../../enums/question-status.enum';
 import { AiInterviewQuestionsValidationHelper } from '../../helpers/ai-interview-questions-validation.helper';
 import { AiInterviewQuestionRepository } from '../../repositories/ai-interview-question.repository';
 
@@ -29,6 +30,7 @@ export class MarkQuestionAnsweredUseCase {
     question.asked_at = question.asked_at ?? now;
     question.answered_at = question.answered_at ?? now;
     question.is_answered = true;
+    question.question_status = QuestionStatus.ANSWERED;
     question.updated_by_user_id = actorUserId;
 
     this.validation.ensureAnsweredAfterAsked(

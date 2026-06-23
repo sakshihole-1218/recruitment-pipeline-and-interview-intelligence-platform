@@ -50,8 +50,41 @@ export type GenerateInterviewPlanInput = {
   job_skills: JobOpeningSkillEntity[];
 };
 
+export type GenerateFollowUpQuestionInput = {
+  sessionId: string;
+  parentQuestion: {
+    id: string;
+    questionText: string;
+    topic: string;
+    difficultyLevel: DifficultyLevel;
+    questionType: QuestionType;
+  };
+  candidateAnswer: string;
+  resumeAnalysis: {
+    id: string;
+    experienceSummary: string | null;
+    projectSummary: string | null;
+    skillsExtracted: unknown;
+    totalExperienceYearsDetected: string | null;
+  } | null;
+  candidateExperience: string | null;
+  candidateSkills: string[];
+  previousFollowUps: string[];
+};
+
+export type GeneratedFollowUpQuestion = {
+  followUpQuestion: string;
+  difficulty: DifficultyLevel;
+  category: string;
+  reasoning: string;
+};
+
 export interface AiInterviewQuestionProvider {
   generateInterviewPlan(
     input: GenerateInterviewPlanInput,
   ): Promise<GeneratedInterviewPlanQuestion[]>;
+
+  generateFollowUpQuestion(
+    input: GenerateFollowUpQuestionInput,
+  ): Promise<GeneratedFollowUpQuestion>;
 }

@@ -8,6 +8,7 @@ import { UpdateInterviewQuestionDto } from '../../dto/update-interview-question.
 import { CreateInterviewQuestionUseCase } from '../use-cases/create-interview-question.usecase';
 import { DeleteInterviewQuestionUseCase } from '../use-cases/delete-interview-question.usecase';
 import { GenerateInterviewPlanUseCase } from '../use-cases/generate-interview-plan.usecase';
+import { GenerateFollowUpQuestionUseCase } from '../use-cases/generate-follow-up-question.usecase';
 import { GetInterviewQuestionByIdUseCase } from '../use-cases/get-interview-question-by-id.usecase';
 import { GetQuestionsBySessionUseCase } from '../use-cases/get-questions-by-session.usecase';
 import { ListInterviewQuestionsUseCase } from '../use-cases/list-interview-questions.usecase';
@@ -19,6 +20,7 @@ import { UpdateInterviewQuestionUseCase } from '../use-cases/update-interview-qu
 export class AiInterviewQuestionsService {
   constructor(
     private readonly generatePlanUseCase: GenerateInterviewPlanUseCase,
+    private readonly generateFollowUpQuestionUseCase: GenerateFollowUpQuestionUseCase,
     private readonly createUseCase: CreateInterviewQuestionUseCase,
     private readonly updateUseCase: UpdateInterviewQuestionUseCase,
     private readonly markAskedUseCase: MarkQuestionAskedUseCase,
@@ -31,6 +33,13 @@ export class AiInterviewQuestionsService {
 
   generatePlan(dto: GenerateInterviewPlanDto, actorUserId?: string) {
     return this.generatePlanUseCase.execute(dto, actorUserId);
+  }
+
+  generateFollowUp(questionId: string, actorUserId?: string) {
+    return this.generateFollowUpQuestionUseCase.execute(
+      questionId,
+      actorUserId,
+    );
   }
 
   create(dto: CreateInterviewQuestionDto, actorUserId?: string) {

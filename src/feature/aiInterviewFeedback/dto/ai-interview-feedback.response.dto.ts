@@ -29,16 +29,19 @@ export class AiInterviewFeedbackResponseDto {
   problem_solving_score: number | null;
 
   @ApiProperty({ nullable: true })
-  project_understanding_score: number | null;
-
-  @ApiProperty({ nullable: true })
-  answer_relevance_score: number | null;
-
-  @ApiProperty({ nullable: true })
-  confidence_score: number | null;
+  experience_relevance_score: number | null;
 
   @ApiProperty({ nullable: true })
   overall_score: number | null;
+
+  @ApiProperty({ nullable: true })
+  strengths_summary: string | null;
+
+  @ApiProperty({ nullable: true })
+  weaknesses_summary: string | null;
+
+  @ApiProperty({ nullable: true })
+  detailed_feedback: string | null;
 
   @ApiProperty({ nullable: true })
   technical_summary: string | null;
@@ -50,19 +53,10 @@ export class AiInterviewFeedbackResponseDto {
   problem_solving_summary: string | null;
 
   @ApiProperty({ nullable: true })
-  project_understanding_summary: string | null;
-
-  @ApiProperty({ nullable: true })
-  strengths: string | null;
-
-  @ApiProperty({ nullable: true })
-  concerns: string | null;
-
-  @ApiProperty({ nullable: true })
-  improvement_areas: string | null;
+  experience_relevance_summary: string | null;
 
   @ApiProperty({ enum: AiInterviewRecommendation, nullable: true })
-  ai_recommendation: AiInterviewRecommendation | null;
+  recommendation: AiInterviewRecommendation | null;
 
   @ApiProperty({ enum: AiInterviewFeedbackStatus })
   feedback_status: AiInterviewFeedbackStatus;
@@ -74,7 +68,7 @@ export class AiInterviewFeedbackResponseDto {
   failure_reason: string | null;
 
   @ApiProperty({ type: Object, nullable: true })
-  raw_ai_payload: Record<string, unknown> | null;
+  evaluation_metadata: Record<string, unknown> | null;
 
   @ApiProperty()
   created_at: Date;

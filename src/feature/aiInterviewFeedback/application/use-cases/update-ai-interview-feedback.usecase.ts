@@ -77,15 +77,18 @@ export class UpdateAiInterviewFeedbackUseCase {
       'technical_score',
       'communication_score',
       'problem_solving_score',
-      'project_understanding_score',
-      'answer_relevance_score',
-      'confidence_score',
+      'experience_relevance_score',
       'overall_score',
     ];
 
     scoreFields.forEach((field) => {
       const value = dto[field] as number | undefined;
       if (value !== undefined) {
+        if (field === 'overall_score') {
+          this.validation.ensureOverallScoreWithinRange(value, field);
+          return;
+        }
+
         this.validation.ensureScoreWithinRange(value, field);
       }
     });
@@ -99,24 +102,16 @@ export class UpdateAiInterviewFeedbackUseCase {
     if (dto.problem_solving_score !== undefined) {
       entity.problem_solving_score = dto.problem_solving_score.toFixed(2);
     }
-    if (dto.project_understanding_score !== undefined) {
-      entity.project_understanding_score =
-        dto.project_understanding_score.toFixed(2);
-    }
-    if (dto.answer_relevance_score !== undefined) {
-      entity.answer_relevance_score = dto.answer_relevance_score.toFixed(2);
-    }
-    if (dto.confidence_score !== undefined) {
-      entity.confidence_score = dto.confidence_score.toFixed(2);
+    if (dto.experience_relevance_score !== undefined) {
+      entity.experience_relevance_score =
+        dto.experience_relevance_score.toFixed(2);
     }
 
     const componentChanged =
       dto.technical_score !== undefined ||
       dto.communication_score !== undefined ||
       dto.problem_solving_score !== undefined ||
-      dto.project_understanding_score !== undefined ||
-      dto.answer_relevance_score !== undefined ||
-      dto.confidence_score !== undefined;
+      dto.experience_relevance_score !== undefined;
 
     if (dto.overall_score !== undefined) {
       entity.overall_score = dto.overall_score.toFixed(2);
@@ -129,20 +124,29 @@ export class UpdateAiInterviewFeedbackUseCase {
         entity.problem_solving_score === null
           ? null
           : Number(entity.problem_solving_score),
-        entity.project_understanding_score === null
+        entity.experience_relevance_score === null
           ? null
-          : Number(entity.project_understanding_score),
-        entity.answer_relevance_score === null
-          ? null
-          : Number(entity.answer_relevance_score),
-        entity.confidence_score === null
-          ? null
-          : Number(entity.confidence_score),
+          : Number(entity.experience_relevance_score),
       ]);
 
       entity.overall_score = overall === null ? null : overall.toFixed(2);
     }
 
+    if (dto.strengths_summary !== undefined) {
+      entity.strengths_summary = this.validation.normalizeText(
+        dto.strengths_summary,
+      );
+    }
+    if (dto.weaknesses_summary !== undefined) {
+      entity.weaknesses_summary = this.validation.normalizeText(
+        dto.weaknesses_summary,
+      );
+    }
+    if (dto.detailed_feedback !== undefined) {
+      entity.detailed_feedback = this.validation.normalizeText(
+        dto.detailed_feedback,
+      );
+    }
     if (dto.technical_summary !== undefined) {
       entity.technical_summary = this.validation.normalizeText(
         dto.technical_summary,
@@ -158,27 +162,16 @@ export class UpdateAiInterviewFeedbackUseCase {
         dto.problem_solving_summary,
       );
     }
-    if (dto.project_understanding_summary !== undefined) {
-      entity.project_understanding_summary = this.validation.normalizeText(
-        dto.project_understanding_summary,
-      );
-    }
-    if (dto.strengths !== undefined) {
-      entity.strengths = this.validation.normalizeText(dto.strengths);
-    }
-    if (dto.concerns !== undefined) {
-      entity.concerns = this.validation.normalizeText(dto.concerns);
-    }
-    if (dto.improvement_areas !== undefined) {
-      entity.improvement_areas = this.validation.normalizeText(
-        dto.improvement_areas,
+    if (dto.experience_relevance_summary !== undefined) {
+      entity.experience_relevance_summary = this.validation.normalizeText(
+        dto.experience_relevance_summary,
       );
     }
 
-    if (dto.ai_recommendation !== undefined) {
-      entity.ai_recommendation = dto.ai_recommendation;
+    if (dto.recommendation !== undefined) {
+      entity.recommendation = dto.recommendation;
     } else if (dto.overall_score !== undefined || componentChanged) {
-      entity.ai_recommendation = this.validation.toRecommendation(
+      entity.recommendation = this.validation.toRecommendation(
         entity.overall_score === null ? null : Number(entity.overall_score),
       );
     }
@@ -212,16 +205,16 @@ export class UpdateAiInterviewFeedbackUseCase {
       entity.failure_reason = this.validation.normalizeText(dto.failure_reason);
     }
 
-    if (dto.raw_ai_payload !== undefined) {
-      entity.raw_ai_payload = dto.raw_ai_payload;
+    if (dto.evaluation_metadata !== undefined) {
+      entity.evaluation_metadata = dto.evaluation_metadata;
     }
 
     if (
-      !dto.ai_recommendation &&
-      !entity.ai_recommendation &&
+      !dto.recommendation &&
+      !entity.recommendation &&
       entity.overall_score !== null
     ) {
-      entity.ai_recommendation = this.validation.toRecommendation(
+      entity.recommendation = this.validation.toRecommendation(
         Number(entity.overall_score),
       );
     }

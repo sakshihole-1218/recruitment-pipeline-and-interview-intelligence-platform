@@ -20,16 +20,16 @@ export class DecisionSnapshotHelper {
       ai_interview_feedback_id: feedback.id,
       ai_interview_session_id: feedback.ai_interview_session_id,
       feedback_status: feedback.feedback_status,
-      ai_recommendation: feedback.ai_recommendation,
+      recommendation: feedback.recommendation,
       overall_score: feedback.overall_score,
       technical_score: feedback.technical_score,
       communication_score: feedback.communication_score,
       problem_solving_score: feedback.problem_solving_score,
-      confidence_score: feedback.confidence_score,
+      experience_relevance_score: feedback.experience_relevance_score,
       generated_at: feedback.generated_at?.toISOString() ?? null,
-      strengths: feedback.strengths,
-      concerns: feedback.concerns,
-      improvement_areas: feedback.improvement_areas,
+      strengths_summary: feedback.strengths_summary,
+      weaknesses_summary: feedback.weaknesses_summary,
+      detailed_feedback: feedback.detailed_feedback,
     };
   }
 

@@ -34,8 +34,6 @@ import { ApiAiInterviewFeedbackPaginatedResponse } from '../decorators/api-ai-in
 import { AiInterviewFeedbackQueryDto } from '../dto/ai-interview-feedback.query.dto';
 import { AiInterviewFeedbackResponseDto } from '../dto/ai-interview-feedback.response.dto';
 import { DeleteAiInterviewFeedbackResponseDto } from '../dto/delete-ai-interview-feedback.response.dto';
-import { GenerateAiInterviewFeedbackDto } from '../dto/generate-ai-interview-feedback.dto';
-import { RegenerateAiInterviewFeedbackDto } from '../dto/regenerate-ai-interview-feedback.dto';
 import { UpdateAiInterviewFeedbackDto } from '../dto/update-ai-interview-feedback.dto';
 import { AiInterviewFeedbackMapper } from '../helpers/ai-interview-feedback.mapper';
 
@@ -53,40 +51,40 @@ import { AiInterviewFeedbackMapper } from '../helpers/ai-interview-feedback.mapp
 export class AiInterviewFeedbackController {
   constructor(private readonly service: AiInterviewFeedbackService) {}
 
-  @Post('generate')
+  @Post('generate/:sessionId')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Generate AI interview feedback from AI interview transcript',
+    summary: 'Generate AI interview evaluation for a completed session',
   })
-  @ApiBody({ type: GenerateAiInterviewFeedbackDto })
+  @ApiParam({ name: 'sessionId', description: 'AI interview session UUID' })
   @ApiStandardResponse(
     AiInterviewFeedbackResponseDto,
     'AI interview feedback generated successfully',
   )
   async generate(
-    @Body() dto: GenerateAiInterviewFeedbackDto,
+    @Param('sessionId') sessionId: string,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const feedback = await this.service.generate(dto, actor?.sub);
+    const feedback = await this.service.generate(sessionId, actor?.sub);
     return ResponseUtil.success(
       'AI interview feedback generated successfully',
       AiInterviewFeedbackMapper.toResponse(feedback),
     );
   }
 
-  @Post('regenerate')
+  @Post('regenerate/:sessionId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Regenerate AI interview feedback for a session' })
-  @ApiBody({ type: RegenerateAiInterviewFeedbackDto })
+  @ApiParam({ name: 'sessionId', description: 'AI interview session UUID' })
   @ApiStandardResponse(
     AiInterviewFeedbackResponseDto,
     'AI interview feedback regenerated successfully',
   )
   async regenerate(
-    @Body() dto: RegenerateAiInterviewFeedbackDto,
+    @Param('sessionId') sessionId: string,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const feedback = await this.service.regenerate(dto, actor?.sub);
+    const feedback = await this.service.regenerate(sessionId, actor?.sub);
     return ResponseUtil.success(
       'AI interview feedback regenerated successfully',
       AiInterviewFeedbackMapper.toResponse(feedback),

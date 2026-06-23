@@ -5,13 +5,15 @@ import { TranscriptSpeakerType } from '../../aiInterviewTranscripts/enums/transc
 import { AiInterviewRecommendation } from '../enums/ai-interview-recommendation.enum';
 
 import {
-  AiInterviewFeedbackProvider,
   GenerateAiInterviewFeedbackInput,
   GenerateAiInterviewFeedbackOutput,
+  InterviewEvaluationProvider,
 } from './ai-interview-feedback-provider';
 
 @Injectable()
-export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvider {
+export class MockInterviewEvaluationProvider
+  implements InterviewEvaluationProvider
+{
   async generateFeedback(
     input: GenerateAiInterviewFeedbackInput,
   ): Promise<GenerateAiInterviewFeedbackOutput> {
@@ -73,42 +75,41 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
       'impact',
       'result',
     ]);
+    const resumeAlignmentSignals = this.keywordHits(transcriptText, [
+      'experience',
+      'project',
+      'ownership',
+      'responsible',
+      'delivered',
+      'implemented',
+    ]);
 
     const technicalScore = this.clamp(
-      42 +
-        questionCoverage * 22 +
-        Math.min(architectureMentions * 4, 18) +
-        Math.min(resumeSkillCount, 10),
+      4.2 +
+        questionCoverage * 2.2 +
+        Math.min(architectureMentions * 0.4, 1.8) +
+        Math.min(resumeSkillCount * 0.12, 1.0),
     );
     const communicationScore = this.clamp(
-      40 +
-        Math.min(avgWordsPerAnswer / 4, 25) +
-        Math.min(communicationMentions * 3, 20),
+      4 +
+        Math.min(avgWordsPerAnswer / 40, 2.5) +
+        Math.min(communicationMentions * 0.35, 2),
     );
     const problemSolvingScore = this.clamp(
-      38 + questionCoverage * 18 + Math.min(problemSolvingMentions * 5, 26),
+      3.8 + questionCoverage * 1.8 + Math.min(problemSolvingMentions * 0.55, 2.6),
     );
-    const projectUnderstandingScore = this.clamp(
-      35 +
-        Math.min(architectureMentions * 5, 25) +
-        Math.min(avgWordsPerAnswer / 5, 20),
-    );
-    const answerRelevanceScore = this.clamp(
-      45 + questionCoverage * 30 + Math.min(answeredQuestionIds.size * 2, 12),
-    );
-    const confidenceScore = this.clamp(
-      41 +
-        Math.min(candidateEntries.length * 4, 20) +
-        Math.min(avgWordsPerAnswer / 6, 18),
+    const experienceRelevanceScore = this.clamp(
+      4.1 +
+        Math.min(resumeAlignmentSignals * 0.45, 2.5) +
+        Math.min(questionCoverage * 2.2, 2.2) +
+        Math.min(avgWordsPerAnswer / 55, 1.4),
     );
 
     const overallScore = this.average([
       technicalScore,
       communicationScore,
       problemSolvingScore,
-      projectUnderstandingScore,
-      answerRelevanceScore,
-      confidenceScore,
+      experienceRelevanceScore,
     ]);
 
     const recommendation = this.toRecommendation(overallScore);
@@ -117,26 +118,29 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
       technical_score: technicalScore,
       communication_score: communicationScore,
       problem_solving_score: problemSolvingScore,
-      project_understanding_score: projectUnderstandingScore,
-      answer_relevance_score: answerRelevanceScore,
-      confidence_score: confidenceScore,
+      experience_relevance_score: experienceRelevanceScore,
       overall_score: overallScore,
-      technical_summary: `The candidate demonstrated ${this.bandLabel(technicalScore)} technical depth with notable references to architecture, APIs, and implementation trade-offs.`,
-      communication_summary: `The candidate showed ${this.bandLabel(communicationScore)} communication clarity with reasonably structured explanations and supporting examples.`,
-      problem_solving_summary: `The responses reflected ${this.bandLabel(problemSolvingScore)} problem-solving ability, particularly in discussing debugging, performance, and decision-making trade-offs.`,
-      project_understanding_summary: `Project understanding appears ${this.bandLabel(projectUnderstandingScore)}, with the candidate describing system components, responsibilities, and implementation context in a coherent way.`,
-      strengths: this.buildStrengths(
+      strengths_summary: this.buildStrengths(
         technicalScore,
         communicationScore,
         problemSolvingScore,
       ),
-      concerns: this.buildConcerns(answerRelevanceScore, confidenceScore),
-      improvement_areas: this.buildImprovementAreas(
-        projectUnderstandingScore,
-        answerRelevanceScore,
+      weaknesses_summary: this.buildWeaknesses(
+        communicationScore,
+        experienceRelevanceScore,
       ),
-      ai_recommendation: recommendation,
-      raw_ai_payload: {
+      detailed_feedback: this.buildDetailedFeedback(
+        technicalScore,
+        communicationScore,
+        problemSolvingScore,
+        experienceRelevanceScore,
+      ),
+      technical_summary: `The candidate demonstrated ${this.bandLabel(technicalScore)} technical depth with references to implementation choices, architecture, and practical engineering trade-offs.`,
+      communication_summary: `The candidate showed ${this.bandLabel(communicationScore)} communication clarity with reasonably structured explanations and supporting examples.`,
+      problem_solving_summary: `The responses reflected ${this.bandLabel(problemSolvingScore)} analytical reasoning, especially in debugging, optimization, and trade-off discussions.`,
+      experience_relevance_summary: `Experience relevance appears ${this.bandLabel(experienceRelevanceScore)}, with the candidate connecting prior work, ownership, and project exposure to the role context.`,
+      recommendation: recommendation,
+      evaluation_metadata: {
         provider: 'mock-ai-interview-feedback',
         signals: {
           candidate_entry_count: candidateEntries.length,
@@ -146,6 +150,7 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
           architecture_mentions: architectureMentions,
           problem_solving_mentions: problemSolvingMentions,
           communication_mentions: communicationMentions,
+          resume_alignment_signals: resumeAlignmentSignals,
           resume_skill_count: resumeSkillCount,
         },
       },
@@ -173,12 +178,12 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
   }
 
   private clamp(score: number): number {
-    return Number(Math.max(0, Math.min(100, score)).toFixed(2));
+    return Number(Math.max(0, Math.min(10, score)).toFixed(2));
   }
 
   private average(values: number[]): number {
     const total = values.reduce((sum, value) => sum + value, 0);
-    return Number((total / values.length).toFixed(2));
+    return Number(((total / values.length) * 10).toFixed(2));
   }
 
   private toRecommendation(score: number): AiInterviewRecommendation {
@@ -242,53 +247,45 @@ export class MockAiInterviewFeedbackProvider implements AiInterviewFeedbackProvi
     return strengths.join('. ');
   }
 
-  private buildConcerns(
-    answerRelevanceScore: number,
-    confidenceScore: number,
+  private buildWeaknesses(
+    communicationScore: number,
+    experienceRelevanceScore: number,
   ): string {
-    const concerns: string[] = [];
+    const weaknesses: string[] = [];
 
-    if (answerRelevanceScore < 60) {
-      concerns.push('Some answers do not fully address the question intent');
+    if (communicationScore < 6) {
+      weaknesses.push(
+        'Some responses could be clearer, more structured, and more direct',
+      );
     }
-    if (confidenceScore < 60) {
-      concerns.push(
-        'Response delivery lacks consistency and assertiveness in places',
+    if (experienceRelevanceScore < 6) {
+      weaknesses.push(
+        'The transcript shows limited role-specific alignment or ownership detail in parts of the discussion',
       );
     }
 
-    if (!concerns.length) {
-      concerns.push(
-        'No major risks were detected from the transcript alone, but human review remains necessary',
+    if (!weaknesses.length) {
+      weaknesses.push(
+        'No major weaknesses were obvious from the transcript alone, though human review should still validate depth and consistency',
       );
     }
 
-    return concerns.join('. ');
+    return weaknesses.join('. ');
   }
 
-  private buildImprovementAreas(
-    projectUnderstandingScore: number,
-    answerRelevanceScore: number,
+  private buildDetailedFeedback(
+    technicalScore: number,
+    communicationScore: number,
+    problemSolvingScore: number,
+    experienceRelevanceScore: number,
   ): string {
-    const areas: string[] = [];
-
-    if (projectUnderstandingScore < 70) {
-      areas.push(
-        'Explain project architecture and ownership boundaries in more depth',
-      );
-    }
-    if (answerRelevanceScore < 70) {
-      areas.push(
-        'Give more direct, question-focused responses with stronger examples',
-      );
-    }
-
-    if (!areas.length) {
-      areas.push(
-        'Continue strengthening quantified examples and decision rationale in technical answers',
-      );
-    }
-
-    return areas.join('. ');
+    return [
+      `Technical performance was ${this.bandLabel(technicalScore)} overall, with signs of practical implementation familiarity.`,
+      `Communication was ${this.bandLabel(communicationScore)}, and explanations were ${
+        communicationScore >= 7 ? 'mostly structured and understandable' : 'in need of tighter structure and clearer articulation'
+      }.`,
+      `Problem solving appeared ${this.bandLabel(problemSolvingScore)}, based on how the candidate discussed debugging, trade-offs, and reasoning.`,
+      `Experience relevance was ${this.bandLabel(experienceRelevanceScore)}, reflecting how well prior work aligned with the role and the resume context.`,
+    ].join(' ');
   }
 }

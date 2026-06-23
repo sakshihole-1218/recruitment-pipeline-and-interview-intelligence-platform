@@ -9,6 +9,8 @@ import { JobOpeningEntity } from '../job-openings/entities/job-opening.entity';
 import { JobOpeningSkillEntity } from '../job-openings/entities/job-opening-skill.entity';
 import { ResumeAiAnalysisEntity } from '../aiInsights/entities/resume-ai-analysis.entity';
 import { AiInterviewSessionEntity } from '../aiInterviewSessions/entities/ai-interview-session.entity';
+import { AiInterviewTranscriptEntity } from '../aiInterviewTranscripts/entities/ai-interview-transcript.entity';
+import { AiInterviewTranscriptRepository } from '../aiInterviewTranscripts/repositories/ai-interview-transcript.repository';
 
 import { AiInterviewQuestionsController } from './controllers/ai-interview-questions.controller';
 import { AiInterviewQuestionsService } from './application/services/ai-interview-questions.service';
@@ -19,6 +21,7 @@ import { AiInterviewQuestionsValidationHelper } from './helpers/ai-interview-que
 import { CreateInterviewQuestionUseCase } from './application/use-cases/create-interview-question.usecase';
 import { DeleteInterviewQuestionUseCase } from './application/use-cases/delete-interview-question.usecase';
 import { GenerateInterviewPlanUseCase } from './application/use-cases/generate-interview-plan.usecase';
+import { GenerateFollowUpQuestionUseCase } from './application/use-cases/generate-follow-up-question.usecase';
 import { GetInterviewQuestionByIdUseCase } from './application/use-cases/get-interview-question-by-id.usecase';
 import { GetQuestionsBySessionUseCase } from './application/use-cases/get-questions-by-session.usecase';
 import { ListInterviewQuestionsUseCase } from './application/use-cases/list-interview-questions.usecase';
@@ -39,12 +42,14 @@ import { MockAiInterviewQuestionProvider } from './providers/mock-ai-interview-q
       CandidateEntity,
       JobOpeningEntity,
       JobOpeningSkillEntity,
+      AiInterviewTranscriptEntity,
     ]),
   ],
   controllers: [AiInterviewQuestionsController],
   providers: [
     AiInterviewQuestionsService,
     AiInterviewQuestionRepository,
+    AiInterviewTranscriptRepository,
     AiInterviewQuestionsReferenceRepository,
     AiInterviewQuestionsValidationHelper,
     {
@@ -68,6 +73,7 @@ import { MockAiInterviewQuestionProvider } from './providers/mock-ai-interview-q
     MockAiInterviewQuestionProvider,
     GeminiAiInterviewQuestionProvider,
     GenerateInterviewPlanUseCase,
+    GenerateFollowUpQuestionUseCase,
     CreateInterviewQuestionUseCase,
     UpdateInterviewQuestionUseCase,
     MarkQuestionAskedUseCase,

@@ -14,6 +14,8 @@ import { AiInterviewRecommendation } from '../enums/ai-interview-recommendation.
 
 @Injectable()
 export class AiInterviewFeedbackValidationHelper {
+  private readonly minimumCandidateTranscriptWords = 30;
+
   ensureActorUserRequired(actorUserId?: string): asserts actorUserId is string {
     if (!actorUserId) {
       throw new BadRequestException({
@@ -60,6 +62,30 @@ export class AiInterviewFeedbackValidationHelper {
     }
   }
 
+  ensureMinimumCandidateTranscriptLength(
+    entries: AiInterviewTranscriptEntity[],
+  ): void {
+    const totalWords = entries
+      .filter((entry) => entry.speaker_type === TranscriptSpeakerType.CANDIDATE)
+      .reduce((sum, entry) => {
+        const normalized = String(entry.message_text || '').trim();
+        const wordCount = normalized ? normalized.split(/\s+/).length : 0;
+        return sum + wordCount;
+      }, 0);
+
+    if (totalWords < this.minimumCandidateTranscriptWords) {
+      throw new BadRequestException({
+        message:
+          'Minimum candidate transcript length is required before generating AI interview feedback',
+        code: 'AI_INTERVIEW_TRANSCRIPT_TOO_SHORT',
+        meta: {
+          minimum_candidate_words: this.minimumCandidateTranscriptWords,
+          actual_candidate_words: totalWords,
+        },
+      });
+    }
+  }
+
   ensureNoDuplicateActiveFeedback(
     existing: AiInterviewFeedbackEntity | null,
   ): void {
@@ -72,6 +98,23 @@ export class AiInterviewFeedbackValidationHelper {
   }
 
   ensureScoreWithinRange(
+    score: number | null | undefined,
+    fieldName: string,
+  ): void {
+    if (score === null || score === undefined) {
+      return;
+    }
+
+    if (!Number.isFinite(score) || score < 0 || score > 10) {
+      throw new BadRequestException({
+        message: `${fieldName} must be between 0 and 10`,
+        code: 'INVALID_SCORE_RANGE',
+        meta: { field: fieldName, value: score },
+      });
+    }
+  }
+
+  ensureOverallScoreWithinRange(
     score: number | null | undefined,
     fieldName: string,
   ): void {
@@ -116,7 +159,7 @@ export class AiInterviewFeedbackValidationHelper {
     }
 
     const total = validScores.reduce((sum, score) => sum + score, 0);
-    return Number((total / validScores.length).toFixed(2));
+    return Number(((total / validScores.length) * 10).toFixed(2));
   }
 
   toRecommendation(

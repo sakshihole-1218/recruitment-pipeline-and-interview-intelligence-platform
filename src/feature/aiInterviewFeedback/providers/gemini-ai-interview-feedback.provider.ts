@@ -6,32 +6,32 @@ import { AiInterviewRecommendation } from '../enums/ai-interview-recommendation.
 import { GeminiAiInterviewFeedbackPromptHelper } from '../helpers/gemini-ai-interview-feedback-prompt.helper';
 
 import {
-  AiInterviewFeedbackProvider,
   GenerateAiInterviewFeedbackInput,
   GenerateAiInterviewFeedbackOutput,
+  InterviewEvaluationProvider,
 } from './ai-interview-feedback-provider';
 
 type GeminiInterviewFeedbackResponse = {
-  technical_score?: number | string | null;
-  communication_score?: number | string | null;
-  problem_solving_score?: number | string | null;
-  project_understanding_score?: number | string | null;
-  answer_relevance_score?: number | string | null;
-  confidence_score?: number | string | null;
-  overall_score?: number | string | null;
-  technical_summary?: string | null;
-  communication_summary?: string | null;
-  problem_solving_summary?: string | null;
-  project_understanding_summary?: string | null;
+  technicalScore?: number | string | null;
+  communicationScore?: number | string | null;
+  problemSolvingScore?: number | string | null;
+  experienceRelevanceScore?: number | string | null;
+  overallScore?: number | string | null;
   strengths?: string | null;
-  concerns?: string | null;
-  improvement_areas?: string | null;
-  ai_recommendation?: string | null;
+  weaknesses?: string | null;
+  detailedFeedback?: string | null;
+  technicalSummary?: string | null;
+  communicationSummary?: string | null;
+  problemSolvingSummary?: string | null;
+  experienceRelevanceSummary?: string | null;
+  recommendation?: string | null;
 };
 
 @Injectable()
-export class GeminiAiInterviewFeedbackProvider implements AiInterviewFeedbackProvider {
-  private readonly logger = new Logger(GeminiAiInterviewFeedbackProvider.name);
+export class GeminiInterviewEvaluationProvider
+  implements InterviewEvaluationProvider
+{
+  private readonly logger = new Logger(GeminiInterviewEvaluationProvider.name);
 
   constructor(private readonly geminiClient: GeminiClient) {}
 
@@ -50,68 +50,58 @@ export class GeminiAiInterviewFeedbackProvider implements AiInterviewFeedbackPro
         );
 
       const technicalScore = this.toScore(
-        parsed.technical_score,
-        'technical_score',
+        parsed.technicalScore,
+        'technicalScore',
       );
       const communicationScore = this.toScore(
-        parsed.communication_score,
-        'communication_score',
+        parsed.communicationScore,
+        'communicationScore',
       );
       const problemSolvingScore = this.toScore(
-        parsed.problem_solving_score,
-        'problem_solving_score',
+        parsed.problemSolvingScore,
+        'problemSolvingScore',
       );
-      const projectUnderstandingScore = this.toScore(
-        parsed.project_understanding_score,
-        'project_understanding_score',
-      );
-      const answerRelevanceScore = this.toScore(
-        parsed.answer_relevance_score,
-        'answer_relevance_score',
-      );
-      const confidenceScore = this.toScore(
-        parsed.confidence_score,
-        'confidence_score',
+      const experienceRelevanceScore = this.toScore(
+        parsed.experienceRelevanceScore,
+        'experienceRelevanceScore',
       );
       const overallScore =
-        this.toNullableScore(parsed.overall_score) ??
-        this.average([
+        this.toNullableOverallScore(parsed.overallScore) ??
+        this.calculateOverallScore([
           technicalScore,
           communicationScore,
           problemSolvingScore,
-          projectUnderstandingScore,
-          answerRelevanceScore,
-          confidenceScore,
+          experienceRelevanceScore,
         ]);
 
       return {
         technical_score: technicalScore,
         communication_score: communicationScore,
         problem_solving_score: problemSolvingScore,
-        project_understanding_score: projectUnderstandingScore,
-        answer_relevance_score: answerRelevanceScore,
-        confidence_score: confidenceScore,
+        experience_relevance_score: experienceRelevanceScore,
         overall_score: overallScore,
-        technical_summary: this.toNullableText(parsed.technical_summary),
+        strengths_summary: this.toNullableText(parsed.strengths),
+        weaknesses_summary: this.toNullableText(parsed.weaknesses),
+        detailed_feedback: this.toNullableText(parsed.detailedFeedback),
+        technical_summary: this.toNullableText(parsed.technicalSummary),
         communication_summary: this.toNullableText(
-          parsed.communication_summary,
+          parsed.communicationSummary,
         ),
         problem_solving_summary: this.toNullableText(
-          parsed.problem_solving_summary,
+          parsed.problemSolvingSummary,
         ),
-        project_understanding_summary: this.toNullableText(
-          parsed.project_understanding_summary,
+        experience_relevance_summary: this.toNullableText(
+          parsed.experienceRelevanceSummary,
         ),
-        strengths: this.toNullableText(parsed.strengths),
-        concerns: this.toNullableText(parsed.concerns),
-        improvement_areas: this.toNullableText(parsed.improvement_areas),
-        ai_recommendation: this.toRecommendation(
-          parsed.ai_recommendation,
+        recommendation: this.toRecommendation(
+          parsed.recommendation,
           overallScore,
         ),
-        raw_ai_payload: {
+        evaluation_metadata: {
           provider: 'gemini-ai-interview-feedback',
           model: 'gemini-2.5-flash',
+          category_score_scale: '0-10',
+          overall_score_scale: '0-100',
         },
       };
     } catch (error) {
@@ -141,19 +131,31 @@ export class GeminiAiInterviewFeedbackProvider implements AiInterviewFeedbackPro
     }
 
     const numeric = Number(value);
-    if (!Number.isFinite(numeric) || numeric < 0 || numeric > 100) {
+    if (!Number.isFinite(numeric) || numeric < 0 || numeric > 10) {
       throw new Error('Gemini returned invalid score');
     }
 
     return Number(numeric.toFixed(2));
   }
 
-  private average(values: number[]): number {
-    return Number(
-      (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(
-        2,
-      ),
-    );
+  private toNullableOverallScore(
+    value: number | string | null | undefined,
+  ): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric) || numeric < 0 || numeric > 100) {
+      throw new Error('Gemini returned invalid overall score');
+    }
+
+    return Number(numeric.toFixed(2));
+  }
+
+  private calculateOverallScore(values: number[]): number {
+    const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+    return Number((average * 10).toFixed(2));
   }
 
   private toNullableText(value: unknown): string | null {

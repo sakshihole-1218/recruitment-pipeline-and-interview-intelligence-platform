@@ -7,6 +7,7 @@ import { DataSource, EntityManager } from 'typeorm';
 
 import { AiInterviewSessionStatus } from '../../../aiInterviewSessions/enums/ai-interview-session-status.enum';
 import { AiInterviewQuestionEntity } from '../../../aiInterviewQuestions/entities/ai-interview-question.entity';
+import { QuestionStatus } from '../../../aiInterviewQuestions/enums/question-status.enum';
 
 import {
   BulkCreateTranscriptEntriesDto,
@@ -231,16 +232,19 @@ export class BulkCreateTranscriptEntriesUseCase {
 
       if (askedAt && !question.asked_at) {
         question.asked_at = askedAt;
+        question.question_status = QuestionStatus.ASKED;
         changed = true;
       }
 
       if (answeredAt && !question.answered_at) {
         question.answered_at = answeredAt;
+        question.question_status = QuestionStatus.ANSWERED;
         changed = true;
       }
 
       if (shouldMarkAnswered && !question.is_answered) {
         question.is_answered = true;
+        question.question_status = QuestionStatus.ANSWERED;
         changed = true;
       }
 

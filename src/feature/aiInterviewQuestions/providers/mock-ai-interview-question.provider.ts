@@ -6,7 +6,9 @@ import { QuestionType } from '../enums/question-type.enum';
 
 import {
   AiInterviewQuestionProvider,
+  GenerateFollowUpQuestionInput,
   GenerateInterviewPlanInput,
+  GeneratedFollowUpQuestion,
   GeneratedInterviewPlanQuestion,
 } from './ai-interview-question-provider';
 
@@ -113,17 +115,37 @@ export class MockAiInterviewQuestionProvider implements AiInterviewQuestionProvi
         generated_from: GeneratedFrom.EXPERIENCE,
         expected_answer_keywords: ['debugging', 'root cause', 'prevention'],
       },
-      {
-        sequence_number: 7,
-        parent_sequence_number: 2,
-        question_text: `How did you validate that your ${primarySkill} design decisions held up under real production load or changing requirements?`,
-        question_type: QuestionType.FOLLOW_UP,
-        topic: `${primarySkill} Follow-up`,
-        difficulty_level: DifficultyLevel.MEDIUM,
-        generated_from: GeneratedFrom.FOLLOW_UP_ENGINE,
-        expected_answer_keywords: ['metrics', 'monitoring', 'iteration'],
-      },
     ];
+  }
+
+  async generateFollowUpQuestion(
+    input: GenerateFollowUpQuestionInput,
+  ): Promise<GeneratedFollowUpQuestion> {
+    const normalizedAnswer = input.candidateAnswer.toLowerCase();
+    const leadingSkill =
+      input.candidateSkills[0] || input.parentQuestion.topic || 'the topic';
+
+    if (
+      normalizedAnswer.includes('used') &&
+      !normalizedAnswer.includes('how') &&
+      !normalizedAnswer.includes('internal')
+    ) {
+      return {
+        followUpQuestion: `Can you walk me through the internal mechanics behind ${leadingSkill} and explain the trade-offs involved?`,
+        difficulty: DifficultyLevel.MEDIUM,
+        category: `${leadingSkill} Internals`,
+        reasoning:
+          'The answer mentioned practical usage but did not demonstrate depth on implementation details.',
+      };
+    }
+
+    return {
+      followUpQuestion: `What design trade-offs or edge cases would you consider when applying ${leadingSkill} in a production backend system?`,
+      difficulty: DifficultyLevel.HARD,
+      category: `${leadingSkill} Trade-offs`,
+      reasoning:
+        'The answer appears substantive enough to probe deeper into production-level decision making.',
+    };
   }
 
   private buildTechnicalQuestion(

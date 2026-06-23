@@ -15,6 +15,8 @@ import { AiInterviewSessionEntity } from '../../aiInterviewSessions/entities/ai-
 
 import { DifficultyLevel } from '../enums/difficulty-level.enum';
 import { GeneratedFrom } from '../enums/generated-from.enum';
+import { QuestionSource } from '../enums/question-source.enum';
+import { QuestionStatus } from '../enums/question-status.enum';
 import { QuestionType } from '../enums/question-type.enum';
 
 @Entity({ name: 'ai_interview_questions' })
@@ -64,11 +66,20 @@ export class AiInterviewQuestionEntity {
   @Column({ type: 'boolean', default: false })
   is_follow_up: boolean;
 
+  @Column({ type: 'varchar', length: 20, default: QuestionSource.SYSTEM })
+  question_source: QuestionSource;
+
   @Column({ type: 'varchar', length: 30 })
   generated_from: GeneratedFrom;
 
+  @Column({ type: 'varchar', length: 20, default: QuestionStatus.PENDING })
+  question_status: QuestionStatus;
+
   @Column({ type: 'jsonb', nullable: true })
   expected_answer_keywords: string[] | null;
+
+  @Column({ type: 'text', nullable: true })
+  follow_up_reasoning: string | null;
 
   @Column({ type: 'timestamptz', nullable: true })
   asked_at: Date | null;

@@ -60,7 +60,7 @@ export class AiInterviewTranscriptsController {
   constructor(private readonly service: AiInterviewTranscriptsService) {}
 
   private static getMaxAudioUploadBytes(): number {
-    const fallback = 15 * 1024 * 1024;
+    const fallback = 20 * 1024 * 1024;
     const raw = Number(process.env.AI_INTERVIEW_AUDIO_MAX_BYTES);
     return Number.isFinite(raw) && raw > 0 ? raw : fallback;
   }

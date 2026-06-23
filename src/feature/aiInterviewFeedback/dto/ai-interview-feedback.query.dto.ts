@@ -20,7 +20,7 @@ const AI_INTERVIEW_FEEDBACK_SORT_FIELDS = [
   'generated_at',
   'overall_score',
   'feedback_status',
-  'ai_recommendation',
+  'recommendation',
 ] as const;
 
 export class AiInterviewFeedbackQueryDto extends PaginationQueryDto {
@@ -34,7 +34,8 @@ export class AiInterviewFeedbackQueryDto extends PaginationQueryDto {
   cursor?: string;
 
   @ApiPropertyOptional({
-    description: 'Search across summaries, concerns and failure reason',
+    description:
+      'Search across summaries, detailed feedback, strengths, weaknesses and failure reason',
   })
   @IsOptional()
   @IsString()
@@ -68,7 +69,7 @@ export class AiInterviewFeedbackQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional({ enum: AiInterviewRecommendation })
   @IsOptional()
   @IsEnum(AiInterviewRecommendation)
-  ai_recommendation?: AiInterviewRecommendation;
+  recommendation?: AiInterviewRecommendation;
 
   @ApiPropertyOptional({ description: 'Generated at start date (ISO8601)' })
   @IsOptional()

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { AiInterviewQuestionEntity } from '../../entities/ai-interview-question.entity';
+import { QuestionStatus } from '../../enums/question-status.enum';
 import { AiInterviewQuestionsValidationHelper } from '../../helpers/ai-interview-questions-validation.helper';
 import { AiInterviewQuestionRepository } from '../../repositories/ai-interview-question.repository';
 
@@ -26,6 +27,7 @@ export class MarkQuestionAskedUseCase {
     }
 
     question.asked_at = question.asked_at ?? new Date();
+    question.question_status = QuestionStatus.ASKED;
     question.updated_by_user_id = actorUserId;
 
     return this.repository.updateQuestion(question);

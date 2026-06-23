@@ -1,36 +1,47 @@
-import { TranscriptSpeakerType } from '../../aiInterviewTranscripts/enums/transcript-speaker-type.enum';
 import { GenerateAiInterviewFeedbackInput } from '../providers/ai-interview-feedback-provider';
 
 export class GeminiAiInterviewFeedbackPromptHelper {
   static buildPrompt(input: GenerateAiInterviewFeedbackInput): string {
+    const questionTextById = new Map(
+      input.questions.map((question) => [question.id, question.question_text]),
+    );
+
     return [
-      'Evaluate this AI interview transcript and return JSON only.',
+      'You are evaluating a completed AI interview for a recruitment platform.',
+      'Evaluate objectively and return JSON only.',
       'Do not include markdown fences or explanations.',
       'Use this exact shape:',
       JSON.stringify(
         {
-          technical_score: 0,
-          communication_score: 0,
-          problem_solving_score: 0,
-          project_understanding_score: 0,
-          answer_relevance_score: 0,
-          confidence_score: 0,
-          overall_score: 0,
-          technical_summary: '',
-          communication_summary: '',
-          problem_solving_summary: '',
-          project_understanding_summary: '',
+          technicalScore: 0,
+          communicationScore: 0,
+          problemSolvingScore: 0,
+          experienceRelevanceScore: 0,
+          overallScore: 0,
           strengths: '',
-          concerns: '',
-          improvement_areas: '',
-          ai_recommendation: 'HOLD',
+          weaknesses: '',
+          detailedFeedback: '',
+          technicalSummary: '',
+          communicationSummary: '',
+          problemSolvingSummary: '',
+          experienceRelevanceSummary: '',
+          recommendation: 'HOLD',
         },
         null,
         2,
       ),
-      'Allowed ai_recommendation values:',
+      'Allowed recommendation values:',
       'STRONGLY_REJECT, REJECT, HOLD, SELECT, STRONGLY_SELECT',
-      'All scores must be between 0 and 100.',
+      'Scoring rules:',
+      '- technicalScore, communicationScore, problemSolvingScore, experienceRelevanceScore must each be between 0 and 10.',
+      '- overallScore must be between 0 and 100 and should represent the average of the 4 category scores multiplied by 10.',
+      'Evaluation rules:',
+      '- Use only the information present in the resume analysis, questions, follow-ups, and transcript.',
+      '- Do not hallucinate technologies, systems, or achievements not discussed.',
+      '- Consider follow-up answers when judging depth, consistency, and ownership.',
+      '- Consider communication quality, technical depth, reasoning, and resume-role alignment.',
+      '- Keep strengths and weaknesses concise but meaningful.',
+      '- Keep detailedFeedback concise, specific, and decision-useful.',
       'Context:',
       JSON.stringify(
         {
@@ -50,22 +61,37 @@ export class GeminiAiInterviewFeedbackPromptHelper {
                 project_summary: input.resume_analysis.project_summary,
               }
             : null,
-          questions: input.questions.map((question) => ({
+          questions: input.questions
+            .filter((question) => !question.is_follow_up)
+            .map((question) => ({
+              id: question.id,
+              sequence_number: question.sequence_number,
+              question_text: question.question_text,
+              question_type: question.question_type,
+              topic: question.topic,
+              difficulty_level: question.difficulty_level,
+              expected_answer_keywords: question.expected_answer_keywords,
+            })),
+          follow_ups: input.follow_ups.map((question) => ({
+            id: question.id,
+            parent_question_id: question.parent_question_id,
             sequence_number: question.sequence_number,
             question_text: question.question_text,
             question_type: question.question_type,
             topic: question.topic,
             difficulty_level: question.difficulty_level,
+            follow_up_reasoning: question.follow_up_reasoning,
+            expected_answer_keywords: question.expected_answer_keywords,
           })),
           transcript: input.transcripts.map((entry) => ({
             speaker_type: entry.speaker_type,
             question_id: entry.ai_interview_question_id,
-            question_text:
-              entry.ai_interview_question?.question_text ||
-              (entry.speaker_type === TranscriptSpeakerType.AI_INTERVIEWER
-                ? entry.message_text
-                : null),
+            question_text: entry.ai_interview_question_id
+              ? questionTextById.get(entry.ai_interview_question_id) ?? null
+              : null,
             message_text: entry.message_text,
+            spoken_at: entry.spoken_at?.toISOString() ?? null,
+            speech_to_text_confidence: entry.speech_to_text_confidence ?? null,
           })),
         },
         null,

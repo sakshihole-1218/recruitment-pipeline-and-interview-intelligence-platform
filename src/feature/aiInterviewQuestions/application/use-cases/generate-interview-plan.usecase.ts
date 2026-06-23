@@ -10,6 +10,8 @@ import { QuestionGenerationStatus } from '../../../aiInterviewSessions/enums/que
 
 import { GenerateInterviewPlanDto } from '../../dto/generate-interview-plan.dto';
 import { AiInterviewQuestionEntity } from '../../entities/ai-interview-question.entity';
+import { QuestionSource } from '../../enums/question-source.enum';
+import { QuestionStatus } from '../../enums/question-status.enum';
 import { QuestionType } from '../../enums/question-type.enum';
 import { AiInterviewQuestionsValidationHelper } from '../../helpers/ai-interview-questions-validation.helper';
 import {
@@ -306,8 +308,13 @@ export class GenerateInterviewPlanUseCase {
       difficulty_level: question.difficulty_level,
       sequence_number: question.sequence_number,
       is_follow_up: isFollowUp,
+      question_source: isFollowUp
+        ? QuestionSource.FOLLOW_UP
+        : QuestionSource.SYSTEM,
       generated_from: question.generated_from,
+      question_status: QuestionStatus.PENDING,
       expected_answer_keywords: question.expected_answer_keywords ?? null,
+      follow_up_reasoning: null,
       asked_at: null,
       answered_at: null,
       is_answered: false,

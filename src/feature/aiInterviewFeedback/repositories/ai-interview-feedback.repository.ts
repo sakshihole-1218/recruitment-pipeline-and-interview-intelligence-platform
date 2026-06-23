@@ -182,13 +182,10 @@ export class AiInterviewFeedbackRepository {
       });
     }
 
-    if (query.ai_recommendation) {
-      qb.andWhere(
-        'ai_interview_feedback.ai_recommendation = :aiRecommendation',
-        {
-          aiRecommendation: query.ai_recommendation,
-        },
-      );
+    if (query.recommendation) {
+      qb.andWhere('ai_interview_feedback.recommendation = :recommendation', {
+        recommendation: query.recommendation,
+      });
     }
 
     if (query.generated_from) {
@@ -217,13 +214,13 @@ export class AiInterviewFeedbackRepository {
       const search = `%${String(query.search).trim()}%`;
       qb.andWhere(
         `(
-          COALESCE(ai_interview_feedback.technical_summary, '') ILIKE :search
+          COALESCE(ai_interview_feedback.strengths_summary, '') ILIKE :search
+          OR COALESCE(ai_interview_feedback.weaknesses_summary, '') ILIKE :search
+          OR COALESCE(ai_interview_feedback.detailed_feedback, '') ILIKE :search
+          OR COALESCE(ai_interview_feedback.technical_summary, '') ILIKE :search
           OR COALESCE(ai_interview_feedback.communication_summary, '') ILIKE :search
           OR COALESCE(ai_interview_feedback.problem_solving_summary, '') ILIKE :search
-          OR COALESCE(ai_interview_feedback.project_understanding_summary, '') ILIKE :search
-          OR COALESCE(ai_interview_feedback.strengths, '') ILIKE :search
-          OR COALESCE(ai_interview_feedback.concerns, '') ILIKE :search
-          OR COALESCE(ai_interview_feedback.improvement_areas, '') ILIKE :search
+          OR COALESCE(ai_interview_feedback.experience_relevance_summary, '') ILIKE :search
           OR COALESCE(ai_interview_feedback.failure_reason, '') ILIKE :search
         )`,
         { search },
@@ -239,7 +236,7 @@ export class AiInterviewFeedbackRepository {
       'generated_at',
       'overall_score',
       'feedback_status',
-      'ai_recommendation',
+      'recommendation',
     ] as const;
 
     if (!allowedSort.includes(sortBy)) {

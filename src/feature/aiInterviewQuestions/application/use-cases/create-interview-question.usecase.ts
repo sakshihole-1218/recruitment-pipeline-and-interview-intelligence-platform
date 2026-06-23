@@ -3,6 +3,8 @@ import { DataSource } from 'typeorm';
 
 import { CreateInterviewQuestionDto } from '../../dto/create-interview-question.dto';
 import { AiInterviewQuestionEntity } from '../../entities/ai-interview-question.entity';
+import { QuestionSource } from '../../enums/question-source.enum';
+import { QuestionStatus } from '../../enums/question-status.enum';
 import { QuestionType } from '../../enums/question-type.enum';
 import { AiInterviewQuestionsValidationHelper } from '../../helpers/ai-interview-questions-validation.helper';
 import { AiInterviewQuestionRepository } from '../../repositories/ai-interview-question.repository';
@@ -25,6 +27,7 @@ export class CreateInterviewQuestionUseCase {
     this.validation.ensureFollowUpConsistency(
       dto.question_type,
       dto.parent_question_id,
+      dto.question_source,
     );
 
     return this.dataSource.transaction(async (manager) => {
@@ -77,7 +80,19 @@ export class CreateInterviewQuestionUseCase {
       }
 
       const questionType = dto.question_type;
-      const isFollowUp = questionType === QuestionType.FOLLOW_UP;
+      const questionSource =
+        dto.question_source ??
+        (questionType === QuestionType.FOLLOW_UP
+          ? QuestionSource.FOLLOW_UP
+          : QuestionSource.SYSTEM);
+      const questionStatus = dto.question_status ?? QuestionStatus.PENDING;
+      const isFollowUp = questionSource === QuestionSource.FOLLOW_UP;
+
+      this.validation.ensureQuestionStatusConsistency(
+        questionStatus,
+        null,
+        null,
+      );
 
       return this.repository.createQuestion(
         {
@@ -89,11 +104,14 @@ export class CreateInterviewQuestionUseCase {
           difficulty_level: dto.difficulty_level,
           sequence_number: dto.sequence_number,
           is_follow_up: isFollowUp,
+          question_source: questionSource,
           generated_from: dto.generated_from,
+          question_status: questionStatus,
           expected_answer_keywords: dto.expected_answer_keywords ?? null,
+          follow_up_reasoning: null,
           asked_at: null,
           answered_at: null,
-          is_answered: false,
+          is_answered: questionStatus === QuestionStatus.ANSWERED,
           created_by_user_id: actorUserId,
           updated_by_user_id: null,
           deleted_by_user_id: null,
