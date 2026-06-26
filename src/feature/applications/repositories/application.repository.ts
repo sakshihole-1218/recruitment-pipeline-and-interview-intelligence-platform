@@ -293,6 +293,43 @@ export class ApplicationRepository {
       total_records: total,
     };
   }
+
+  async listEligibleForDecision(options?: {
+    assignedHiringManagerUserId?: string;
+    limit?: number;
+    manager?: EntityManager;
+  }): Promise<ApplicationEntity[]> {
+    const qb = this.baseQuery('applications', options?.manager)
+      .leftJoin(
+        'application_decisions',
+        'application_decisions',
+        'application_decisions.application_id = applications.id AND application_decisions.deleted_at IS NULL',
+      )
+      .andWhere('application_decisions.id IS NULL')
+      .andWhere('applications.application_status = :status', {
+        status: ApplicationStatus.ACTIVE,
+      })
+      .andWhere('applications.current_stage IN (:...eligibleStages)', {
+        eligibleStages: [
+          ApplicationCurrentStage.INTERVIEW,
+          ApplicationCurrentStage.DECISION,
+        ],
+      })
+      .orderBy('applications.updated_at', 'DESC')
+      .addOrderBy('applications.id', 'ASC')
+      .take(options?.limit ?? 100);
+
+    if (options?.assignedHiringManagerUserId) {
+      qb.andWhere(
+        'applications.assigned_hiring_manager_user_id = :assignedHiringManagerUserId',
+        {
+          assignedHiringManagerUserId: options.assignedHiringManagerUserId,
+        },
+      );
+    }
+
+    return qb.getMany();
+  }
 }
 
 const APPLICATION_SORTABLE_FIELDS = new Set([
