@@ -8,7 +8,9 @@ import { UpdateApplicationDecisionUseCase } from '../use-cases/update-applicatio
 import { FindDecisionByIdUseCase } from '../use-cases/find-decision-by-id.usecase';
 import { FindDecisionByApplicationIdUseCase } from '../use-cases/find-decision-by-application-id.usecase';
 import { ListDecisionsUseCase } from '../use-cases/list-decisions.usecase';
+import { ListEligibleDecisionApplicationsUseCase } from '../use-cases/list-eligible-decision-applications.usecase';
 import { SoftDeleteDecisionUseCase } from '../use-cases/soft-delete-decision.usecase';
+import { SystemRoleCode } from '../../../accessControl/enums/system-role-code.enum';
 
 @Injectable()
 export class DecisionsService {
@@ -18,6 +20,7 @@ export class DecisionsService {
     private readonly findByIdUseCase: FindDecisionByIdUseCase,
     private readonly findByApplicationIdUseCase: FindDecisionByApplicationIdUseCase,
     private readonly listUseCase: ListDecisionsUseCase,
+    private readonly listEligibleDecisionApplicationsUseCase: ListEligibleDecisionApplicationsUseCase,
     private readonly softDeleteUseCase: SoftDeleteDecisionUseCase,
   ) {}
 
@@ -43,6 +46,13 @@ export class DecisionsService {
 
   async list(query: ListDecisionsQueryDto) {
     return this.listUseCase.execute(query);
+  }
+
+  async listEligibleApplications(actor: {
+    userId: string;
+    roles: SystemRoleCode[];
+  }) {
+    return this.listEligibleDecisionApplicationsUseCase.execute(actor);
   }
 
   async softDelete(id: string, actorUserId: string) {

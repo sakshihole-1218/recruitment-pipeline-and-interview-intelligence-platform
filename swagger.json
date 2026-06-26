@@ -7297,6 +7297,50 @@
         ]
       }
     },
+    "/api/decisions/eligible-applications": {
+      "get": {
+        "operationId": "DecisionsController_listEligibleApplications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Eligible decision applications fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/EligibleDecisionApplicationResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List applications eligible to start a decision and without an existing final decision",
+        "tags": [
+          "Decisions"
+        ]
+      }
+    },
     "/api/offers": {
       "post": {
         "operationId": "OffersController_create",
@@ -18061,6 +18105,73 @@
             ]
           }
         }
+      },
+      "EligibleDecisionApplicationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Application UUID"
+          },
+          "application_number": {
+            "type": "string",
+            "example": "APP-2026-000001"
+          },
+          "candidate_id": {
+            "type": "string",
+            "description": "Candidate UUID"
+          },
+          "job_opening_id": {
+            "type": "string",
+            "description": "Job opening UUID"
+          },
+          "current_stage": {
+            "type": "string",
+            "enum": [
+              "APPLIED",
+              "SCREENING",
+              "SHORTLISTED",
+              "INTERVIEW",
+              "DECISION",
+              "OFFER",
+              "HIRED",
+              "REJECTED",
+              "WITHDRAWN",
+              "ON_HOLD"
+            ]
+          },
+          "application_status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CLOSED",
+              "REJECTED",
+              "HIRED",
+              "WITHDRAWN",
+              "ON_HOLD"
+            ]
+          },
+          "assigned_hiring_manager_user_id": {
+            "type": "object",
+            "nullable": true,
+            "description": "Assigned hiring manager user UUID"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-06-26T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "application_number",
+          "candidate_id",
+          "job_opening_id",
+          "current_stage",
+          "application_status",
+          "assigned_hiring_manager_user_id",
+          "updated_at"
+        ]
       },
       "SoftDeleteDecisionResponseDto": {
         "type": "object",

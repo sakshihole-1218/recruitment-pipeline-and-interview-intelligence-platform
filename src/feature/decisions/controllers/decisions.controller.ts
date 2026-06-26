@@ -14,13 +14,17 @@ import {
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiExtraModels,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 
 import { ApiStandardResponse } from '../../../common/decorators/api-standard-response.decorator';
+import { BaseResponseDto } from '../../../common/dto/base-response.dto';
 import { ResponseUtil } from '../../../common/utils/response.util';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
@@ -36,6 +40,7 @@ import { ApplicationDecisionResponseDto } from '../dto/application-decision.resp
 import { SoftDeleteDecisionResponseDto } from '../dto/soft-delete-decision.response.dto';
 import { ApiDecisionsPaginatedResponse } from '../decorators/api-decisions-paginated-response.decorator';
 import { DecisionsMapper } from '../helpers/decisions.mapper';
+import { EligibleDecisionApplicationResponseDto } from '../dto/eligible-decision-application.response.dto';
 
 @ApiTags('Decisions')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -111,6 +116,53 @@ export class DecisionsController {
     return ResponseUtil.success(
       'Decision fetched successfully',
       DecisionsMapper.toDecisionResponse(decision),
+    );
+  }
+
+  @Get('eligible-applications')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.HIRING_MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'List applications eligible to start a decision and without an existing final decision',
+  })
+  @ApiExtraModels(BaseResponseDto, EligibleDecisionApplicationResponseDto)
+  @ApiOkResponse({
+    description: 'Eligible decision applications fetched successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(BaseResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                $ref: getSchemaPath(EligibleDecisionApplicationResponseDto),
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  async listEligibleApplications(@CurrentUser() actor: AuthJwtPayload) {
+    const rows = await this.decisionsService.listEligibleApplications({
+      userId: actor?.sub,
+      roles: actor?.roles ?? [],
+    });
+
+    return ResponseUtil.success(
+      'Eligible decision applications fetched successfully',
+      rows.map((row) => ({
+        id: row.id,
+        application_number: row.application_number,
+        candidate_id: row.candidate_id,
+        job_opening_id: row.job_opening_id,
+        current_stage: row.current_stage,
+        application_status: row.application_status,
+        assigned_hiring_manager_user_id: row.assigned_hiring_manager_user_id,
+        updated_at: row.updated_at,
+      })),
     );
   }
 

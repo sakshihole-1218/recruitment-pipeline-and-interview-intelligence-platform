@@ -34,6 +34,7 @@ import { UpdateApplicationDecisionUseCase } from './application/use-cases/update
 import { FindDecisionByIdUseCase } from './application/use-cases/find-decision-by-id.usecase';
 import { FindDecisionByApplicationIdUseCase } from './application/use-cases/find-decision-by-application-id.usecase';
 import { ListDecisionsUseCase } from './application/use-cases/list-decisions.usecase';
+import { ListEligibleDecisionApplicationsUseCase } from './application/use-cases/list-eligible-decision-applications.usecase';
 import { SoftDeleteDecisionUseCase } from './application/use-cases/soft-delete-decision.usecase';
 import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
 
@@ -79,6 +80,7 @@ import { ActivityLogsModule } from '../activityLogs/activity-logs.module';
     FindDecisionByIdUseCase,
     FindDecisionByApplicationIdUseCase,
     ListDecisionsUseCase,
+    ListEligibleDecisionApplicationsUseCase,
     SoftDeleteDecisionUseCase,
     // service
     DecisionsService,
