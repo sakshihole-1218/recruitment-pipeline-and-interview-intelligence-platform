@@ -13,6 +13,7 @@ import { AiInterviewTranscriptEntity } from '../aiInterviewTranscripts/entities/
 import { AiInterviewTranscriptRepository } from '../aiInterviewTranscripts/repositories/ai-interview-transcript.repository';
 
 import { AiInterviewQuestionsController } from './controllers/ai-interview-questions.controller';
+import { AiInterviewConversationMemoryService } from './application/services/ai-interview-conversation-memory.service';
 import { AiInterviewQuestionsService } from './application/services/ai-interview-questions.service';
 import { AiInterviewQuestionEntity } from './entities/ai-interview-question.entity';
 import { AiInterviewQuestionRepository } from './repositories/ai-interview-question.repository';
@@ -48,6 +49,7 @@ import { MockAiInterviewQuestionProvider } from './providers/mock-ai-interview-q
   controllers: [AiInterviewQuestionsController],
   providers: [
     AiInterviewQuestionsService,
+    AiInterviewConversationMemoryService,
     AiInterviewQuestionRepository,
     AiInterviewTranscriptRepository,
     AiInterviewQuestionsReferenceRepository,

@@ -63,7 +63,7 @@ export class GeminiAiInterviewQuestionPromptHelper {
 
   static buildFollowUpPrompt(input: GenerateFollowUpQuestionInput): string {
     return [
-      'Generate one concise technical follow-up interview question.',
+      'Generate one concise interview-quality follow-up question.',
       'Return JSON only. Do not include markdown fences or extra commentary.',
       'Use this object shape exactly:',
       JSON.stringify(
@@ -77,15 +77,28 @@ export class GeminiAiInterviewQuestionPromptHelper {
         2,
       ),
       'Rules:',
-      '- Ask a professional technical follow-up question only.',
-      '- Probe depth of knowledge based on the candidate answer.',
-      '- Stay relevant to the current question and answer.',
-      '- Avoid repeating the parent question or any previous follow-up.',
-      '- Adapt difficulty based on answer quality and completeness.',
-      '- Keep the follow-up concise.',
-      '- Assume the interview allows a maximum of 2 follow-up questions for the main question.',
+      '- Ask a professional follow-up question only.',
+      '- Use the full conversation context, not just the latest answer.',
+      '- Probe depth progressively based on what has already been asked and answered.',
+      '- Stay relevant to the current question, latest answer, resume context, and interview scope.',
+      '- Avoid repeating the current question, previous main questions, previous follow-ups, discussed topics, or already answered concepts unless resolving a contradiction.',
+      '- Prefer unexplored concepts, weak areas, or contradictions when deciding the next question.',
+      '- Adapt difficulty based on answer quality, candidate level, and prior depth.',
+      '- Keep the follow-up concise and interview-ready.',
+      '- Ask only one question.',
+      '- Do not exceed the maximum allowed follow-up count.',
       'Context:',
-      JSON.stringify(input, null, 2),
+      JSON.stringify(
+        {
+          sessionId: input.sessionId,
+          currentQuestion: input.currentQuestion,
+          latestAnswer: input.latestAnswer,
+          maxFollowUpCount: input.maxFollowUpCount,
+          conversationContext: input.conversationContext,
+        },
+        null,
+        2,
+      ),
     ].join('\n');
   }
 }
