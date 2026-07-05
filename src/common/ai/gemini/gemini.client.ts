@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI } from '@google/genai';
 
 type GeminiGenerateTextOptions = {
-  prompt: string;
+  prompt: string | any[];
   systemInstruction?: string;
   responseMimeType?: 'application/json' | 'text/plain';
   model?: string;
@@ -14,7 +14,7 @@ type GeminiGenerateTextOptions = {
 export class GeminiClient {
   private readonly logger = new Logger(GeminiClient.name);
   private readonly defaultModel = 'gemini-2.5-flash';
-  private readonly defaultTimeoutMs = 20000;
+  private readonly defaultTimeoutMs = 60000;
 
   constructor(private readonly configService: ConfigService) {}
 

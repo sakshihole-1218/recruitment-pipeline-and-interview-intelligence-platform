@@ -23,6 +23,7 @@ export class GeminiAiInsightsPromptHelper {
           project_summary: '',
           certification_summary: '',
           ai_fit_score: 0,
+          extracted_text: '',
         },
         null,
         2,
@@ -33,6 +34,7 @@ export class GeminiAiInsightsPromptHelper {
       '- experience_years must be numeric.',
       '- education, projects, and certifications must be arrays.',
       '- Summaries must be concise and professional.',
+      '- extracted_text must contain all raw text content read from the resume.',
       'Resume text:',
       extractedText,
     ].join('\n');

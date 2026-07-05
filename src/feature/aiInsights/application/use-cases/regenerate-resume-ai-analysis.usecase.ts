@@ -98,10 +98,10 @@ export class RegenerateResumeAiAnalysisUseCase {
         existing.analyzed_at = now;
         existing.updated_by_user_id = actorId;
         existing.failure_reason = null;
-      } catch {
+      } catch (err) {
         existing.analysis_status = ResumeAiAnalysisStatus.FAILED;
         existing.updated_by_user_id = actorId;
-        existing.failure_reason = 'Resume analysis regeneration failed';
+        existing.failure_reason = err instanceof Error ? err.message : 'Resume analysis regeneration failed';
         existing.analyzed_at = null;
       }
 
