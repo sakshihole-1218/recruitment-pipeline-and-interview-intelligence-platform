@@ -1,9 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import { GeminiClient } from '../../../common/ai/gemini/gemini.client';
 import { GeminiJsonHelper } from '../../../common/ai/gemini/gemini-json.helper';
 import { FinalAiRecommendation } from '../enums/final-ai-recommendation.enum';
 import { GeminiAiInsightsPromptHelper } from '../helpers/gemini-ai-insights-prompt.helper';
+import { CandidateDocumentEntity } from '../../candidates/entities/candidate-document.entity';
 
 import {
   AiInsightsProvider,
@@ -27,6 +32,7 @@ type GeminiResumeAnalysisResponse = {
   project_summary?: string | null;
   certification_summary?: string | null;
   ai_fit_score?: number | string | null;
+  extracted_text?: string | null;
 };
 
 type GeminiFeedbackSummaryResponse = {
@@ -47,21 +53,70 @@ type GeminiFeedbackSummaryResponse = {
 export class GeminiAiInsightsProvider implements AiInsightsProvider {
   private readonly logger = new Logger(GeminiAiInsightsProvider.name);
 
-  constructor(private readonly geminiClient: GeminiClient) {}
+  constructor(
+    private readonly geminiClient: GeminiClient,
+    @InjectRepository(CandidateDocumentEntity)
+    private readonly candidateDocRepo: Repository<CandidateDocumentEntity>,
+  ) {}
 
   async analyzeResume(input: AnalyzeResumeInput): Promise<AnalyzeResumeOutput> {
-    const extractedText = String(input.extractedText || '').trim();
+    let resolvedExtractedText = String(input.extractedText || '').trim();
+    let promptContents: string | any[] = '';
 
-    if (!extractedText) {
-      throw new Error(
-        'Resume extracted text is required for Gemini resume analysis',
+    if (!resolvedExtractedText) {
+      const doc = await this.candidateDocRepo.findOneBy({
+        id: input.candidateDocumentId,
+      });
+
+      if (!doc) {
+        throw new Error(
+          `Candidate document with ID ${input.candidateDocumentId} not found`,
+        );
+      }
+
+      const isPdf =
+        doc.mime_type === 'application/pdf' ||
+        doc.file_name.toLowerCase().endsWith('.pdf');
+
+      if (!isPdf) {
+        throw new Error(
+          'Gemini AI provider currently only supports analyzing PDF files natively. ' +
+            'Please upload a PDF resume or provide extracted text manually.',
+        );
+      }
+
+      const filePath = path.join(process.cwd(), doc.file_url);
+      if (!fs.existsSync(filePath)) {
+        throw new Error(
+          `Candidate document file not found on disk at: ${filePath}`,
+        );
+      }
+
+      const fileBuffer = fs.readFileSync(filePath);
+      const base64Data = fileBuffer.toString('base64');
+
+      const promptText = GeminiAiInsightsPromptHelper.buildResumeAnalysisPrompt(
+        '[Attached PDF Document]',
+      );
+
+      promptContents = [
+        { text: promptText },
+        {
+          inlineData: {
+            mimeType: doc.mime_type || 'application/pdf',
+            data: base64Data,
+          },
+        },
+      ];
+    } else {
+      promptContents = GeminiAiInsightsPromptHelper.buildResumeAnalysisPrompt(
+        resolvedExtractedText,
       );
     }
 
     try {
       const responseText = await this.geminiClient.generateText({
-        prompt:
-          GeminiAiInsightsPromptHelper.buildResumeAnalysisPrompt(extractedText),
+        prompt: promptContents,
         responseMimeType: 'application/json',
       });
 
@@ -75,8 +130,14 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
       const experienceYears = this.toNullableNumber(parsed.experience_years);
       const aiFitScore = this.toScore(parsed.ai_fit_score, 'ai_fit_score');
 
+      if (!resolvedExtractedText) {
+        resolvedExtractedText =
+          this.toText(parsed.extracted_text) ||
+          '[PDF Resume document content analyzed directly by Gemini]';
+      }
+
       return {
-        extracted_text: extractedText,
+        extracted_text: resolvedExtractedText,
         parsed_resume_json: {
           candidate_name: this.toText(parsed.candidate_name),
           email: this.toText(parsed.email),
@@ -91,6 +152,7 @@ export class GeminiAiInsightsProvider implements AiInsightsProvider {
           project_summary: this.toText(parsed.project_summary),
           certification_summary: this.toText(parsed.certification_summary),
           ai_fit_score: aiFitScore,
+          extracted_text: resolvedExtractedText,
           context: {
             candidate_id: input.candidateId,
             candidate_document_id: input.candidateDocumentId,

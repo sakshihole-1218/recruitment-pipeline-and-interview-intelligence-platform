@@ -132,12 +132,9 @@ export class RegenerateFeedbackAiSummaryUseCase {
         existing.updated_by_user_id = actorId;
       } catch (err) {
         existing.generation_status = AiFeedbackSummaryStatus.FAILED;
-        existing.failure_reason =
-          err instanceof Error
-            ? err.message
-            : 'Feedback summary regeneration failed';
-        existing.generated_at = null;
         existing.updated_by_user_id = actorId;
+        existing.failure_reason = err instanceof Error ? err.message : 'Feedback AI summary regeneration failed';
+        existing.generated_at = null;
       }
 
       await this.feedbackAiSummaryRepository.save(existing, { manager });
