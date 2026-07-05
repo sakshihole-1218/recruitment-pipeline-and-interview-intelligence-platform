@@ -121,9 +121,12 @@ export class MockAiInterviewQuestionProvider implements AiInterviewQuestionProvi
   async generateFollowUpQuestion(
     input: GenerateFollowUpQuestionInput,
   ): Promise<GeneratedFollowUpQuestion> {
-    const normalizedAnswer = input.candidateAnswer.toLowerCase();
+    const normalizedAnswer = input.latestAnswer.toLowerCase();
     const leadingSkill =
-      input.candidateSkills[0] || input.parentQuestion.topic || 'the topic';
+      input.conversationContext.skills[0] ||
+      input.currentQuestion.topic ||
+      'the topic';
+    const weakArea = input.conversationContext.weakAreas[0];
 
     if (
       normalizedAnswer.includes('used') &&
@@ -136,6 +139,16 @@ export class MockAiInterviewQuestionProvider implements AiInterviewQuestionProvi
         category: `${leadingSkill} Internals`,
         reasoning:
           'The answer mentioned practical usage but did not demonstrate depth on implementation details.',
+      };
+    }
+
+    if (weakArea) {
+      return {
+        followUpQuestion: `Can you go deeper on ${weakArea.topic} and explain the reasoning, trade-offs, and implementation details behind your approach?`,
+        difficulty: DifficultyLevel.MEDIUM,
+        category: weakArea.topic,
+        reasoning:
+          'The conversation context suggests this area needs deeper validation before moving on.',
       };
     }
 

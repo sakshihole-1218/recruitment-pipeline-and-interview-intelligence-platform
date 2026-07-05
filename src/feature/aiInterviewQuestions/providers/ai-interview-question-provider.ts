@@ -1,4 +1,5 @@
 import { JobOpeningSkillEntity } from '../../job-openings/entities/job-opening-skill.entity';
+import { ConversationContext } from '../types/conversation-context.type';
 
 import { DifficultyLevel } from '../enums/difficulty-level.enum';
 import { GeneratedFrom } from '../enums/generated-from.enum';
@@ -52,24 +53,18 @@ export type GenerateInterviewPlanInput = {
 
 export type GenerateFollowUpQuestionInput = {
   sessionId: string;
-  parentQuestion: {
+  currentQuestion: {
     id: string;
     questionText: string;
     topic: string;
     difficultyLevel: DifficultyLevel;
     questionType: QuestionType;
+    askedQuestionCount: number;
+    previousFollowUpCount: number;
   };
-  candidateAnswer: string;
-  resumeAnalysis: {
-    id: string;
-    experienceSummary: string | null;
-    projectSummary: string | null;
-    skillsExtracted: unknown;
-    totalExperienceYearsDetected: string | null;
-  } | null;
-  candidateExperience: string | null;
-  candidateSkills: string[];
-  previousFollowUps: string[];
+  latestAnswer: string;
+  maxFollowUpCount: number;
+  conversationContext: ConversationContext;
 };
 
 export type GeneratedFollowUpQuestion = {

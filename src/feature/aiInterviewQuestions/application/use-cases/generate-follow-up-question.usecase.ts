@@ -6,7 +6,9 @@ import {
 import { DataSource } from 'typeorm';
 
 import { AiInterviewTranscriptRepository } from '../../../aiInterviewTranscripts/repositories/ai-interview-transcript.repository';
+import { TranscriptSpeakerType } from '../../../aiInterviewTranscripts/enums/transcript-speaker-type.enum';
 
+import { AiInterviewConversationMemoryService } from '../services/ai-interview-conversation-memory.service';
 import { AiInterviewQuestionEntity } from '../../entities/ai-interview-question.entity';
 import { DifficultyLevel } from '../../enums/difficulty-level.enum';
 import { GeneratedFrom } from '../../enums/generated-from.enum';
@@ -29,6 +31,7 @@ export class GenerateFollowUpQuestionUseCase {
     private readonly transcriptRepository: AiInterviewTranscriptRepository,
     private readonly referenceRepository: AiInterviewQuestionsReferenceRepository,
     private readonly validation: AiInterviewQuestionsValidationHelper,
+    private readonly conversationMemory: AiInterviewConversationMemoryService,
     @Inject(AI_INTERVIEW_QUESTION_PROVIDER)
     private readonly provider: AiInterviewQuestionProvider,
   ) {}
@@ -73,6 +76,10 @@ export class GenerateFollowUpQuestionUseCase {
           manager,
         },
       );
+      const sessionTranscripts = await this.transcriptRepository.findBySessionId(
+        session.id,
+        { manager },
+      );
       const rootQuestion = this.resolveRootQuestion(question, sessionQuestions);
       const rootFollowUps = this.findRootFollowUps(
         rootQuestion.id,
@@ -81,11 +88,11 @@ export class GenerateFollowUpQuestionUseCase {
 
       this.validation.ensureFollowUpLimitNotReached(rootFollowUps.length);
 
-      const transcriptEntries =
-        await this.transcriptRepository.findCandidateEntriesByQuestionId(
-          question.id,
-          { manager },
-        );
+      const transcriptEntries = sessionTranscripts.filter(
+        (entry) =>
+          entry.ai_interview_question_id === question.id &&
+          entry.speaker_type === TranscriptSpeakerType.CANDIDATE,
+      );
 
       if (!transcriptEntries.length) {
         throw new NotFoundException({
@@ -121,43 +128,37 @@ export class GenerateFollowUpQuestionUseCase {
           )
         : null;
 
-      const candidateSkills = this.extractCandidateSkills(
-        resumeAnalysis?.skills_extracted,
-      );
+      const conversationContext = this.conversationMemory.buildContext({
+        session,
+        candidate,
+        currentQuestion: question,
+        questions: sessionQuestions,
+        transcripts: sessionTranscripts,
+        resumeAnalysis,
+      });
 
       const generated = await this.provider.generateFollowUpQuestion({
         sessionId: session.id,
-        parentQuestion: {
+        currentQuestion: {
           id: question.id,
           questionText: question.question_text,
           topic: question.topic,
           difficultyLevel: question.difficulty_level,
           questionType: question.question_type,
+          askedQuestionCount: sessionQuestions.filter(
+            (item) => item.asked_at !== null || item.is_answered,
+          ).length,
+          previousFollowUpCount: rootFollowUps.length,
         },
-        candidateAnswer,
-        resumeAnalysis: resumeAnalysis
-          ? {
-              id: resumeAnalysis.id,
-              experienceSummary: resumeAnalysis.experience_summary,
-              projectSummary: resumeAnalysis.project_summary,
-              skillsExtracted: resumeAnalysis.skills_extracted,
-              totalExperienceYearsDetected:
-                resumeAnalysis.total_experience_years_detected,
-            }
-          : null,
-        candidateExperience:
-          resumeAnalysis?.total_experience_years_detected ||
-          candidate.total_experience_years,
-        candidateSkills,
-        previousFollowUps: rootFollowUps.map(
-          (followUp) => followUp.question_text,
-        ),
+        latestAnswer: candidateAnswer,
+        maxFollowUpCount: 2,
+        conversationContext,
       });
 
-      this.validation.ensureNoDuplicateFollowUp(generated.followUpQuestion, [
-        ...sessionQuestions.map((item) => item.question_text),
-        candidateAnswer,
-      ]);
+      this.validation.ensureNoDuplicateFollowUp(
+        generated.followUpQuestion,
+        sessionQuestions.map((item) => item.question_text),
+      );
 
       const insertionSequence = this.getInsertionSequence(
         rootQuestion,
@@ -278,23 +279,6 @@ export class GenerateFollowUpQuestionUseCase {
     );
 
     return nextQuestion?.sequence_number ?? maxChainSequence + 1;
-  }
-
-  private extractCandidateSkills(value: unknown): string[] {
-    const rawSkills =
-      value && typeof value === 'object'
-        ? (value as { skills?: unknown }).skills
-        : null;
-
-    if (!Array.isArray(rawSkills)) {
-      return [];
-    }
-
-    return Array.from(
-      new Set(
-        rawSkills.map((skill) => String(skill || '').trim()).filter(Boolean),
-      ),
-    ).slice(0, 12);
   }
 
   private resolveDifficulty(
