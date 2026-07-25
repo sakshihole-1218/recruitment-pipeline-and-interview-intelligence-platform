@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 
 import { CreateCandidateDto } from '../../dto/create-candidate.dto';
 import { UpdateCandidateDto } from '../../dto/update-candidate.dto';
@@ -103,8 +104,8 @@ export class CandidatesService {
     );
   }
 
-  async listDocuments(candidateId: string) {
-    return this.listDocumentsUseCase.execute(candidateId);
+  async listDocuments(candidateId: string, actor?: AuthJwtPayload) {
+    return this.listDocumentsUseCase.execute(candidateId, actor);
   }
 
   async markLatestResume(

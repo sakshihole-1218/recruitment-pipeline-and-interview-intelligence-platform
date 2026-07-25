@@ -82,6 +82,12 @@ export class ApplicationsController {
   }
 
   @Get(':id')
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+    SystemRoleCode.INTERVIEWER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get application by id' })
   @ApiParam({ name: 'id', description: 'Application UUID' })

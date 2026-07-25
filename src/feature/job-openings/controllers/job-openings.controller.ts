@@ -97,6 +97,12 @@ export class JobOpeningsController {
   }
 
   @Get(':id')
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+    SystemRoleCode.INTERVIEWER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get job opening by id' })
   @ApiParam({ name: 'id', description: 'Job opening UUID' })

@@ -209,6 +209,12 @@ export class CandidatesController {
   }
 
   @Get(':id')
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+    SystemRoleCode.INTERVIEWER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get candidate by id' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
@@ -452,6 +458,12 @@ export class CandidatesController {
   }
 
   @Get(':id/documents')
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+    SystemRoleCode.INTERVIEWER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get candidate documents' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
@@ -472,8 +484,11 @@ export class CandidatesController {
       ],
     },
   })
-  async listDocuments(@Param('id') id: string) {
-    const docs = await this.candidatesService.listDocuments(id);
+  async listDocuments(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const docs = await this.candidatesService.listDocuments(id, actor);
     return ResponseUtil.success(
       'Candidate documents fetched successfully',
       docs.map(CandidatesMapper.toDocumentResponse),
