@@ -14494,6 +14494,66 @@
           "LiveKit Integration"
         ]
       }
+    },
+    "/api/dashboard/stats": {
+      "get": {
+        "operationId": "DashboardController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get dashboard summary stats",
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/api/dashboard/pipeline": {
+      "get": {
+        "operationId": "DashboardController_getPipelineActivity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get pipeline activity (applications by stage)",
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/api/dashboard/activity": {
+      "get": {
+        "operationId": "DashboardController_getRecentActivity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get recent activity logs",
+        "tags": [
+          "Dashboard"
+        ]
+      }
     }
   },
   "info": {

@@ -82,6 +82,12 @@ export class UsersController {
   }
 
   @Get(':id')
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+    SystemRoleCode.INTERVIEWER,
+  )
   @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get user by id' })

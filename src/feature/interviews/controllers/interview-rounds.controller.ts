@@ -98,6 +98,12 @@ export class InterviewRoundsController {
   }
 
   @Get()
+  @Roles(
+    SystemRoleCode.ADMIN,
+    SystemRoleCode.RECRUITER,
+    SystemRoleCode.HIRING_MANAGER,
+    SystemRoleCode.INTERVIEWER,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List interview rounds by job opening' })
   @ApiStandardArrayResponse(
