@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 
 import { JobOpeningEntity } from '../../job-openings/entities/job-opening.entity';
 import { CandidateEntity } from '../../candidates/entities/candidate.entity';
@@ -10,6 +10,7 @@ import { OfferEntity } from '../../offers/entities/offer.entity';
 import { ActivityLogEntity } from '../../activityLogs/entities/activity-log.entity';
 import { SystemRoleCode } from '../../accessControl/enums/system-role-code.enum';
 import { AuthJwtPayload } from '../../auth/helpers/jwt-payload.helper';
+import { InterviewStatus } from '../../interviews/enums/interview-status.enum';
 
 @Injectable()
 export class DashboardService {
@@ -28,12 +29,33 @@ export class DashboardService {
     private readonly activityLogRepository: Repository<ActivityLogEntity>,
   ) {}
 
-  async getStats(user: any) {
+  async getStats(user: AuthJwtPayload) {
     // Basic global count for now.
     const jobOpenings = await this.jobOpeningRepository.count();
     const candidates = await this.candidateRepository.count();
     const applications = await this.applicationRepository.count();
-    const interviews = await this.interviewRepository.count();
+
+    const roles = user?.roles ?? [];
+    const isInterviewerOnly =
+      roles.includes(SystemRoleCode.INTERVIEWER) &&
+      !roles.includes(SystemRoleCode.ADMIN) &&
+      !roles.includes(SystemRoleCode.RECRUITER) &&
+      !roles.includes(SystemRoleCode.HIRING_MANAGER);
+
+    let interviewsQuery = this.interviewRepository
+      .createQueryBuilder('interview')
+      .where('interview.interview_status IN (:...statuses)', {
+        statuses: [InterviewStatus.SCHEDULED, InterviewStatus.RESCHEDULED],
+      });
+
+    if (isInterviewerOnly && user?.sub) {
+      interviewsQuery = interviewsQuery
+        .innerJoin('interview.panel_members', 'panel_member')
+        .andWhere('panel_member.user_id = :userId', { userId: user.sub });
+    }
+
+    const interviews = await interviewsQuery.getCount();
+
     const offers = await this.offerRepository.count();
 
     return {

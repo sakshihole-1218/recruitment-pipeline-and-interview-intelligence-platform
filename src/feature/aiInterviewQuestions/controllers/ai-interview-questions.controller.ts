@@ -80,11 +80,6 @@ export class AiInterviewQuestionsController {
   }
 
   @Post('generate-plan')
-  @Roles(
-    SystemRoleCode.ADMIN,
-    SystemRoleCode.RECRUITER,
-    SystemRoleCode.HIRING_MANAGER,
-  )
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary:
