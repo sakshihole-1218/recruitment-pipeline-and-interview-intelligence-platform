@@ -56,7 +56,6 @@ export class AiInterviewSessionsController {
   constructor(private readonly service: AiInterviewSessionsService) {}
 
   @Post()
-  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create AI interview session for a scheduled interview',
