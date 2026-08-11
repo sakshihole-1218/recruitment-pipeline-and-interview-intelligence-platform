@@ -55,12 +55,7 @@ export class AiInterviewQuestionsController {
   constructor(private readonly service: AiInterviewQuestionsService) {}
 
   @Post()
-  @Roles(
-    SystemRoleCode.ADMIN,
-    SystemRoleCode.RECRUITER,
-    SystemRoleCode.HIRING_MANAGER,
-    SystemRoleCode.INTERVIEWER,
-  )
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a single AI interview question' })
   @ApiBody({ type: CreateInterviewQuestionDto })
@@ -80,6 +75,7 @@ export class AiInterviewQuestionsController {
   }
 
   @Post('generate-plan')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary:
@@ -102,6 +98,7 @@ export class AiInterviewQuestionsController {
   }
 
   @Post(':questionId/generate-follow-up')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Generate and store a Gemini follow-up question for a question',
@@ -125,6 +122,7 @@ export class AiInterviewQuestionsController {
   }
 
   @Patch(':id/mark-asked')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark interview question as asked' })
   @ApiParam({ name: 'id', description: 'AI interview question UUID' })
@@ -144,6 +142,7 @@ export class AiInterviewQuestionsController {
   }
 
   @Patch(':id/mark-answered')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark interview question as answered' })
   @ApiParam({ name: 'id', description: 'AI interview question UUID' })
@@ -228,6 +227,7 @@ export class AiInterviewQuestionsController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update AI interview question' })
   @ApiParam({ name: 'id', description: 'AI interview question UUID' })

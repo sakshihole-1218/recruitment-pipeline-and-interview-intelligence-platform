@@ -54,8 +54,8 @@ export class CandidatesService {
     return this.updateUseCase.execute(id, dto, actorUserId);
   }
 
-  async findById(id: string) {
-    return this.findByIdUseCase.execute(id);
+  async findById(id: string, actor?: AuthJwtPayload) {
+    return this.findByIdUseCase.execute(id, actor);
   }
 
   async list(query: ListCandidatesQueryDto) {

@@ -1,16 +1,20 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
+import { SystemRoleCode } from '../../../accessControl/enums/system-role-code.enum';
 import { UserRepository } from '../../../accessControl/repositories/user.repository';
 import { ApplicationDecisionRepository } from '../../repositories/application-decision.repository';
 import { ActivityLogsWriterService } from '../../../activityLogs/application/services/activity-logs-writer.service';
 import { ActivityActionType } from '../../../activityLogs/enums/activity-action-type.enum';
 import { ActivityEntityType } from '../../../activityLogs/enums/activity-entity-type.enum';
 import { ActivityLogBuilder } from '../../../activityLogs/helpers/activity-log.builder';
+import { DecisionStatus } from '../../enums/decision-status.enum';
 
 @Injectable()
 export class SoftDeleteDecisionUseCase {
@@ -21,7 +25,8 @@ export class SoftDeleteDecisionUseCase {
     private readonly activityWriter: ActivityLogsWriterService,
   ) {}
 
-  async execute(id: string, actorUserId: string): Promise<void> {
+  async execute(id: string, actorPayload: AuthJwtPayload): Promise<void> {
+    const actorUserId = actorPayload?.sub;
     if (!actorUserId) {
       throw new BadRequestException({
         message: 'Actor user is required',
@@ -45,6 +50,19 @@ export class SoftDeleteDecisionUseCase {
         throw new NotFoundException({
           message: 'Decision not found',
           code: 'DECISION_NOT_FOUND',
+        });
+      }
+
+      const isAdmin = actorPayload.roles?.includes(SystemRoleCode.ADMIN);
+      const canHiringManagerDelete =
+        decision.decision_status === DecisionStatus.HOLD;
+
+      if (!isAdmin && !canHiringManagerDelete) {
+        throw new ConflictException({
+          message:
+            'Finalized decisions can only be deleted by an admin. Hiring managers may only delete HOLD decisions.',
+          code: 'DECISION_DELETE_FINALITY_RESTRICTED',
+          meta: { decision_status: decision.decision_status },
         });
       }
 

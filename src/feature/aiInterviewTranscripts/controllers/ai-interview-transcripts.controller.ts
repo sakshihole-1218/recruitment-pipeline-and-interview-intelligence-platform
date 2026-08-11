@@ -66,6 +66,7 @@ export class AiInterviewTranscriptsController {
   }
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a transcript entry for an AI interview session',
@@ -87,6 +88,7 @@ export class AiInterviewTranscriptsController {
   }
 
   @Post('bulk')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Bulk create transcript entries for an AI interview session',
@@ -108,6 +110,7 @@ export class AiInterviewTranscriptsController {
   }
 
   @Post('transcribe-answer')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary:
@@ -234,6 +237,7 @@ export class AiInterviewTranscriptsController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update AI interview transcript entry' })
   @ApiParam({ name: 'id', description: 'AI interview transcript entry UUID' })

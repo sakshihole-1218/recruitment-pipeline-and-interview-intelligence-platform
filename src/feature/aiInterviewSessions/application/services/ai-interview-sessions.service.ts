@@ -50,12 +50,12 @@ export class AiInterviewSessionsService {
     return this.markFailedUseCase.execute(id, { actorUserId, reason });
   }
 
-  getById(id: string) {
-    return this.getByIdUseCase.execute(id);
+  getById(id: string, actor?: any) {
+    return this.getByIdUseCase.execute(id, actor);
   }
 
-  getByInterviewId(interviewId: string) {
-    return this.getByInterviewUseCase.execute(interviewId);
+  getByInterviewId(interviewId: string, actor?: any) {
+    return this.getByInterviewUseCase.execute(interviewId, actor);
   }
 
   list(query: AiInterviewSessionQueryDto) {

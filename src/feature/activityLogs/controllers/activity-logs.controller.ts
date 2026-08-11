@@ -33,8 +33,6 @@ import { ActivityLogsMapper } from '../helpers/activity-logs.mapper';
 @Roles(
   SystemRoleCode.ADMIN,
   SystemRoleCode.RECRUITER,
-  SystemRoleCode.HIRING_MANAGER,
-  SystemRoleCode.INTERVIEWER,
 )
 @ApiBearerAuth('JWT-auth')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })

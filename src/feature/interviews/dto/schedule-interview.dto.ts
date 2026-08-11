@@ -15,6 +15,7 @@ import {
 
 import { InterviewMode } from '../enums/interview-mode.enum';
 import { InterviewPanelMemberInputDto } from './assign-interview-panel-members.dto';
+import { IsBoolean } from 'class-validator';
 
 export class ScheduleInterviewDto {
   @ApiProperty({ description: 'Application UUID' })
@@ -36,6 +37,14 @@ export class ScheduleInterviewDto {
   @ApiProperty({ enum: InterviewMode })
   @IsEnum(InterviewMode)
   interview_mode: InterviewMode;
+
+  @ApiPropertyOptional({
+    description: 'Whether this is a candidate-facing AI interview flow',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_ai_interview?: boolean;
 
   @ApiPropertyOptional({ example: 'https://meet.google.com/xxx-yyyy-zzz' })
   @IsOptional()

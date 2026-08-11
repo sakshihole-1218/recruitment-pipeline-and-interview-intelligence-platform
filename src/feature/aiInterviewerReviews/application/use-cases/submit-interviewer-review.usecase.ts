@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { InterviewerAccessValidationHelper } from '../../../../common/authorization/interviewer-access-validation.helper';
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 import { SubmitInterviewerReviewDto } from '../../dto/submit-interviewer-review.dto';
 import { InterviewerReviewEntity } from '../../entities/interviewer-review.entity';
 import { InterviewerRecommendation } from '../../enums/interviewer-recommendation.enum';
@@ -14,14 +16,18 @@ export class SubmitInterviewerReviewUseCase {
     private readonly dataSource: DataSource,
     private readonly repository: InterviewerReviewRepository,
     private readonly validation: InterviewerReviewsValidationHelper,
+    private readonly interviewerAccessValidationHelper: InterviewerAccessValidationHelper,
   ) {}
 
   async execute(
     id: string,
     dto: SubmitInterviewerReviewDto,
-    actorUserId?: string,
+    actor?: AuthJwtPayload,
   ): Promise<InterviewerReviewEntity> {
+    const actorUserId = actor?.sub;
     this.validation.ensureActorUserRequired(actorUserId);
+    const isInterviewerOnly =
+      this.interviewerAccessValidationHelper.isInterviewerOnly(actor);
 
     return this.dataSource.transaction(async (manager) => {
       const review = await this.repository.findById(id, {
@@ -37,6 +43,11 @@ export class SubmitInterviewerReviewUseCase {
       }
 
       this.validation.ensureSubmitAllowed(review);
+      this.validation.ensureInterviewerOwnsReview(
+        isInterviewerOnly,
+        actorUserId,
+        review,
+      );
       this.validation.ensureSubmissionPayloadComplete(dto);
 
       review.technical_score = Number(dto.technical_score).toFixed(2);

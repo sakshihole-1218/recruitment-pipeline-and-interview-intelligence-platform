@@ -53,6 +53,9 @@ export class InterviewEntity {
   @Column({ type: 'varchar', length: 20 })
   interview_mode: InterviewMode;
 
+  @Column({ type: 'boolean', default: false })
+  is_ai_interview: boolean;
+
   @Column({ type: 'text', nullable: true })
   meeting_link: string | null;
 

@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { InterviewerAccessValidationHelper } from '../../../../common/authorization/interviewer-access-validation.helper';
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 import { CreateInterviewerReviewDto } from '../../dto/create-interviewer-review.dto';
 import { InterviewerReviewEntity } from '../../entities/interviewer-review.entity';
 import { InterviewerReviewStatus } from '../../enums/interviewer-review-status.enum';
@@ -19,13 +21,17 @@ export class CreateInterviewerReviewUseCase {
     private readonly repository: InterviewerReviewRepository,
     private readonly referenceRepository: InterviewerReviewReferenceRepository,
     private readonly validation: InterviewerReviewsValidationHelper,
+    private readonly interviewerAccessValidationHelper: InterviewerAccessValidationHelper,
   ) {}
 
   async execute(
     dto: CreateInterviewerReviewDto,
-    actorUserId?: string,
+    actor?: AuthJwtPayload,
   ): Promise<InterviewerReviewEntity> {
+    const actorUserId = actor?.sub;
     this.validation.ensureActorUserRequired(actorUserId);
+    const isInterviewerOnly =
+      this.interviewerAccessValidationHelper.isInterviewerOnly(actor);
 
     return this.dataSource.transaction(async (manager) => {
       const session = await this.referenceRepository.findSessionById(
@@ -41,6 +47,11 @@ export class CreateInterviewerReviewUseCase {
       }
 
       this.validation.ensureSessionCompleted(session.session_status);
+      this.validation.ensureInterviewerReviewerIdentity(
+        isInterviewerOnly,
+        actorUserId,
+        dto.reviewer_user_id,
+      );
 
       const reviewer = await this.referenceRepository.findActiveUserById(
         dto.reviewer_user_id,

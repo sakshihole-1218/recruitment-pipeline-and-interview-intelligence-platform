@@ -139,14 +139,29 @@ export class AiInterviewFeedbackRepository {
 
   async findAllWithFilters(
     query: AiInterviewFeedbackQueryDto,
+    options?: { interviewerUserId?: string },
   ): Promise<AiInterviewFeedbackListResult> {
-    return this.list(query);
+    return this.list(query, options);
   }
 
   async list(
     query: AiInterviewFeedbackQueryDto,
+    options?: { interviewerUserId?: string },
   ): Promise<AiInterviewFeedbackListResult> {
     const qb = this.baseQuery('ai_interview_feedback');
+
+    if (options?.interviewerUserId) {
+      qb.innerJoin(
+        'ai_interview_sessions',
+        'ai_session_access',
+        'ai_session_access.id = ai_interview_feedback.ai_interview_session_id AND ai_session_access.deleted_at IS NULL',
+      ).innerJoin(
+        'interview_panel_members',
+        'panel_member_access',
+        'panel_member_access.interview_id = ai_session_access.interview_id AND panel_member_access.user_id = :interviewerUserId AND panel_member_access.deleted_at IS NULL',
+        { interviewerUserId: options.interviewerUserId },
+      );
+    }
 
     if (query.ai_interview_session_id) {
       qb.andWhere(

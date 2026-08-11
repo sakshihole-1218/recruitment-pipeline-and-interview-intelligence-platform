@@ -177,6 +177,7 @@ export class ScheduleInterviewUseCase {
             scheduled_start_at: startAt,
             scheduled_end_at: endAt,
             interview_mode: dto.interview_mode,
+            is_ai_interview: dto.is_ai_interview ?? false,
             meeting_link: dto.meeting_link?.trim() || null,
             location_details: dto.location_details?.trim() || null,
             interview_status: InterviewStatus.SCHEDULED,
@@ -261,6 +262,7 @@ export class ScheduleInterviewUseCase {
             interview_round_id: loaded.interview_round_id,
             interview_status: loaded.interview_status,
             interview_mode: loaded.interview_mode,
+            is_ai_interview: loaded.is_ai_interview,
             scheduled_start_at:
               loaded.scheduled_start_at?.toISOString?.() ?? null,
             scheduled_end_at: loaded.scheduled_end_at?.toISOString?.() ?? null,

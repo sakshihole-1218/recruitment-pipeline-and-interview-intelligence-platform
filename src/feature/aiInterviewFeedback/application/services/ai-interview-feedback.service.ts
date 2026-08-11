@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 import { AiInterviewFeedbackQueryDto } from '../../dto/ai-interview-feedback.query.dto';
 import { UpdateAiInterviewFeedbackDto } from '../../dto/update-ai-interview-feedback.dto';
 import { DeleteAiInterviewFeedbackUseCase } from '../use-cases/delete-ai-interview-feedback.usecase';
@@ -30,16 +31,16 @@ export class AiInterviewFeedbackService {
     return this.regenerateUseCase.execute(sessionId, actorUserId);
   }
 
-  getById(id: string) {
-    return this.getByIdUseCase.execute(id);
+  getById(id: string, actor?: AuthJwtPayload) {
+    return this.getByIdUseCase.execute(id, actor);
   }
 
-  getBySession(sessionId: string) {
-    return this.getBySessionUseCase.execute(sessionId);
+  getBySession(sessionId: string, actor?: AuthJwtPayload) {
+    return this.getBySessionUseCase.execute(sessionId, actor);
   }
 
-  list(query: AiInterviewFeedbackQueryDto) {
-    return this.listUseCase.execute(query);
+  list(query: AiInterviewFeedbackQueryDto, actor?: AuthJwtPayload) {
+    return this.listUseCase.execute(query, actor);
   }
 
   update(id: string, dto: UpdateAiInterviewFeedbackDto, actorUserId?: string) {

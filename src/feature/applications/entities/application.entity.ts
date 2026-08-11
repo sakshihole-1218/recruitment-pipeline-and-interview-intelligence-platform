@@ -3,11 +3,15 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+import { CandidateEntity } from '../../candidates/entities/candidate.entity';
+import { JobOpeningEntity } from '../../job-openings/entities/job-opening.entity';
 import { ApplicationCurrentStage } from '../enums/application-current-stage.enum';
 import { ApplicationStatus } from '../enums/application-status.enum';
 import { ApplicationStageHistoryEntity } from './application-stage-history.entity';
@@ -76,6 +80,14 @@ export class ApplicationEntity {
 
   @Column({ type: 'uuid', nullable: true })
   deleted_by_user_id: string | null;
+
+  @ManyToOne(() => CandidateEntity, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'candidate_id' })
+  candidate?: CandidateEntity;
+
+  @ManyToOne(() => JobOpeningEntity, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'job_opening_id' })
+  job_opening?: JobOpeningEntity;
 
   @OneToMany(
     () => ApplicationStageHistoryEntity,

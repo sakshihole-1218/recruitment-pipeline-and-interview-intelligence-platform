@@ -52,6 +52,7 @@ export class AiInterviewFeedbackController {
   constructor(private readonly service: AiInterviewFeedbackService) {}
 
   @Post('generate/:sessionId')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Generate AI interview evaluation for a completed session',
@@ -73,6 +74,7 @@ export class AiInterviewFeedbackController {
   }
 
   @Post('regenerate/:sessionId')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Regenerate AI interview feedback for a session' })
   @ApiParam({ name: 'sessionId', description: 'AI interview session UUID' })
@@ -100,8 +102,11 @@ export class AiInterviewFeedbackController {
     AiInterviewFeedbackResponseDto,
     'AI interview feedback fetched successfully',
   )
-  async list(@Query() query: AiInterviewFeedbackQueryDto) {
-    const result = await this.service.list(query);
+  async list(
+    @Query() query: AiInterviewFeedbackQueryDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.service.list(query, actor);
 
     if (result.mode === 'cursor') {
       return ResponseUtil.success(
@@ -134,8 +139,11 @@ export class AiInterviewFeedbackController {
     AiInterviewFeedbackResponseDto,
     'AI interview feedback fetched successfully',
   )
-  async getBySession(@Param('sessionId') sessionId: string) {
-    const feedback = await this.service.getBySession(sessionId);
+  async getBySession(
+    @Param('sessionId') sessionId: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const feedback = await this.service.getBySession(sessionId, actor);
     return ResponseUtil.success(
       'AI interview feedback fetched successfully',
       AiInterviewFeedbackMapper.toResponse(feedback),
@@ -150,8 +158,11 @@ export class AiInterviewFeedbackController {
     AiInterviewFeedbackResponseDto,
     'AI interview feedback fetched successfully',
   )
-  async getById(@Param('id') id: string) {
-    const feedback = await this.service.getById(id);
+  async getById(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const feedback = await this.service.getById(id, actor);
     return ResponseUtil.success(
       'AI interview feedback fetched successfully',
       AiInterviewFeedbackMapper.toResponse(feedback),
@@ -159,6 +170,7 @@ export class AiInterviewFeedbackController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update AI interview feedback' })
   @ApiParam({ name: 'id', description: 'AI interview feedback UUID' })

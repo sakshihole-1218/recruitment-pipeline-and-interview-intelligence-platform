@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 
 import { CreateApplicationDto } from '../../dto/create-application.dto';
 import { ListApplicationsQueryDto } from '../../dto/list-applications.query.dto';
@@ -47,8 +48,8 @@ export class ApplicationsService {
     return this.createUseCase.execute(dto, actorUserId);
   }
 
-  async findById(id: string) {
-    return this.findByIdUseCase.execute(id);
+  async findById(id: string, actor?: AuthJwtPayload) {
+    return this.findByIdUseCase.execute(id, actor);
   }
 
   async list(query: ListApplicationsQueryDto) {

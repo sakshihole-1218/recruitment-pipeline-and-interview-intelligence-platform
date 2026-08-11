@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { InterviewerAccessValidationHelper } from '../../../../common/authorization/interviewer-access-validation.helper';
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 import { UpdateInterviewerReviewDto } from '../../dto/update-interviewer-review.dto';
 import { InterviewerReviewEntity } from '../../entities/interviewer-review.entity';
 import { InterviewerReviewsValidationHelper } from '../../helpers/interviewer-reviews-validation.helper';
@@ -12,15 +14,19 @@ export class UpdateInterviewerReviewUseCase {
     private readonly dataSource: DataSource,
     private readonly repository: InterviewerReviewRepository,
     private readonly validation: InterviewerReviewsValidationHelper,
+    private readonly interviewerAccessValidationHelper: InterviewerAccessValidationHelper,
   ) {}
 
   async execute(
     id: string,
     dto: UpdateInterviewerReviewDto,
-    actorUserId?: string,
+    actor?: AuthJwtPayload,
   ): Promise<InterviewerReviewEntity> {
+    const actorUserId = actor?.sub;
     this.validation.ensureActorUserRequired(actorUserId);
     this.validation.ensureUpdateDoesNotSubmit(dto.review_status);
+    const isInterviewerOnly =
+      this.interviewerAccessValidationHelper.isInterviewerOnly(actor);
 
     return this.dataSource.transaction(async (manager) => {
       const review = await this.repository.findById(id, {
@@ -36,6 +42,11 @@ export class UpdateInterviewerReviewUseCase {
       }
 
       this.validation.ensureDraftEditable(review);
+      this.validation.ensureInterviewerOwnsReview(
+        isInterviewerOnly,
+        actorUserId,
+        review,
+      );
 
       if (dto.technical_score !== undefined) {
         review.technical_score =

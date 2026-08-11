@@ -54,6 +54,7 @@ export class InterviewerReviewsController {
   constructor(private readonly service: InterviewerReviewsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.INTERVIEWER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create interviewer review draft for an AI interview session',
@@ -67,7 +68,7 @@ export class InterviewerReviewsController {
     @Body() dto: CreateInterviewerReviewDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const review = await this.service.create(dto, actor?.sub);
+    const review = await this.service.create(dto, actor);
     return ResponseUtil.success(
       'Interviewer review created successfully',
       InterviewerReviewsMapper.toResponse(review),
@@ -83,8 +84,11 @@ export class InterviewerReviewsController {
     InterviewerReviewResponseDto,
     'Interviewer reviews fetched successfully',
   )
-  async list(@Query() query: InterviewerReviewQueryDto) {
-    const result = await this.service.list(query);
+  async list(
+    @Query() query: InterviewerReviewQueryDto,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const result = await this.service.list(query, actor);
 
     if (result.mode === 'cursor') {
       return ResponseUtil.success('Interviewer reviews fetched successfully', {
@@ -114,8 +118,11 @@ export class InterviewerReviewsController {
     InterviewerReviewResponseDto,
     'Interviewer reviews fetched successfully',
   )
-  async getBySession(@Param('sessionId') sessionId: string) {
-    const reviews = await this.service.getBySession(sessionId);
+  async getBySession(
+    @Param('sessionId') sessionId: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const reviews = await this.service.getBySession(sessionId, actor);
     return ResponseUtil.success(
       'Interviewer reviews fetched successfully',
       reviews.map(InterviewerReviewsMapper.toResponse),
@@ -130,8 +137,11 @@ export class InterviewerReviewsController {
     InterviewerReviewResponseDto,
     'Interviewer reviews fetched successfully',
   )
-  async getByApplication(@Param('applicationId') applicationId: string) {
-    const reviews = await this.service.getByApplication(applicationId);
+  async getByApplication(
+    @Param('applicationId') applicationId: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const reviews = await this.service.getByApplication(applicationId, actor);
     return ResponseUtil.success(
       'Interviewer reviews fetched successfully',
       reviews.map(InterviewerReviewsMapper.toResponse),
@@ -146,8 +156,11 @@ export class InterviewerReviewsController {
     InterviewerReviewResponseDto,
     'Interviewer review fetched successfully',
   )
-  async getById(@Param('id') id: string) {
-    const review = await this.service.getById(id);
+  async getById(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const review = await this.service.getById(id, actor);
     return ResponseUtil.success(
       'Interviewer review fetched successfully',
       InterviewerReviewsMapper.toResponse(review),
@@ -155,6 +168,7 @@ export class InterviewerReviewsController {
   }
 
   @Patch(':id')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.INTERVIEWER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update interviewer review draft' })
   @ApiParam({ name: 'id', description: 'Interviewer review UUID' })
@@ -168,7 +182,7 @@ export class InterviewerReviewsController {
     @Body() dto: UpdateInterviewerReviewDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const review = await this.service.update(id, dto, actor?.sub);
+    const review = await this.service.update(id, dto, actor);
     return ResponseUtil.success(
       'Interviewer review updated successfully',
       InterviewerReviewsMapper.toResponse(review),
@@ -176,6 +190,7 @@ export class InterviewerReviewsController {
   }
 
   @Patch(':id/submit')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.INTERVIEWER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Submit interviewer review' })
   @ApiParam({ name: 'id', description: 'Interviewer review UUID' })
@@ -189,7 +204,7 @@ export class InterviewerReviewsController {
     @Body() dto: SubmitInterviewerReviewDto,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    const review = await this.service.submit(id, dto, actor?.sub);
+    const review = await this.service.submit(id, dto, actor);
     return ResponseUtil.success(
       'Interviewer review submitted successfully',
       InterviewerReviewsMapper.toResponse(review),

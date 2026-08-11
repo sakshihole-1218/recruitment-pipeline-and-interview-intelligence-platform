@@ -56,6 +56,7 @@ export class InterviewProctoringEventsController {
   constructor(private readonly service: InterviewProctoringEventsService) {}
 
   @Post()
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a proctoring event for an AI interview session',
@@ -77,6 +78,7 @@ export class InterviewProctoringEventsController {
   }
 
   @Post('bulk')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Bulk create proctoring events for an AI interview session',
@@ -182,6 +184,7 @@ export class InterviewProctoringEventsController {
   }
 
   @Patch(':id/resolve')
+  @Roles(SystemRoleCode.ADMIN, SystemRoleCode.RECRUITER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Resolve an interview proctoring event' })
   @ApiParam({ name: 'id', description: 'Interview proctoring event UUID' })
