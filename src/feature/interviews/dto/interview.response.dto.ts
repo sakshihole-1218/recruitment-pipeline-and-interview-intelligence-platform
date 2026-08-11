@@ -23,6 +23,9 @@ export class InterviewResponseDto {
   @ApiProperty({ enum: InterviewMode })
   interview_mode: InterviewMode;
 
+  @ApiProperty({ default: false })
+  is_ai_interview: boolean;
+
   @ApiPropertyOptional({ nullable: true })
   meeting_link: string | null;
 

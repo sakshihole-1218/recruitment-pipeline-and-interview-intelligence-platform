@@ -233,7 +233,7 @@ export class DecisionsController {
     @Param('id') id: string,
     @CurrentUser() actor: AuthJwtPayload,
   ) {
-    await this.decisionsService.softDelete(id, actor?.sub);
+    await this.decisionsService.softDelete(id, actor);
     return ResponseUtil.success('Decision deleted successfully', { id });
   }
 }

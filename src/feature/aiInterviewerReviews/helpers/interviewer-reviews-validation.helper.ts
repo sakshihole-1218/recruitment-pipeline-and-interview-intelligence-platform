@@ -68,6 +68,41 @@ export class InterviewerReviewsValidationHelper {
     }
   }
 
+  ensureInterviewerReviewerIdentity(
+    isInterviewerOnly: boolean,
+    actorUserId: string,
+    reviewerUserId: string,
+  ): void {
+    if (!isInterviewerOnly) {
+      return;
+    }
+
+    if (actorUserId !== reviewerUserId) {
+      throw new ForbiddenException({
+        message:
+          'Interviewers can only create reviewer records for themselves',
+        code: 'INTERVIEWER_REVIEWER_ID_MISMATCH',
+      });
+    }
+  }
+
+  ensureInterviewerOwnsReview(
+    isInterviewerOnly: boolean,
+    actorUserId: string,
+    review: InterviewerReviewEntity,
+  ): void {
+    if (!isInterviewerOnly) {
+      return;
+    }
+
+    if (review.reviewer_user_id !== actorUserId) {
+      throw new ForbiddenException({
+        message: 'You can only access your own interviewer review',
+        code: 'INTERVIEWER_REVIEW_NOT_OWNED',
+      });
+    }
+  }
+
   ensureDraftEditable(review: InterviewerReviewEntity): void {
     if (review.review_status !== InterviewerReviewStatus.DRAFT) {
       throw new ConflictException({

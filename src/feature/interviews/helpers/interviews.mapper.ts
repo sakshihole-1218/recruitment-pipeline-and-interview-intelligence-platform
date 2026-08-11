@@ -46,6 +46,7 @@ export class InterviewsMapper {
       scheduled_start_at: entity.scheduled_start_at,
       scheduled_end_at: entity.scheduled_end_at,
       interview_mode: entity.interview_mode,
+      is_ai_interview: entity.is_ai_interview,
       meeting_link: entity.meeting_link,
       location_details: entity.location_details,
       interview_status: entity.interview_status,

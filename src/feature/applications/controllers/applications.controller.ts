@@ -95,8 +95,11 @@ export class ApplicationsController {
     ApplicationResponseDto,
     'Application fetched successfully',
   )
-  async findById(@Param('id') id: string) {
-    const app = await this.applicationsService.findById(id);
+  async findById(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const app = await this.applicationsService.findById(id, actor);
     return ResponseUtil.success(
       'Application fetched successfully',
       ApplicationsMapper.toApplicationResponse(app),

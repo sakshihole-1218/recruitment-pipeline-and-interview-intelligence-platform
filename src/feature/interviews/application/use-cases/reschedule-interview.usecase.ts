@@ -195,6 +195,7 @@ export class RescheduleInterviewUseCase {
           scheduled_start_at: startAt,
           scheduled_end_at: endAt,
           interview_mode: current.interview_mode,
+          is_ai_interview: current.is_ai_interview,
           meeting_link: meetingLink,
           location_details: locationDetails,
           interview_status: InterviewStatus.SCHEDULED,
@@ -253,6 +254,7 @@ export class RescheduleInterviewUseCase {
             interview_round_id: loaded.interview_round_id,
             interview_status: loaded.interview_status,
             interview_mode: loaded.interview_mode,
+            is_ai_interview: loaded.is_ai_interview,
             scheduled_start_at:
               loaded.scheduled_start_at?.toISOString?.() ?? null,
             scheduled_end_at: loaded.scheduled_end_at?.toISOString?.() ?? null,

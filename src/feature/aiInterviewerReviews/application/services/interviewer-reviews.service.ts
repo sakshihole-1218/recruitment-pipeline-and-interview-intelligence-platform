@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 import { CreateInterviewerReviewDto } from '../../dto/create-interviewer-review.dto';
 import { InterviewerReviewQueryDto } from '../../dto/interviewer-review.query.dto';
 import { SubmitInterviewerReviewDto } from '../../dto/submit-interviewer-review.dto';
@@ -26,32 +27,32 @@ export class InterviewerReviewsService {
     private readonly deleteUseCase: DeleteInterviewerReviewUseCase,
   ) {}
 
-  create(dto: CreateInterviewerReviewDto, actorUserId?: string) {
-    return this.createUseCase.execute(dto, actorUserId);
+  create(dto: CreateInterviewerReviewDto, actor?: AuthJwtPayload) {
+    return this.createUseCase.execute(dto, actor);
   }
 
-  update(id: string, dto: UpdateInterviewerReviewDto, actorUserId?: string) {
-    return this.updateUseCase.execute(id, dto, actorUserId);
+  update(id: string, dto: UpdateInterviewerReviewDto, actor?: AuthJwtPayload) {
+    return this.updateUseCase.execute(id, dto, actor);
   }
 
-  submit(id: string, dto: SubmitInterviewerReviewDto, actorUserId?: string) {
-    return this.submitUseCase.execute(id, dto, actorUserId);
+  submit(id: string, dto: SubmitInterviewerReviewDto, actor?: AuthJwtPayload) {
+    return this.submitUseCase.execute(id, dto, actor);
   }
 
-  getById(id: string) {
-    return this.getByIdUseCase.execute(id);
+  getById(id: string, actor?: AuthJwtPayload) {
+    return this.getByIdUseCase.execute(id, actor);
   }
 
-  getBySession(sessionId: string) {
-    return this.getBySessionUseCase.execute(sessionId);
+  getBySession(sessionId: string, actor?: AuthJwtPayload) {
+    return this.getBySessionUseCase.execute(sessionId, actor);
   }
 
-  getByApplication(applicationId: string) {
-    return this.getByApplicationUseCase.execute(applicationId);
+  getByApplication(applicationId: string, actor?: AuthJwtPayload) {
+    return this.getByApplicationUseCase.execute(applicationId, actor);
   }
 
-  list(query: InterviewerReviewQueryDto) {
-    return this.listUseCase.execute(query);
+  list(query: InterviewerReviewQueryDto, actor?: AuthJwtPayload) {
+    return this.listUseCase.execute(query, actor);
   }
 
   softDelete(id: string, actorUserId?: string) {

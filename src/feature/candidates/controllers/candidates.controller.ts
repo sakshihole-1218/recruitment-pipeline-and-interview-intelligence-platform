@@ -219,8 +219,11 @@ export class CandidatesController {
   @ApiOperation({ summary: 'Get candidate by id' })
   @ApiParam({ name: 'id', description: 'Candidate UUID' })
   @ApiStandardResponse(CandidateResponseDto, 'Candidate fetched successfully')
-  async findById(@Param('id') id: string) {
-    const candidate = await this.candidatesService.findById(id);
+  async findById(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const candidate = await this.candidatesService.findById(id, actor);
     return ResponseUtil.success(
       'Candidate fetched successfully',
       CandidatesMapper.toCandidateResponse(candidate),

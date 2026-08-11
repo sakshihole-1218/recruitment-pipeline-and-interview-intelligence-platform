@@ -36,12 +36,12 @@ export class AiInterviewTranscriptsService {
     return this.bulkCreateUseCase.execute(dto, actorUserId);
   }
 
-  getById(id: string) {
-    return this.getByIdUseCase.execute(id);
+  getById(id: string, actor?: any) {
+    return this.getByIdUseCase.execute(id, actor);
   }
 
-  getBySession(sessionId: string) {
-    return this.getBySessionUseCase.execute(sessionId);
+  getBySession(sessionId: string, actor?: any) {
+    return this.getBySessionUseCase.execute(sessionId, actor);
   }
 
   list(query: TranscriptQueryDto) {

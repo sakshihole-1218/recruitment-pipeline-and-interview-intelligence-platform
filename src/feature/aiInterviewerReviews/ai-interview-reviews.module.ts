@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthorizationModule } from '../../common/authorization/authorization.module';
 import { UserEntity } from '../accessControl/entities/user.entity';
 import { AiInterviewFeedbackEntity } from '../aiInterviewFeedback/entities/ai-interview-feedback.entity';
 import { AiInterviewSessionEntity } from '../aiInterviewSessions/entities/ai-interview-session.entity';
@@ -25,6 +26,7 @@ import { InterviewerReviewRepository } from './repositories/interviewer-review.r
 
 @Module({
   imports: [
+    AuthorizationModule,
     TypeOrmModule.forFeature([
       InterviewerReviewEntity,
       AiInterviewSessionEntity,

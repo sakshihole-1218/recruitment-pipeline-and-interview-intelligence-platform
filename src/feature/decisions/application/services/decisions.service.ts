@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { AuthJwtPayload } from '../../../auth/helpers/jwt-payload.helper';
 import { CreateApplicationDecisionDto } from '../../dto/create-application-decision.dto';
 import { UpdateApplicationDecisionDto } from '../../dto/update-application-decision.dto';
 import { ListDecisionsQueryDto } from '../../dto/list-decisions.query.dto';
@@ -55,7 +56,7 @@ export class DecisionsService {
     return this.listEligibleDecisionApplicationsUseCase.execute(actor);
   }
 
-  async softDelete(id: string, actorUserId: string) {
-    return this.softDeleteUseCase.execute(id, actorUserId);
+  async softDelete(id: string, actor: AuthJwtPayload) {
+    return this.softDeleteUseCase.execute(id, actor);
   }
 }

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -93,7 +94,23 @@ export class UsersController {
   @ApiOperation({ summary: 'Get user by id' })
   @ApiParam({ name: 'id', description: 'User UUID' })
   @ApiStandardResponse(UserResponseDto, 'User fetched successfully')
-  async findById(@Param('id') id: string) {
+  async findById(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthJwtPayload,
+  ) {
+    const isInterviewerOnly =
+      actor.roles?.includes(SystemRoleCode.INTERVIEWER) &&
+      !actor.roles?.includes(SystemRoleCode.ADMIN) &&
+      !actor.roles?.includes(SystemRoleCode.RECRUITER) &&
+      !actor.roles?.includes(SystemRoleCode.HIRING_MANAGER);
+
+    if (isInterviewerOnly && actor.sub !== id) {
+      throw new ForbiddenException({
+        message: 'You do not have permission to access this user',
+        code: 'USER_ACCESS_DENIED',
+      });
+    }
+
     const user = await this.usersService.findById(id);
     return ResponseUtil.success(
       'User fetched successfully',

@@ -26,6 +26,8 @@ import { AiInterviewProctoringEventsModule } from './feature/aiInterviewProctori
 import { AiInterviewReviewsModule } from './feature/aiInterviewerReviews/ai-interview-reviews.module';
 import { LivekitIntegrationModule } from './feature/livekit-integration/livekit-integration.module';
 import { DashboardModule } from './feature/dashboard/dashboard.module';
+import { CandidateInterviewInvitesModule } from './feature/candidateInterviewInvites/candidate-interview-invites.module';
+import { AuthorizationModule } from './common/authorization/authorization.module';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { DashboardModule } from './feature/dashboard/dashboard.module';
       validationSchema: envValidationSchema,
       envFilePath: '.env',
     }),
+    AuthorizationModule,
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: getTypeOrmConfig,
@@ -60,6 +63,7 @@ import { DashboardModule } from './feature/dashboard/dashboard.module';
     AiInterviewReviewsModule,
     LivekitIntegrationModule,
     DashboardModule,
+    CandidateInterviewInvitesModule,
   ],
 })
 export class AppModule {}

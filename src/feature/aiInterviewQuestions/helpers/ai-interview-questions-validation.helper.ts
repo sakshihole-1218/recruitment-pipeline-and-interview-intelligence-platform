@@ -16,8 +16,12 @@ import { QuestionType } from '../enums/question-type.enum';
 export class AiInterviewQuestionsValidationHelper {
   ensureActorUserRequired(actorUserId?: string): asserts actorUserId is string {
     if (!actorUserId) {
+      return;
+    }
+
+    if (typeof actorUserId !== 'string') {
       throw new BadRequestException({
-        message: 'Actor user is required',
+        message: 'Actor user is invalid',
         code: 'ACTOR_USER_REQUIRED',
       });
     }
