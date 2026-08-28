@@ -1,27 +1,38 @@
 import 'reflect-metadata';
-
-import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
 
 config();
 
-const configService = new ConfigService();
+const isCompiled = __filename.endsWith('.js');
+const isProd =
+  process.env.NODE_ENV === 'production' ||
+  process.env.APP_ENV === 'production';
+
+const dbConnection = process.env.DATABASE_URL
+  ? {
+    url: process.env.DATABASE_URL,
+    ssl: process.env.PG_SSL === 'true'
+      ? { rejectUnauthorized: false }
+      : false,
+  }
+  : {
+    host: process.env.PG_HOST,
+    port: Number(process.env.PG_PORT),
+    username: process.env.PG_USERNAME,
+    password: process.env.PG_PASSWORD,
+    database: process.env.PG_DATABASE,
+  };
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-
-  host: configService.get<string>('PG_HOST'),
-  port: Number(configService.get('PG_PORT')),
-  username: configService.get<string>('PG_USERNAME'),
-  password: configService.get<string>('PG_PASSWORD'),
-  database: configService.get<string>('PG_DATABASE'),
-  schema: configService.get<string>('PG_SCHEMA') || 'public',
-
+  ...dbConnection,
+  schema: process.env.PG_SCHEMA || 'public',
   synchronize: false,
-  logging: true,
-
-  entities: ['dist/**/*.entity.js'],
-  migrations: ['dist/migrations/*.js'],
+  logging: isProd ? ['error', 'warn'] : true,
+  entities: [isCompiled ? 'dist/*/.entity.js' : 'src/*/.entity.ts'],
+  migrations: [isCompiled ? 'dist/migrations/.js' : 'src/migrations/.ts'],
   migrationsTableName: 'migrations_recruitment_platform',
 });
+
+export default AppDataSource;

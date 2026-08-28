@@ -46,11 +46,11 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
     .setTitle(
       configService.get<string>('SWAGGER_TITLE') ||
-        'Recruitment Pipeline & Interview Intelligence Platform',
+      'Recruitment Pipeline & Interview Intelligence Platform',
     )
     .setDescription(
       configService.get<string>('SWAGGER_DESCRIPTION') ||
-        'Backend API documentation for Recruitment Platform',
+      'Backend API documentation for Recruitment Platform',
     )
     .setVersion(configService.get<string>('SWAGGER_VERSION') || '1.0')
     .addBearerAuth(
@@ -68,7 +68,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-  fs.writeFileSync('./swagger.json', JSON.stringify(document, null, 2));
+  if (process.env.APP_ENV !== "production") {
+    fs.writeFileSync('./swagger.json', JSON.stringify(document, null, 2));
+  }
 
   SwaggerModule.setup(
     configService.get<string>('SWAGGER_PATH') || 'docs',
@@ -91,7 +93,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  const port = Number(configService.get<string>('APP_PORT')) || 3000;
+  const port = Number(configService.get<string>('PORT')) || 3000;
   await app.listen(port);
 }
 

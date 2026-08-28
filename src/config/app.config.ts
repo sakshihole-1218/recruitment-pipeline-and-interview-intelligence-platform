@@ -1,7 +1,7 @@
 export default () => ({
   app: {
     name: process.env.APP_NAME,
-    port: Number(process.env.APP_PORT ?? 3000),
+    port: Number(process.env.PORT ?? 3000),
     env: process.env.APP_ENV,
     globalPrefix: process.env.APP_GLOBAL_PREFIX ?? 'api',
   },

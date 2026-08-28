@@ -36,6 +36,7 @@ import { AuthorizationModule } from './common/authorization/authorization.module
       load: [appConfig],
       validationSchema: envValidationSchema,
       envFilePath: '.env',
+      ignoreEnvFile: process.env.APP_ENV === 'production',
     }),
     AuthorizationModule,
     TypeOrmModule.forRootAsync({
@@ -66,4 +67,4 @@ import { AuthorizationModule } from './common/authorization/authorization.module
     CandidateInterviewInvitesModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
