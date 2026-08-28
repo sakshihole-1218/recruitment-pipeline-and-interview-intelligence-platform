@@ -24,14 +24,14 @@ const dbConnection = process.env.DATABASE_URL
     database: process.env.PG_DATABASE,
   };
 
-export const AppDataSource = new DataSource({
+const AppDataSource = new DataSource({
   type: 'postgres',
   ...dbConnection,
   schema: process.env.PG_SCHEMA || 'public',
   synchronize: false,
   logging: isProd ? ['error', 'warn'] : true,
-  entities: [isCompiled ? 'dist/*/.entity.js' : 'src/*/.entity.ts'],
-  migrations: [isCompiled ? 'dist/migrations/.js' : 'src/migrations/.ts'],
+  entities: [isCompiled ? 'dist/**/*.entity.js' : 'src/**/*.entity.ts'],
+  migrations: [isCompiled ? 'dist/migrations/*.js' : 'src/migrations/*.ts'],
   migrationsTableName: 'migrations_recruitment_platform',
 });
 

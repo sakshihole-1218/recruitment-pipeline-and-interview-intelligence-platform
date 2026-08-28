@@ -22,6 +22,8 @@ async function bootstrap() {
     }),
   });
 
+  app.enableShutdownHooks();
+
   const configService = app.get(ConfigService);
 
   app.use(
@@ -37,7 +39,7 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
 
   app.enableCors();
-  app.use(helmet());
+  app.use(helmet({ contentSecurityPolicy: false }));
 
   app.setGlobalPrefix(
     configService.get<string>('APP_GLOBAL_PREFIX') || 'admin',
@@ -66,17 +68,23 @@ async function bootstrap() {
     )
     .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const swaggerEnabled =
+    process.env.APP_ENV !== 'production' ||
+    process.env.ENABLE_SWAGGER === 'true';
 
-  if (process.env.APP_ENV !== "production") {
-    fs.writeFileSync('./swagger.json', JSON.stringify(document, null, 2));
+  if (swaggerEnabled) {
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+
+    if (process.env.APP_ENV !== 'production') {
+      fs.writeFileSync('./swagger.json', JSON.stringify(document, null, 2));
+    }
+
+    SwaggerModule.setup(
+      configService.get<string>('SWAGGER_PATH') || 'docs',
+      app,
+      document,
+    );
   }
-
-  SwaggerModule.setup(
-    configService.get<string>('SWAGGER_PATH') || 'docs',
-    app,
-    document,
-  );
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -93,8 +101,11 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  const port = Number(configService.get<string>('PORT')) || 3000;
-  await app.listen(port);
+  const port =
+    Number(process.env.PORT) ||
+    Number(configService.get<string>('PORT')) ||
+    3000;
+  await app.listen(port, '0.0.0.0');
 }
 
 bootstrap();

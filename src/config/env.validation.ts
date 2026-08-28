@@ -12,10 +12,26 @@ export const envValidationSchema = Joi.object({
     then: Joi.optional(),
     otherwise: Joi.required(),
   }),
-  PG_PORT: Joi.number().required(),
-  PG_USERNAME: Joi.string().required(),
-  PG_PASSWORD: Joi.string().allow('').required(),
-  PG_DATABASE: Joi.string().required(),
+  PG_PORT: Joi.number().when('DATABASE_URL', {
+    is: Joi.exist(),
+    then: Joi.optional(),
+    otherwise: Joi.required(),
+  }),
+  PG_USERNAME: Joi.string().when('DATABASE_URL', {
+    is: Joi.exist(),
+    then: Joi.optional(),
+    otherwise: Joi.required(),
+  }),
+  PG_PASSWORD: Joi.string().allow('').when('DATABASE_URL', {
+    is: Joi.exist(),
+    then: Joi.optional(),
+    otherwise: Joi.required(),
+  }),
+  PG_DATABASE: Joi.string().when('DATABASE_URL', {
+    is: Joi.exist(),
+    then: Joi.optional(),
+    otherwise: Joi.required(),
+  }),
   PG_SCHEMA: Joi.string().default('public'),
 
   SWAGGER_TITLE: Joi.string().required(),
