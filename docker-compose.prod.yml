@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: interview_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: interview_db
+      POSTGRES_USER: interview_user
+      POSTGRES_PASSWORD: docker_local_pass
+    ports:
+      - '5434:5432'
+    volumes:
+      - interview_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U interview_user -d interview_db']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    image: interview-api:local
+    container_name: interview_api
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    expose:
+      - '3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: interview_nginx
+    restart: unless-stopped
+    ports:
+      - '8081:80'
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+volumes:
+  interview_pgdata:
