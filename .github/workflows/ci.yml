@@ -78,8 +78,8 @@ jobs:
             set -e
             cd ~/recruitment-pipeline-and-interview-intelligence-platform
             git fetch origin
-            git checkout feature/ci-pipeline
             git reset --hard origin/feature/ci-pipeline
+            git checkout feature/ci-pipeline
             export IMAGE_TAG=${{ github.sha }}
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
