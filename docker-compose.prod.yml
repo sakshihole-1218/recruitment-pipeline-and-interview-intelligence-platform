@@ -7,8 +7,6 @@ services:
       POSTGRES_DB: interview_db
       POSTGRES_USER: interview_user
       POSTGRES_PASSWORD: docker_local_pass
-    ports:
-      - '5434:5432'
     volumes:
       - interview_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,8 +16,7 @@ services:
       retries: 10
 
   api:
-    build: .
-    image: interview-api:local
+    image: ghcr.io/sakshihole-1218/recruitment-pipeline-and-interview-intelligence-platform:${IMAGE_TAG:-latest}
     container_name: interview_api
     restart: unless-stopped
     env_file:
@@ -35,7 +32,7 @@ services:
     container_name: interview_nginx
     restart: unless-stopped
     ports:
-      - '8081:80'
+      - '80:80'
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
